@@ -8,25 +8,26 @@ using System.Threading.Tasks;
 
 namespace PCS.ConsoleApp
 {
-    class PCSClient
+    class PCSClient : IDisposable
     {
+        private readonly Socket sender;
+
         public const ushort ConnectingPort = 6783;
 
-        private Socket sender;
         public IPAddress ConnectedAddress { get; set; }
 
         public PCSClient(IPAddress address)
         {
             ConnectedAddress = address;
-        }
 
+            sender = new Socket(ConnectedAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        }
+        
         public void Connect()
         {
             try
             {
                 var endPoint = new IPEndPoint(ConnectedAddress, ConnectingPort);
-
-                sender = new Socket(ConnectedAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 try
                 {
@@ -47,21 +48,36 @@ namespace PCS.ConsoleApp
 
         public void SignIn(Member member)
         {
-
+            // TODO
         }
 
         public void SendMessage(string message)
         {
             message += '\0';
+
             byte[] encodedMessage = Encoding.ASCII.GetBytes(message);
 
-            int bytesSent = sender.Send(encodedMessage);
+            sender.Send(encodedMessage);
+        }
+
+        public string ReceiveEchoMessage()
+        {
+            byte[] echoBuffer = new byte[1024];
+
+            int bytesRec = sender.Receive(echoBuffer);
+
+            return Encoding.ASCII.GetString(echoBuffer, 0, bytesRec);
         }
 
         public void Disconnect()
         {
             sender.Shutdown(SocketShutdown.Both);
             sender.Close();
+        }
+
+        public void Dispose()
+        {
+            Disconnect();
         }
     }
 }

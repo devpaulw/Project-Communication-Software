@@ -11,7 +11,7 @@ namespace PCS.ServerApp
         static void Main(string[] args)
         {
             var server = new PCSServer();
-            server.StartListening();
+            server.HostClients();
         }
     }
 }

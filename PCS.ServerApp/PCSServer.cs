@@ -4,67 +4,102 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PCS.ServerApp
 {
     class PCSServer
     {
-        public const ushort Port = 6783;
+        private readonly Socket listener;
 
-        public string Data { get; private set; } = null;
+        public const ushort Port = 6783;
 
         public PCSServer()
         {
-        }
-
-        public void Listen()
-        {
-            // UNDONE: gestion des thread
-        }
-
-        public void StartListening()
-        {
-            var incomingBuffer = new byte[1024];
-
             IPAddress ipAddress = IPAddress.Parse("127.0.0.1"); // TODO: Why I have to put localhost wheareas it's a server
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, Port);
 
-            var listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            listener.Bind(localEndPoint);
+        }
 
+        public void HostClients()
+        {
             try
             {
-                listener.Bind(localEndPoint);
                 listener.Listen(10);
+
+                Console.WriteLine("Server started.");
 
                 while (true)
                 {
-                    Console.WriteLine("Waiting for a connection...");
-                    Socket handler = listener.Accept();
-                    Data = null;
+                    Socket client = listener.Accept();
 
-                    while (true)
-                    {
-                        int bytesRecording = handler.Receive(incomingBuffer);
-
-                        string appendData = Encoding.ASCII.GetString(incomingBuffer, 0, bytesRecording);
-
-                        Data += appendData;
-
-                        if (Data.EndsWith("\0"))
-                            break;
-                    }
-
-                    Console.WriteLine("Text received: {0}", Data);
-
-                    handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
+                    var connectionThread = new Thread(() => HandleConnection(client));
+                    connectionThread.Start();
                 }
             }
             catch
             {
                 throw;
             }
+        }
+
+        private void HandleConnection(Socket client)
+        {
+            var incomingBuffer = new byte[1024];
+
+            string data;
+            int id = new Random().Next(0, int.MaxValue); // TMP
+
+            Console.WriteLine("Client {0} connected!", id);
+
+            while (true)
+            {
+                try
+                {
+                    data = string.Empty;
+
+                    while (true)
+                    {
+                        int bytesRecording = client.Receive(incomingBuffer);
+
+                        string appendData = Encoding.ASCII.GetString(incomingBuffer, 0, bytesRecording);
+
+                        data += appendData;
+
+                        if (data.EndsWith("\0"))
+                            break;
+                    }
+                }
+                catch
+                {
+                    break;
+                }
+
+                Console.WriteLine("Client {0} sent: {1}", id, data);
+
+                SendEchoMessage();
+            }
+
+            Disconnect();
+            
+            void SendEchoMessage()
+            {
+                var echoMsg = Encoding.ASCII.GetBytes(data.ToUpper());
+                client.Send(echoMsg);
+            }
+
+            void Disconnect()
+            {
+                Console.WriteLine("Client {0} disconnected.", id);
+
+                client.Shutdown(SocketShutdown.Both);
+                client.Close();
+            }
+
+            // UNDONE managed functions ...
         }
     }
 }

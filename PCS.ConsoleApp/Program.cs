@@ -11,18 +11,22 @@ namespace PCS.ConsoleApp
     {
         static void Main(string[] args)
         {
-            var client = new PCSClient(IPAddress.Parse("127.0.0.1"));
-            
-            while (true)
+            using (var client = new PCSClient(IPAddress.Parse("127.0.0.1"))) // idisposable using
             {
                 client.Connect();
-                string readLine = Console.ReadLine();
-                if (readLine != "quit")
-                    client.SendMessage(readLine);
-                else break;
-            }
 
-            client.Disconnect();
+                while (true)
+                {
+                    string readLine = Console.ReadLine();
+
+                    if (readLine == "quit")
+                        break;
+
+                    client.SendMessage(readLine);
+
+                    Console.WriteLine("Echoed: {0}", client.ReceiveEchoMessage());
+                }
+            }
         }
     }
 }
