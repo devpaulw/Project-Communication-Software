@@ -9,11 +9,15 @@ namespace PCS.ConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
+            Console.WriteLine("What is your username?");
+            string username = Console.ReadLine();
+
             using (var client = new PCSClient(IPAddress.Parse("127.0.0.1"))) // idisposable using
             {
                 client.Connect();
+                client.SignIn(new Member(username, new Random().Next(0, 255)));
 
                 while (true)
                 {

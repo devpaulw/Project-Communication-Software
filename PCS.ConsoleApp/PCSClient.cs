@@ -48,7 +48,7 @@ namespace PCS.ConsoleApp
 
         public void SignIn(Member member)
         {
-            // TODO
+            sender.Send(member.GetBytes());
         }
 
         public void SendMessage(string message)

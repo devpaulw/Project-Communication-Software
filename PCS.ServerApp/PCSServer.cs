@@ -48,52 +48,67 @@ namespace PCS.ServerApp
 
         private void HandleConnection(Socket client)
         {
-            var incomingBuffer = new byte[1024];
+            var identifiedMember = Identify();
 
-            string data;
-            int id = new Random().Next(0, int.MaxValue); // TMP
-
-            Console.WriteLine("Client {0} connected!", id);
+            Console.WriteLine("{0} connected!", identifiedMember);
 
             while (true)
             {
                 try
                 {
-                    data = string.Empty;
+                    string receivedMsg = ReceiveMessage();
 
-                    while (true)
-                    {
-                        int bytesRecording = client.Receive(incomingBuffer);
+                    Console.WriteLine("{0} sent: {1}", identifiedMember, receivedMsg);
 
-                        string appendData = Encoding.ASCII.GetString(incomingBuffer, 0, bytesRecording);
-
-                        data += appendData;
-
-                        if (data.EndsWith("\0"))
-                            break;
-                    }
+                    SendEchoMessage(receivedMsg);
                 }
                 catch
                 {
                     break;
                 }
-
-                Console.WriteLine("Client {0} sent: {1}", id, data);
-
-                SendEchoMessage();
             }
 
             Disconnect();
             
-            void SendEchoMessage()
+            Member Identify()
             {
-                var echoMsg = Encoding.ASCII.GetBytes(data.ToUpper());
+                string signedInMember = ReceiveMessage();
+
+                var infos = signedInMember.Split(new string[] { "MBR::UN:", ";ID:", ";;", "\0" }, StringSplitOptions.RemoveEmptyEntries);
+
+                return new Member(infos[0], Convert.ToInt32(infos[1]));
+            }
+
+            string ReceiveMessage()
+            {
+                var incomingBuffer = new byte[1024];
+
+                string data = string.Empty;
+
+                while (true)
+                {
+                    int bytesRecording = client.Receive(incomingBuffer);
+
+                    string appendData = Encoding.ASCII.GetString(incomingBuffer, 0, bytesRecording);
+
+                    data += appendData;
+
+                    if (data.EndsWith("\0"))
+                        break;
+                }
+
+                return data;
+            }
+
+            void SendEchoMessage(string message)
+            {
+                var echoMsg = Encoding.ASCII.GetBytes(message.ToUpper());
                 client.Send(echoMsg);
             }
 
             void Disconnect()
             {
-                Console.WriteLine("Client {0} disconnected.", id);
+                Console.WriteLine("{0} disconnected.", identifiedMember);
 
                 client.Shutdown(SocketShutdown.Both);
                 client.Close();

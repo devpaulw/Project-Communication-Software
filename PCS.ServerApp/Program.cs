@@ -8,7 +8,7 @@ namespace PCS.ServerApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             var server = new PCSServer();
             server.HostClients();
