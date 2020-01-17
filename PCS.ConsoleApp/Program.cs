@@ -11,12 +11,14 @@ namespace PCS.ConsoleApp
     {
         static void Main()
         {
+            // SDNMSG: The console app is no longer maintened. Use the WPF interface instead.
+
             Console.WriteLine("What is your username?");
             string username = Console.ReadLine();
 
-            using (var client = new PCSClient(IPAddress.Parse("127.0.0.1"))) // idisposable using
+            using (var client = new PCSClient()) // IDisposable using
             {
-                client.Connect();
+                client.Connect(IPAddress.Parse("127.0.0.1"));
                 client.SignIn(new Member(username, new Random().Next(0, 255)));
 
                 while (true)
@@ -28,7 +30,7 @@ namespace PCS.ConsoleApp
 
                     client.SendMessage(readLine);
 
-                    Console.WriteLine("Echoed: {0}", client.ReceiveEchoMessage());
+                    //Console.WriteLine("Echoed: {0}", client.ReceiveEchoMessage());
                 }
             }
         }

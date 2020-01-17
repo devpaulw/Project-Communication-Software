@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace PCS.WPFClientInterface
 {
@@ -22,43 +23,107 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        IndevClass ic;
+        readonly PCSClient client;
+        readonly Thread serverListening;
+        readonly List<Message> receivedMessages;
+        readonly DispatcherTimer dispatcherTimer;
+
         public MainWindow()
         {
+            client = new PCSClient();
+            serverListening = new Thread(() => ListenServer());
+            receivedMessages = new List<Message>();
+
+            const int refreshTicks = 10;
+            dispatcherTimer = new DispatcherTimer();
+            dispatcherTimer.Tick += new EventHandler(DispatcherTimer_Tick);
+            dispatcherTimer.Interval = new TimeSpan(refreshTicks);
+
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e) //ok button from ip address
+        public void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            IPAddress ipAddress;
-            int port;
+            var ipAddress = IPAddress.Parse(ipAddressTextBox.Text);
+            
+            client.Connect(ipAddress);
 
-            try
-            {
-                ipAddress = IPAddress.Parse(ipAddressTextBox.Text);
-                port = Convert.ToInt32(portTextBox.Text);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Server connection error");
-                return;
-            }
-
-            // If ipAddress and port are correct
-            ic = new IndevClass(ipAddress, port, AddMessage);
-
-            // Listen thread start
-            Thread listenThread = new Thread(() => ic.Listen());
-            listenThread.Start();
-
+            connectButton.Content = "Connected";
             connectButton.IsEnabled = false;
+            ipAddressTextBox.IsEnabled = false;
+            disconnectButton.IsEnabled = true;
+            signInButton.IsEnabled = true;
+            usernameTextBox.IsEnabled = true;
         }
 
-        private void AddMessage(DateTime dateTime, Member member, string message, Resource resource = null)
+        private void SignInButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(message);
+            int id = new Random().Next(UInt16.MaxValue);
+            var member = new Member(usernameTextBox.Text, id);
+
+            client.SignIn(member);
+
+            signInButton.Content = "Signed In";
+            signInButton.IsEnabled = false;
+            usernameTextBox.IsEnabled = false;
+            msgTextBox.IsEnabled = true;
+            sendMsgButton.IsEnabled = true;
+
+            serverListening.Start();
+            dispatcherTimer.Start();
+        }
+
+        private void SendMsgButton_Click(object sender, RoutedEventArgs e)
+        {
+            client.SendMessage(msgTextBox.Text);
+            msgTextBox.Text = string.Empty;
+        }
+
+        private void DisconnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            // WARNING: This method crash and is not safe
+
+            client.Disconnect();
+
+            connectButton.IsEnabled = true;
+            signInButton.IsEnabled = false;
+            ipAddressTextBox.IsEnabled = true;
+            usernameTextBox.IsEnabled = false;
+            ipAddressTextBox.Text = string.Empty;
+            usernameTextBox.Text = string.Empty;
+            connectButton.Content = "Connect";
+            signInButton.Content = "Sign In";
+            disconnectButton.IsEnabled = false;
+            msgTextBox.IsEnabled = false;
+            sendMsgButton.IsEnabled = false;
+
+            serverListening.Abort(); // TODO: Use a safer way
+            dispatcherTimer.Stop();
+        }
+
+        private void DispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            msgRtbZone.Text = string.Empty;
+
+            foreach (Message message in receivedMessages)
+            {
+                msgRtbZone.Text += "@" + message.Author.Username + ": " + message.Text + "\n";
+            }
+        }
+
+        private void ListenServer()
+        {
+            while (true)
+            {
+                var receivedMessage = client.ReceiveServerMessage();
+                new MessageHandler(WriteMessage).Invoke(receivedMessage);
+            }
+        }
+
+        delegate void MessageHandler(Message message);
+        void WriteMessage(Message message) // TODO: Separate into another class
+        {
+            receivedMessages.Add(message);
         }
     }
-
-    class Resource { } // TEMP
 }

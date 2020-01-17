@@ -19,9 +19,12 @@ namespace PCS
 
         public byte[] GetBytes()
         {
-            string formattedUsername = $"MBR::UN:{Username};ID:{ID};;\0";
+            return Encoding.UTF8.GetBytes(GetDataFlag() + '\0');
+        }
 
-            return Encoding.ASCII.GetBytes(formattedUsername);
+        public string GetDataFlag()
+        {
+            return $"{Username};:!{ID};:!";
         }
 
         public override string ToString()
