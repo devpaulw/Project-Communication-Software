@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Json;
@@ -20,6 +21,7 @@ namespace PCS
 
         public void Connect(IPAddress ip)
         {
+            if (ip.MapToIPv4().ToString() == "127.0.0.1") ip = IPAddressHelper.GetLocalIPAddress(); // Accept localhost ip
             adapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
 
@@ -51,7 +53,11 @@ namespace PCS
 
         public void Disconnect()
         {
-            Send(Flags.Disconnection);
+            try // TEMP Because when the server connection handler try to send DC it crashes
+            {
+                Send(Flags.Disconnection);
+            }
+            catch (SocketException) { }
 
             adapteeSocket.Shutdown(SocketShutdown.Both);
             adapteeSocket.Close();
@@ -71,7 +77,7 @@ namespace PCS
 
                 data += appendData;
 
-                if (data.EndsWith(Flags.EndOfTransmission.ToString()))
+                if (data.EndsWith(Flags.EndOfTransmission.ToString(CultureInfo.CurrentCulture), StringComparison.CurrentCulture))
                 {
                     data = data.Remove(data.Length - 1, 1); // Remove end of transmission char
                     break;
