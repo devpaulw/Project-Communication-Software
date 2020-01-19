@@ -83,6 +83,15 @@ namespace PCS
             return data;
         }
 
+        public Message ReceiveMessage() // Exclusive for clients applications
+        {
+            Message message = DataPacket.TryGetMessage(Receive());
+
+            if (message != null)
+                return message;
+            else
+                throw new Exception("Message receipt failed.");
+        }
 
         public void Dispose()
         {

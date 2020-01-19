@@ -5,9 +5,9 @@ using System.Text;
 namespace PCS
 {
     // In another approach, this class could be not be static, and contain a type "DataType" and easily get data with object function, but that's less clear
-    internal static class PacketData
+    internal static class DataPacket
     {
-        public static Member TryGetConnectedMember(string textData)
+        public static Member TryGetSignedInMember(string textData)
         {
             string[] infos = Flags.Split(textData);
 
