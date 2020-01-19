@@ -13,7 +13,7 @@ namespace PCS
 
             Console.WriteLine("{0} connected!", identifiedMember);
 
-            while (client.IsConnected())
+            while (true) //while (client.IsConnected()) // BUG, receive text lock that approach
             {
                 try
                 {

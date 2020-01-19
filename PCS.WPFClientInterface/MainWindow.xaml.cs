@@ -91,10 +91,12 @@ namespace PCS.WPFClientInterface
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
             server.Disconnect();
+            Environment.Exit(0);
 
-            // Below is a way to restart the app; Before we make this WPF App more reliable.
-            System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
-            Application.Current.Shutdown();
+            //// Below is a way to restart the app; Before we make this WPF App more reliable.
+            //System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+            //Application.Current.Shutdown();
+            //Window_Closed(this, null);
 
             // Below deprecated (too buggy)
             // WARNING: This method crash and is not safe

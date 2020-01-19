@@ -71,6 +71,7 @@ namespace PCS
 
         public void Dispose()
         {
+            // Example: Save messages, properly disconnect people...
         }
     }
 }

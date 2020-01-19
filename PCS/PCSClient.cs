@@ -72,7 +72,7 @@ namespace PCS
             return data;
         }
 
-        public bool IsConnected() // Temporary before a new approach
+        public bool IsConnected() // TEMP Temporary before a new approach
         {
             try
             {
@@ -83,8 +83,6 @@ namespace PCS
 
         public void Disconnect()
         {
-            adapteeSocket.Dispose();
-            return;
             adapteeSocket.Shutdown(SocketShutdown.Both);
             adapteeSocket.Close();
         }
