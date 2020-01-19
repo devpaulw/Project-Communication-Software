@@ -15,14 +15,18 @@ namespace PCS
             Text = text;
         }
 
-        public byte[] GetBytes() // TODO: Make an interface
+        public string GetData()
         {
-            return PcsServerHost.Encoding.GetBytes(GetDataFlag() + (char)4);
+            return Text + Flags.EndOfText + Author.GetData();
         }
 
-        public string GetDataFlag()
+        public static Message FromTextData(string textData)
         {
-            return $"{Text}{(char)3}{Author.GetDataFlag()}";
+            var infos = textData.Split(new char[] { Flags.EndOfText, Flags.EndOfTransmission }, 
+                StringSplitOptions.RemoveEmptyEntries);
+            var author = new Member(infos[1], Convert.ToInt32(infos[2])); // TODO use member from text data
+
+            return new Message(author, infos[0]);
         }
     }
 }

@@ -6,7 +6,6 @@ namespace PCS
 {
     interface IDataStream
     {
-        byte[] GetBytes();
-        string GetDataFlag();
+        string GetData();
     }
 }

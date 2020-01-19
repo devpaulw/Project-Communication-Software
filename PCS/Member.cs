@@ -17,21 +17,15 @@ namespace PCS
             ID = id;
         }
 
-        public byte[] GetBytes()
+        public string GetData()
         {
-            return PcsServerHost.Encoding.GetBytes(GetDataFlag() + (char)4);
+            return Username + Flags.EndOfText + ID;
         }
 
-        public string GetDataFlag()
+        public static Member FromTextData(string textData)
         {
-            return $"{Username}{(char)3}{ID}{(char)3}"; // DOLATER not clean
-        }
-
-        public static Member FromBytes(byte[] bytes, Encoding encoding) // UNDONE
-        {
-            string strMember = encoding.GetString(bytes);
-
-            var infos = strMember.Split(new char[] { (char)3, (char)4 }, StringSplitOptions.RemoveEmptyEntries);
+            var infos = textData.Split(new char[] { Flags.EndOfText, Flags.EndOfTransmission },
+                StringSplitOptions.RemoveEmptyEntries);
 
             return new Member(infos[0], Convert.ToInt32(infos[1]));
         }

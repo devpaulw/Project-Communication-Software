@@ -4,7 +4,12 @@ using System.Text;
 
 namespace PCS
 {
-    class Flags
+    internal static class Flags
     {
+        public const char EndOfText = (char)3;
+        public const char EndOfTransmission = (char)4;
+
+        public const string Connect = "C";
+        public const string Disconnect = "D";
     }
 }

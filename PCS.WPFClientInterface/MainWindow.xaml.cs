@@ -23,14 +23,13 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly PcsServer server;
+        PcsClient server;
         readonly Thread serverListening;
         readonly List<Message> receivedMessages;
         readonly DispatcherTimer dispatcherTimer;
 
         public MainWindow()
         {
-            server = new PcsServer();
             serverListening = new Thread(() => ListenServer());
             receivedMessages = new List<Message>();
 
@@ -45,7 +44,8 @@ namespace PCS.WPFClientInterface
         public void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             var ipAddress = IPAddress.Parse(ipAddressTextBox.Text);
-            
+
+            server = new PcsClient();
             server.Connect(ipAddress);
 
             connectButton.Content = "Connected";
@@ -75,7 +75,14 @@ namespace PCS.WPFClientInterface
 
         private void SendMsgButton_Click(object sender, RoutedEventArgs e)
         {
-            server.SendMessage(msgTextBox.Text);
+            if (msgTextBox.Text == "bell") // Troll
+            {
+                server.SendText(msgTextBox.Text + ((char)7).ToString());
+                return;
+            }
+                
+
+            server.SendText(msgTextBox.Text);
             msgTextBox.Text = string.Empty;
         }
 
@@ -115,7 +122,7 @@ namespace PCS.WPFClientInterface
         {
             while (true)
             {
-                var receivedMessage = server.ReceiveServerMessage();
+                var receivedMessage = Message.FromTextData(server.ReceiveText());
                 new MessageHandler(WriteMessage).Invoke(receivedMessage);
             }
         }

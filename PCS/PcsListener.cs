@@ -12,7 +12,7 @@ namespace PCS
 
         public PcsListener(IPAddress ip)
         {
-            var localEndPoint = new IPEndPoint(ip, PcsClient.Port); // TODO: Is port in the right place?
+            var localEndPoint = new IPEndPoint(ip, PcsServer.Port); // TODO: Is port in the right place?
 
             adapteeListener = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             adapteeListener.Bind(localEndPoint);

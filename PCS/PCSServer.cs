@@ -4,67 +4,59 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PCS
 {
-    public class PcsServer : IDisposable // TODO Do rather a library that make text exchanges easier
+    public class PcsServer
     {
-        private readonly Encoding encoding = Encoding.UTF8;
-        private PcsClient socket;
+        private readonly PcsListener listener;
+        private readonly List<PcsClient> connectedClients;
+
+        public const ushort Port = 6783;
+        public static readonly Encoding Encoding = Encoding.UTF8;
 
         public PcsServer()
         {
+            listener = new PcsListener(IPAddressHelper.GetLocalIPAddress());
+            connectedClients = new List<PcsClient>();
         }
-        
-        public void Connect(IPAddress ip)
-        {
-            socket = new PcsClient(ip);
 
+        public void HostClients()
+        {
             try
             {
-                socket.Connect(ip);
+                listener.Listen();
 
-                Console.WriteLine("Client connected to {0}", ip.MapToIPv4());
+                Console.WriteLine("Server started.");
+
+                while (true)
+                {
+                    var client = listener.Accept();
+                    connectedClients.Add(client);
+
+                    var connectionThread = new Thread(() => new ConnectionHandler(client, OnMessageReceived, OnClientDisconnect));
+                    connectionThread.Start();
+                }
             }
             catch
             {
                 throw;
             }
-
         }
 
-        public void SignIn(Member member)
+        private void OnMessageReceived(Message message)
         {
-            socket.SendBytes(member.GetBytes());
+            // Send to all clients
+            foreach (var connectedClient in connectedClients)
+                connectedClient.SendText(message.GetData());
         }
 
-        public void SendMessage(string text)
+
+        private void OnClientDisconnect(PcsClient client)
         {
-            socket.SendText(text);
-        }
-
-        public Message ReceiveServerMessage()
-        {
-            string receivedMsg = socket.ReceiveText();
-
-            var infos = receivedMsg.Split(new char[] { (char)3, (char)4 }, StringSplitOptions.RemoveEmptyEntries);
-
-            var author = new Member(infos[1], Convert.ToInt32(infos[2]));
-            var message = new Message(author, infos[0]);
-
-            return message;
-        }
-
-        public void Disconnect()
-        {
-            // TEMP, it's because legit disconnect handling has not been set-up yet
-            socket.Disconnect();
-        }
-
-        public void Dispose()
-        {
-            Disconnect();
+            connectedClients.Remove(client);
         }
     }
 }

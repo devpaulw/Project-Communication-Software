@@ -9,8 +9,7 @@ namespace PCS
 
         public ConnectionHandler(PcsClient client, Action<Message> addMessage, Action<PcsClient> clientDisconnect)
         {
-
-            Member identifiedMember = Member.FromBytes(client.ReceiveBytes(), Encoding.UTF8); // TODO not safe
+            Member identifiedMember = Member.FromTextData(client.ReceiveText());
 
             Console.WriteLine("{0} connected!", identifiedMember);
 

@@ -16,7 +16,7 @@ namespace PCS.ConsoleApp
             Console.WriteLine("What is your username?");
             string username = Console.ReadLine();
 
-            using (var client = new PcsServer()) // IDisposable using
+            using (var client = new PcsClient()) // IDisposable using
             {
                 client.Connect(IPAddress.Parse("192.168.1.11"));
                 client.SignIn(new Member(username, new Random().Next(0, 255)));
@@ -28,7 +28,7 @@ namespace PCS.ConsoleApp
                     if (readLine == "quit")
                         break;
 
-                    client.SendMessage(readLine);
+                    client.SendText(readLine);
 
                     //Console.WriteLine("Echoed: {0}", client.ReceiveEchoMessage());
                 }

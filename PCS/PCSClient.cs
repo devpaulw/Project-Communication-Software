@@ -7,17 +7,12 @@ using System.Text;
 
 namespace PCS
 {
-    class PcsClient
+    public class PcsClient : IDisposable
     {
         private readonly Encoding encoding = Encoding.UTF8;
-        private readonly Socket adapteeSocket;
+        private Socket adapteeSocket;
 
-        public const ushort Port = 6783;
-
-        public PcsClient(IPAddress ip)
-        {
-            adapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-        }
+        public PcsClient() { }
 
         public PcsClient(Socket cloneInstance)
         {
@@ -26,28 +21,28 @@ namespace PCS
 
         public void Connect(IPAddress ip)
         {
-            var endPoint = new IPEndPoint(ip, Port);
-            adapteeSocket.Connect(endPoint);
+            adapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            var endPoint = new IPEndPoint(ip, PcsServer.Port);
+
+            try
+            {
+                adapteeSocket.Connect(endPoint);
+                Console.WriteLine("Client connected to {0}", ip.MapToIPv4());
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public void SendBytes(byte[] buffer)
+        public void SignIn(Member member) // TODO should perhaps be separated
         {
-            adapteeSocket.Send(buffer);
-        }
-
-        public byte[] ReceiveBytes()
-        { // TODO This is not safe and it have to updated
-            var incomingBuffer = new byte[1024];
-
-            adapteeSocket.Receive(incomingBuffer);
-
-            return incomingBuffer;
+            SendText(/*Flags.Connect + Flags.EndOfText +*/ member.GetData());
         }
 
         public void SendText(string message)
         {
-            // TODO Regroup separators and end of transmission in a known class
-            message += (char)4;
+            message += Flags.EndOfTransmission;
 
             byte[] encodedMessage = encoding.GetBytes(message);
 
@@ -68,10 +63,9 @@ namespace PCS
 
                 data += appendData;
 
-                if (data.EndsWith(((char)4).ToString()))
+                if (data.EndsWith(Flags.EndOfTransmission.ToString()))
                 {
-                    // TODO too ugly
-                    data = data.Remove(data.Length - 1, 1);
+                    data = data.Remove(data.Length - 1, 1); // Remove end of transmission char
                     break;
                 }
             }
@@ -83,6 +77,11 @@ namespace PCS
         {
             adapteeSocket.Shutdown(SocketShutdown.Both);
             adapteeSocket.Close();
+        }
+
+        public void Dispose()
+        {
+            Disconnect();
         }
     }
 }
