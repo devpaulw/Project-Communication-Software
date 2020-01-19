@@ -9,15 +9,15 @@ namespace PCS
 
         public ConnectionHandler(PcsClient client, Action<Message> addMessage, Action<PcsClient> clientDisconnect)
         {
-            Member identifiedMember = Member.FromTextData(client.ReceiveText());
+            Member identifiedMember = Member.FromTextData(client.Receive());
 
             Console.WriteLine("{0} connected!", identifiedMember);
 
-            while (true) //while (client.IsConnected()) // BUG, receive text lock that approach
+            while (true)
             {
                 try
                 {
-                    string receivedMsg = client.ReceiveText();
+                    string receivedMsg = client.Receive();
 
                     Console.WriteLine("{0} sent: {1}", identifiedMember, receivedMsg);
 
@@ -36,9 +36,26 @@ namespace PCS
             Console.WriteLine("{0} disconnected.", identifiedMember);
         }
 
-        Member Identify()
-        {
-            return default;
-        }
+        //public ConnectionHandler(PcsClient client, Action<Message> addMessage, Action<PcsClient> clientDisconnect)
+        //{
+        //    while (true)
+        //    {
+        //        try
+        //        {
+        //            string receivedMsg = client.Receive();
+
+        //            Console.WriteLine("{0} sent: {1}", identifiedMember, receivedMsg);
+
+        //            var message = new Message(identifiedMember, receivedMsg);
+        //            addMessage(message);
+
+
+        //        }
+        //        catch
+        //        {
+        //            break;
+        //        }
+        //    }
+        //}
     }
 }

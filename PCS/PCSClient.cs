@@ -36,19 +36,30 @@ namespace PCS
 
         public void SignIn(Member member) // TODO should perhaps be separated
         {
-            SendText(/*Flags.Connect + Flags.EndOfText +*/ member.GetData());
+            SendText(member.GetData());
+            //Send(Flags.SigningIn + Flags.EndOfText + member.GetData());
         }
 
-        public void SendText(string message)
+        public void SendText(string text)
         {
-            message += Flags.EndOfTransmission;
-
-            byte[] encodedMessage = PcsServer.Encoding.GetBytes(message);
-
-            adapteeSocket.Send(encodedMessage);
+            //Send(Flags.Text + Flags.EndOfText + text);
+            Send(text);
         }
 
-        public string ReceiveText()
+        public void SendMessage(Message message)
+        {
+            Send(Flags.Message + Flags.EndOfText + message.GetData());
+        }
+
+        public void Disconnect()
+        {
+            //Send(Flags.Disconnection);
+
+            adapteeSocket.Shutdown(SocketShutdown.Both);
+            adapteeSocket.Close();
+        }
+
+        public string Receive()
         {
             var incomingBuffer = new byte[1024];
 
@@ -72,24 +83,19 @@ namespace PCS
             return data;
         }
 
-        public bool IsConnected() // TEMP Temporary before a new approach
-        {
-            try
-            {
-                return !(adapteeSocket.Poll(1, SelectMode.SelectRead) && adapteeSocket.Available == 0);
-            }
-            catch (SocketException) { return false; }
-        }
-
-        public void Disconnect()
-        {
-            adapteeSocket.Shutdown(SocketShutdown.Both);
-            adapteeSocket.Close();
-        }
 
         public void Dispose()
         {
             Disconnect();
+        }
+
+        public void Send(string text) // TODO TO BE PRIVATE
+        {
+            text += Flags.EndOfTransmission;
+
+            byte[] encodedMessage = PcsServer.Encoding.GetBytes(text);
+
+            adapteeSocket.Send(encodedMessage);
         }
     }
 }

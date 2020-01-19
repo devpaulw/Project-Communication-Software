@@ -9,10 +9,10 @@ namespace PCS
         public const char EndOfText = (char)3;
         public const char EndOfTransmission = (char)4;
 
-        // TODO Continue this concept!
-        //public const string Message = "M";
-        //public const string Connect = "C";
-        //public const string Disconnect = "D";
+        public const string Text = "TX";
+        public const string Message = "MS";
+        public const string SigningIn = "SI";
+        public const string Disconnection = "DC";
 
         public static string[] Split(string textData)
         {
@@ -20,9 +20,4 @@ namespace PCS
                 StringSplitOptions.None);
         }
     }
-
-    //enum DataType
-    //{
-    //    Connection, Disconnection, ServerMessage, ClientMessage
-    //}
 }

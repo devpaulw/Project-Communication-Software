@@ -1,0 +1,38 @@
+New approach (KISS principle)
+
+Sign In: CO<Member>
+	=>SI<EOT>Text<EOTransmission>
+Text: CM<EOT>Username<EOT>Id<EOTransmission>
+	=> TX<EOT>Text<EOTransmission>
+Disconnect: DC
+	=> DC<EOTransmission>
+Message: SM<Member><Message> 
+	=> MS<EOT>Username<EOT>Id<EOT>Text<EOTransmission>
+
+
+
+---
+
+Old Approach (deprecated)
+
+Server Message
+<EOT> 
+	<SOH> 
+		<SOT>Username<EOT> 
+	<SOT>Id<EOT> 
+<EOTB> 
+
+<SOH><EOTB>
+
+Server Message
+Start Of Header
+	-> Member
+	End Of Text
+		Username
+	End Of Text
+	Start Of Text
+		Id
+	End Of Text
+End Of Transmission Block
+
+<SOH><EOTB>

@@ -18,6 +18,7 @@ namespace PCS
         public string GetData()
         {
             return Text + Flags.EndOfText + Author.GetData();
+            //return Author.GetData() + Flags.EndOfText + Text;
         }
 
         public static Message FromTextData(string textData)

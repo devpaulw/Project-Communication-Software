@@ -133,7 +133,7 @@ namespace PCS.WPFClientInterface
         {
             while (true)
             {
-                var receivedMessage = Message.FromTextData(server.ReceiveText());
+                var receivedMessage = Message.FromTextData(server.Receive());
                 new MessageHandler(WriteMessage).Invoke(receivedMessage);
             }
         }
