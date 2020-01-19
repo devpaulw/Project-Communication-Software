@@ -22,13 +22,6 @@ namespace PCS
             return Username + Flags.EndOfText + ID;
         }
 
-        public static Member FromTextData(string textData)
-        {
-            var infos = Flags.Split(textData);
-
-            return new Member(infos[0], Convert.ToInt32(infos[1])); // TODO Find another way to get infos intead of [x]
-        }
-
         public override string ToString()
         {
             return "Member " + Username + " (ID " + ID + ")";

@@ -36,14 +36,12 @@ namespace PCS
 
         public void SignIn(Member member) // TODO should perhaps be separated
         {
-            SendText(member.GetData());
-            //Send(Flags.SigningIn + Flags.EndOfText + member.GetData());
+            Send(Flags.SigningIn + Flags.EndOfText + member.GetData());
         }
 
         public void SendText(string text)
         {
-            //Send(Flags.Text + Flags.EndOfText + text);
-            Send(text);
+            Send(Flags.Text + Flags.EndOfText + text);
         }
 
         public void SendMessage(Message message)
@@ -53,7 +51,7 @@ namespace PCS
 
         public void Disconnect()
         {
-            //Send(Flags.Disconnection);
+            Send(Flags.Disconnection);
 
             adapteeSocket.Shutdown(SocketShutdown.Both);
             adapteeSocket.Close();
@@ -85,7 +83,8 @@ namespace PCS
 
         public Message ReceiveMessage() // Exclusive for clients applications
         {
-            Message message = DataPacket.TryGetMessage(Receive());
+            string receivedData = Receive();
+            Message message = DataPacket.TryGetMessage(receivedData);
 
             if (message != null)
                 return message;
@@ -98,7 +97,7 @@ namespace PCS
             Disconnect();
         }
 
-        public void Send(string text) // TODO TO BE PRIVATE
+        private void Send(string text)
         {
             text += Flags.EndOfTransmission;
 

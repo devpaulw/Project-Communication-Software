@@ -61,8 +61,7 @@ namespace PCS
         {
             // Send to all clients
             foreach (var connectedClient in connectedClients)
-                //connectedClient.SendMessage(message);
-                connectedClient.SendText(message.GetData());
+                connectedClient.SendMessage(message);
         }
 
         private void SaveMessage(Message message)

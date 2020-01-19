@@ -17,16 +17,7 @@ namespace PCS
 
         public string GetData()
         {
-            return Text + Flags.EndOfText + Author.GetData();
-            //return Author.GetData() + Flags.EndOfText + Text;
-        }
-
-        public static Message FromTextData(string textData)
-        {
-            var infos = Flags.Split(textData);
-            var author = new Member(infos[1], Convert.ToInt32(infos[2])); // TODO use member from text data
-
-            return new Message(author, infos[0]);
+            return Author.GetData() + Flags.EndOfText + Text;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace PCS
         {
             string[] infos = Flags.Split(textData);
 
+
             string header = infos[0];
 
             if (header != Flags.SigningIn)
