@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ZSGP.WPFClientInterface"
         mc:Ignorable="d"
-        Title="Project Communication Software" Height="450" Width="726.091">
+        Title="Project Communication Software" Height="450" Width="726.091" Closed="Window_Closed">
     <Window.Background>
         <RadialGradientBrush>
             <GradientStop Color="#FFFFB900" Offset="1"/>
@@ -18,29 +18,49 @@
             <RowDefinition Height="188*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="251*"/>
+            <ColumnDefinition Width="237*"/>
+            <ColumnDefinition Width="14*"/>
             <ColumnDefinition Width="107*"/>
             <ColumnDefinition Width="268*"/>
             <ColumnDefinition Width="92*"/>
         </Grid.ColumnDefinitions>
-        <Border BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="4" HorizontalAlignment="Left" Height="370" Margin="197,10,0,0" VerticalAlignment="Top" Width="511" Grid.RowSpan="2"/>
-        <TextBox x:Name="msgTextBox" HorizontalAlignment="Left" Height="24" Margin="197,154,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="419" Grid.ColumnSpan="3" Grid.Row="1" IsEnabled="False"/>
+        <Border BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="5" HorizontalAlignment="Left" Height="370" Margin="197,10,0,0" VerticalAlignment="Top" Width="511" Grid.RowSpan="2"/>
+        <TextBox x:Name="msgTextBox" HorizontalAlignment="Left" Height="24" Margin="197,154,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="419" Grid.ColumnSpan="4" Grid.Row="1" IsEnabled="False"/>
 
-        <TextBlock x:Name="msgRtbZone" HorizontalAlignment="Left" Height="370" Margin="197,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="511" Grid.ColumnSpan="4" Grid.RowSpan="2">
-            <TextBlock.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#BFFFF3A6"/>
-                </LinearGradientBrush>
-            </TextBlock.Background>
-        </TextBlock>
+        <Grid Width="511" Height="370" Margin="197,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="5" Grid.RowSpan="2">
+            <!--<ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="msgRtbZone" Width="Auto" Height="Auto" TextWrapping="Wrap"  >
+                    <TextBlock.Background>
+                        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                            <GradientStop Color="#BFFFF3A6"/>
+                        </LinearGradientBrush>
+                    </TextBlock.Background>
+                </TextBlock>
+            </ScrollViewer>-->
 
-        <Button x:Name="sendMsgButton" Content="Send" HorizontalAlignment="Left" Margin="0,154,0,0" VerticalAlignment="Top" Width="82" Height="24" Grid.Column="3" Click="SendMsgButton_Click" Grid.Row="1" IsEnabled="False"/>
+            <TextBox x:Name="msgRtbZone" Height="Auto" TextWrapping="Wrap" Width="Auto" 
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     IsReadOnly="True">
+
+                <TextBox.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#BFFFF3A6"/>
+                    </LinearGradientBrush>
+                </TextBox.Background>
+
+            </TextBox>
+
+        </Grid>
+
+        <Button x:Name="sendMsgButton" Content="Send" HorizontalAlignment="Left" Margin="0,154,0,0" VerticalAlignment="Top" Width="82" Height="24" Grid.Column="4" Click="SendMsgButton_Click" Grid.Row="1" IsEnabled="False"/>
         <TextBox x:Name="ipAddressTextBox" HorizontalAlignment="Left" Height="22" Margin="69,6,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" Text="192.168.1.11"/>
         <Label x:Name="___No_Name_" Content="IP Address:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="37" Width="75" Margin="0,2,0,0"/>
         <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" Height="22" Margin="10,33,0,0" VerticalAlignment="Top" Width="74" RenderTransformOrigin="0.653,-0.208" Click="ConnectButton_Click"/>
         <Label Content="Username:" HorizontalAlignment="Left" VerticalAlignment="Top" Height="37" Width="75" Margin="0,55,0,0"/>
         <TextBox x:Name="usernameTextBox" HorizontalAlignment="Left" Height="22" Margin="69,60,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="90" IsEnabled="False" Text="t1"/>
         <Button x:Name="signInButton" Content="Sign In" HorizontalAlignment="Left" Height="22" Margin="10,87,0,0" VerticalAlignment="Top" Width="149" RenderTransformOrigin="0.653,-0.208" Click="SignInButton_Click" IsEnabled="False"/>
-        <Button x:Name="disconnectButton" Content="... Disconnect" HorizontalAlignment="Left" Height="22" Margin="10,114,0,0" VerticalAlignment="Top" Width="85" RenderTransformOrigin="0.653,-0.208" Click="DisconnectButton_Click" IsEnabled="False"/>
+        <Button x:Name="disconnectButton" Content="Disconnect" HorizontalAlignment="Left" Height="22" Margin="10,114,0,0" VerticalAlignment="Top" Width="74" RenderTransformOrigin="0.653,-0.208" Click="DisconnectButton_Click" IsEnabled="False"/>
+        <Label Content="Made by SpydotNet and&#xD;&#xA;Binary Bluff" HorizontalAlignment="Left" Height="47" Margin="10,131,0,0" Grid.Row="1" VerticalAlignment="Top" Width="165"/>
     </Grid>
 </Window>

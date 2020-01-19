@@ -23,8 +23,10 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
+        // WARNING: L'application WPF est complètement instable, lente, tout est mal géré et nécessite de recommencer à zero.
+
         PcsClient server;
-        readonly Thread serverListening;
+        Thread serverListening;
         readonly List<Message> receivedMessages;
         readonly DispatcherTimer dispatcherTimer;
 
@@ -33,7 +35,7 @@ namespace PCS.WPFClientInterface
             serverListening = new Thread(() => ListenServer());
             receivedMessages = new List<Message>();
 
-            const int refreshTicks = 10;
+            const int refreshTicks = 50;
             dispatcherTimer = new DispatcherTimer();
             dispatcherTimer.Tick += new EventHandler(DispatcherTimer_Tick);
             dispatcherTimer.Interval = new TimeSpan(refreshTicks);
@@ -88,24 +90,29 @@ namespace PCS.WPFClientInterface
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
-            // WARNING: This method crash and is not safe
-
             server.Disconnect();
 
-            connectButton.IsEnabled = true;
-            signInButton.IsEnabled = false;
-            ipAddressTextBox.IsEnabled = true;
-            usernameTextBox.IsEnabled = false;
-            ipAddressTextBox.Text = string.Empty;
-            usernameTextBox.Text = string.Empty;
-            connectButton.Content = "Connect";
-            signInButton.Content = "Sign In";
-            disconnectButton.IsEnabled = false;
-            msgTextBox.IsEnabled = false;
-            sendMsgButton.IsEnabled = false;
+            // Below is a way to restart the app; Before we make this WPF App more reliable.
+            System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+            Application.Current.Shutdown();
 
-            serverListening.Abort(); // TODO: Use a safer way
-            dispatcherTimer.Stop();
+            // Below deprecated (too buggy)
+            // WARNING: This method crash and is not safe
+            //connectButton.IsEnabled = true;
+            //signInButton.IsEnabled = false;
+            //ipAddressTextBox.IsEnabled = true;
+            //usernameTextBox.IsEnabled = false;
+            //ipAddressTextBox.Text = string.Empty;
+            //usernameTextBox.Text = string.Empty;
+            //connectButton.Content = "Connect";
+            //signInButton.Content = "Sign In";
+            //disconnectButton.IsEnabled = false;
+            //msgTextBox.IsEnabled = false;
+            //sendMsgButton.IsEnabled = false;
+
+            //serverListening.Abort(); // TODO: Use a safer way
+            //serverListening = new Thread(() => ListenServer());
+            //dispatcherTimer.Stop();
         }
 
         private void DispatcherTimer_Tick(object sender, EventArgs e)
@@ -116,6 +123,8 @@ namespace PCS.WPFClientInterface
             {
                 msgRtbZone.Text += "@" + message.Author.Username + ": " + message.Text + "\n";
             }
+
+            msgRtbZone.ScrollToEnd();
         }
 
         private void ListenServer()
@@ -131,6 +140,13 @@ namespace PCS.WPFClientInterface
         void WriteMessage(Message message) // TODO: Separate into another class
         {
             receivedMessages.Add(message);
+        }
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            serverListening.Abort();
+            dispatcherTimer.Stop();
+            Application.Current.Shutdown();
+            Environment.Exit(0);
         }
     }
 }

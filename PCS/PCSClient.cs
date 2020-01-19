@@ -9,7 +9,6 @@ namespace PCS
 {
     public class PcsClient : IDisposable
     {
-        private readonly Encoding encoding = Encoding.UTF8;
         private Socket adapteeSocket;
 
         public PcsClient() { }
@@ -44,7 +43,7 @@ namespace PCS
         {
             message += Flags.EndOfTransmission;
 
-            byte[] encodedMessage = encoding.GetBytes(message);
+            byte[] encodedMessage = PcsServer.Encoding.GetBytes(message);
 
             adapteeSocket.Send(encodedMessage);
         }
@@ -59,7 +58,7 @@ namespace PCS
             {
                 int bytesRecording = adapteeSocket.Receive(incomingBuffer);
 
-                string appendData = encoding.GetString(incomingBuffer, 0, bytesRecording);
+                string appendData = PcsServer.Encoding.GetString(incomingBuffer, 0, bytesRecording);
 
                 data += appendData;
 
@@ -73,8 +72,19 @@ namespace PCS
             return data;
         }
 
+        public bool IsConnected() // Temporary before a new approach
+        {
+            try
+            {
+                return !(adapteeSocket.Poll(1, SelectMode.SelectRead) && adapteeSocket.Available == 0);
+            }
+            catch (SocketException) { return false; }
+        }
+
         public void Disconnect()
         {
+            adapteeSocket.Dispose();
+            return;
             adapteeSocket.Shutdown(SocketShutdown.Both);
             adapteeSocket.Close();
         }

@@ -13,7 +13,7 @@ namespace PCS
 
             Console.WriteLine("{0} connected!", identifiedMember);
 
-            while (true)
+            while (client.IsConnected())
             {
                 try
                 {
@@ -34,6 +34,11 @@ namespace PCS
             clientDisconnect(client);
 
             Console.WriteLine("{0} disconnected.", identifiedMember);
+        }
+
+        Member Identify()
+        {
+            return default;
         }
     }
 }

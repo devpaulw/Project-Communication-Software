@@ -9,20 +9,20 @@ using System.Threading.Tasks;
 
 namespace PCS
 {
-    public class PcsServer
+    public class PcsServer : IDisposable
     {
         private readonly PcsListener listener;
         private readonly List<PcsClient> connectedClients;
 
         public const ushort Port = 6783;
-        public static readonly Encoding Encoding = Encoding.UTF8;
+        public static readonly Encoding Encoding = Encoding.Unicode;
 
         public PcsServer()
         {
             listener = new PcsListener(IPAddressHelper.GetLocalIPAddress());
             connectedClients = new List<PcsClient>();
         }
-
+        
         public void HostClients()
         {
             try
@@ -48,15 +48,29 @@ namespace PCS
 
         private void OnMessageReceived(Message message)
         {
+            SendToEveryone(message);
+            SaveMessage(message);
+        }
+
+        private void OnClientDisconnect(PcsClient client)
+        {
+            connectedClients.Remove(client);
+        }
+
+        private void SendToEveryone(Message message)
+        {
             // Send to all clients
             foreach (var connectedClient in connectedClients)
                 connectedClient.SendText(message.GetData());
         }
 
-
-        private void OnClientDisconnect(PcsClient client)
+        private void SaveMessage(Message message)
         {
-            connectedClients.Remove(client);
+            // Will be filled later
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

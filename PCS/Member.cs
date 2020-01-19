@@ -24,10 +24,9 @@ namespace PCS
 
         public static Member FromTextData(string textData)
         {
-            var infos = textData.Split(new char[] { Flags.EndOfText, Flags.EndOfTransmission },
-                StringSplitOptions.RemoveEmptyEntries);
+            var infos = Flags.Split(textData);
 
-            return new Member(infos[0], Convert.ToInt32(infos[1]));
+            return new Member(infos[0], Convert.ToInt32(infos[1])); // TODO Find another way to get infos intead of [x]
         }
 
         public override string ToString()

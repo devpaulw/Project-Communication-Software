@@ -22,8 +22,7 @@ namespace PCS
 
         public static Message FromTextData(string textData)
         {
-            var infos = textData.Split(new char[] { Flags.EndOfText, Flags.EndOfTransmission }, 
-                StringSplitOptions.RemoveEmptyEntries);
+            var infos = Flags.Split(textData);
             var author = new Member(infos[1], Convert.ToInt32(infos[2])); // TODO use member from text data
 
             return new Message(author, infos[0]);
