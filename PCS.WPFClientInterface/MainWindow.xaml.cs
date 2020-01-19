@@ -23,14 +23,14 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        readonly PCSClient client;
+        readonly PcsServer server;
         readonly Thread serverListening;
         readonly List<Message> receivedMessages;
         readonly DispatcherTimer dispatcherTimer;
 
         public MainWindow()
         {
-            client = new PCSClient();
+            server = new PcsServer();
             serverListening = new Thread(() => ListenServer());
             receivedMessages = new List<Message>();
 
@@ -46,7 +46,7 @@ namespace PCS.WPFClientInterface
         {
             var ipAddress = IPAddress.Parse(ipAddressTextBox.Text);
             
-            client.Connect(ipAddress);
+            server.Connect(ipAddress);
 
             connectButton.Content = "Connected";
             connectButton.IsEnabled = false;
@@ -61,7 +61,7 @@ namespace PCS.WPFClientInterface
             int id = new Random().Next(UInt16.MaxValue);
             var member = new Member(usernameTextBox.Text, id);
 
-            client.SignIn(member);
+            server.SignIn(member);
 
             signInButton.Content = "Signed In";
             signInButton.IsEnabled = false;
@@ -75,7 +75,7 @@ namespace PCS.WPFClientInterface
 
         private void SendMsgButton_Click(object sender, RoutedEventArgs e)
         {
-            client.SendMessage(msgTextBox.Text);
+            server.SendMessage(msgTextBox.Text);
             msgTextBox.Text = string.Empty;
         }
 
@@ -83,7 +83,7 @@ namespace PCS.WPFClientInterface
         {
             // WARNING: This method crash and is not safe
 
-            client.Disconnect();
+            server.Disconnect();
 
             connectButton.IsEnabled = true;
             signInButton.IsEnabled = false;
@@ -115,7 +115,7 @@ namespace PCS.WPFClientInterface
         {
             while (true)
             {
-                var receivedMessage = client.ReceiveServerMessage();
+                var receivedMessage = server.ReceiveServerMessage();
                 new MessageHandler(WriteMessage).Invoke(receivedMessage);
             }
         }

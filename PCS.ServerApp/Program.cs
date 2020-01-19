@@ -10,7 +10,7 @@ namespace PCS.ServerApp
     {
         static void Main()
         {
-            var server = new PCSServer();
+            var server = new PcsServerHost();
             server.HostClients();
         }
     }

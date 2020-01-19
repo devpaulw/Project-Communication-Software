@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PCS
 {
-    public class Member
+    public class Member : IDataStream
     {
         public string Username { get; set; }
         public int ID { get; set; }
@@ -19,12 +19,21 @@ namespace PCS
 
         public byte[] GetBytes()
         {
-            return Encoding.UTF8.GetBytes(GetDataFlag() + '\0');
+            return PcsServerHost.Encoding.GetBytes(GetDataFlag() + (char)4);
         }
 
         public string GetDataFlag()
         {
-            return $"{Username};:!{ID};:!";
+            return $"{Username}{(char)3}{ID}{(char)3}"; // DOLATER not clean
+        }
+
+        public static Member FromBytes(byte[] bytes, Encoding encoding) // UNDONE
+        {
+            string strMember = encoding.GetString(bytes);
+
+            var infos = strMember.Split(new char[] { (char)3, (char)4 }, StringSplitOptions.RemoveEmptyEntries);
+
+            return new Member(infos[0], Convert.ToInt32(infos[1]));
         }
 
         public override string ToString()

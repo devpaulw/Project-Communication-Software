@@ -1,97 +1,88 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PCS
 {
-    public class PCSClient : IDisposable
+    class PcsClient
     {
-        private Socket sender;
+        private readonly Encoding encoding = Encoding.UTF8;
+        private readonly Socket adapteeSocket;
 
-        public const ushort ConnectingPort = 6783;
+        public const ushort Port = 6783;
 
-        public PCSClient()
+        public PcsClient(IPAddress ip)
         {
+            adapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         }
-        
-        public void Connect(IPAddress address)
+
+        public PcsClient(Socket cloneInstance)
         {
-            sender = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            adapteeSocket = cloneInstance;
+        }
 
-            try
+        public void Connect(IPAddress ip)
+        {
+            var endPoint = new IPEndPoint(ip, Port);
+            adapteeSocket.Connect(endPoint);
+        }
+
+        public void SendBytes(byte[] buffer)
+        {
+            adapteeSocket.Send(buffer);
+        }
+
+        public byte[] ReceiveBytes()
+        { // TODO This is not safe and it have to updated
+            var incomingBuffer = new byte[1024];
+
+            adapteeSocket.Receive(incomingBuffer);
+
+            return incomingBuffer;
+        }
+
+        public void SendText(string message)
+        {
+            // TODO Regroup separators and end of transmission in a known class
+            message += (char)4;
+
+            byte[] encodedMessage = encoding.GetBytes(message);
+
+            adapteeSocket.Send(encodedMessage);
+        }
+
+        public string ReceiveText()
+        {
+            var incomingBuffer = new byte[1024];
+
+            string data = string.Empty;
+
+            while (true)
             {
-                var endPoint = new IPEndPoint(address, ConnectingPort);
+                int bytesRecording = adapteeSocket.Receive(incomingBuffer);
 
-                try
-                {
-                    sender.Connect(endPoint);
+                string appendData = encoding.GetString(incomingBuffer, 0, bytesRecording);
 
-                    Console.WriteLine("Client connected to {0}", sender.RemoteEndPoint); // USELESS
-                }
-                catch
+                data += appendData;
+
+                if (data.EndsWith(((char)4).ToString()))
                 {
-                    throw;
+                    // TODO too ugly
+                    data = data.Remove(data.Length - 1, 1);
+                    break;
                 }
             }
-            catch
-            {
-                throw;
-            }
+
+            return data;
         }
-
-        public void SignIn(Member member)
-        {
-            sender.Send(member.GetBytes());
-        }
-
-        public void SendMessage(string message)
-        {
-            message += '\0';
-
-            byte[] encodedMessage = Encoding.UTF8.GetBytes(message);
-
-            sender.Send(encodedMessage);
-        }
-
-        public Message ReceiveServerMessage()
-        {
-            byte[] buffer = new byte[1024]; // TODO: Make it bigger, and smarter; Even make a class to handler send/receive
-
-            int bytesRec = sender.Receive(buffer);
-            string receivedMsg = Encoding.UTF8.GetString(buffer, 0, bytesRec);
-
-            var infos = receivedMsg.Split(new string[] { ";:!", "\0" }, StringSplitOptions.RemoveEmptyEntries);
-
-            var author = new Member(infos[1], Convert.ToInt32(infos[2]));
-            var message = new Message(author, infos[0]);
-
-            return message;
-        }
-
-        //public string ReceiveEchoMessage()
-        //{
-        //    byte[] echoBuffer = new byte[1024];
-
-        //    int bytesRec = sender.Receive(echoBuffer);
-
-        //    return Encoding.UTF8.GetString(echoBuffer, 0, bytesRec);
-        //}
 
         public void Disconnect()
         {
-            // TEMP, it's because legit disconnect handling has not been set-up yet
-            //sender.Shutdown(SocketShutdown.Both);
-            //sender.Close();
-            sender.Dispose();
-        }
-
-        public void Dispose()
-        {
-            Disconnect();
+            adapteeSocket.Shutdown(SocketShutdown.Both);
+            adapteeSocket.Close();
         }
     }
 }

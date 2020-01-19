@@ -16,9 +16,9 @@ namespace PCS.ConsoleApp
             Console.WriteLine("What is your username?");
             string username = Console.ReadLine();
 
-            using (var client = new PCSClient()) // IDisposable using
+            using (var client = new PcsServer()) // IDisposable using
             {
-                client.Connect(IPAddress.Parse("127.0.0.1"));
+                client.Connect(IPAddress.Parse("192.168.1.11"));
                 client.SignIn(new Member(username, new Random().Next(0, 255)));
 
                 while (true)

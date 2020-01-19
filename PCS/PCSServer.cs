@@ -4,136 +4,67 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace PCS
 {
-    public class PCSServer
+    public class PcsServer : IDisposable // TODO Do rather a library that make text exchanges easier
     {
-        private readonly Socket listener;
-        readonly List<Socket> connectedClients;
+        private readonly Encoding encoding = Encoding.UTF8;
+        private PcsClient socket;
 
-        public const ushort Port = 6783;
-
-        public PCSServer()
+        public PcsServer()
         {
-            IPAddress ipAddress = IPAddress.Parse("127.0.0.1"); // TODO: Why I have to put localhost wheareas it's a server
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, Port);
-
-            listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(localEndPoint);
-
-            connectedClients = new List<Socket>();
         }
-
-        public void HostClients()
+        
+        public void Connect(IPAddress ip)
         {
+            socket = new PcsClient(ip);
+
             try
             {
-                listener.Listen(10);
+                socket.Connect(ip);
 
-                Console.WriteLine("Server started.");
-
-                while (true)
-                {
-                    Socket client = listener.Accept();
-                    connectedClients.Add(client);
-
-                    var connectionThread = new Thread(() => HandleConnection(client));
-                    connectionThread.Start();
-                }
+                Console.WriteLine("Client connected to {0}", ip.MapToIPv4());
             }
             catch
             {
                 throw;
             }
-        }
-
-        private void HandleConnection(Socket client)
-        {
-            Member identifiedMember = Identify(client);
-
-            Console.WriteLine("{0} connected!", identifiedMember);
-
-            while (true)
-            {
-                try
-                {
-                    string receivedMsg = ReceiveMessage(client);
-
-                    Console.WriteLine("{0} sent: {1}", identifiedMember, receivedMsg);
-
-                    var message = new Message(identifiedMember, receivedMsg);
-                    var messageAdder = new MessageHandler(AddMessage);
-                    messageAdder.Invoke(message);
-                }
-                catch
-                {
-                    break;
-                }
-            }
-
-            Disconnect(client);
-
-            Console.WriteLine("{0} disconnected.", identifiedMember);
 
         }
 
-        delegate void MessageHandler(Message message);
-        private void AddMessage(Message message)
+        public void SignIn(Member member)
         {
-            byte[] bytesMsg = message.GetBytes();
-
-            // Send to all clients
-            foreach (var connectedClient in connectedClients)
-            {
-                connectedClient.Send(bytesMsg);
-            }
+            socket.SendBytes(member.GetBytes());
         }
 
-        static Member Identify(Socket client)
+        public void SendMessage(string text)
         {
-            string signedInMember = ReceiveMessage(client);
-
-            var infos = signedInMember.Split(new string[] { ";:!", "\0" }, StringSplitOptions.RemoveEmptyEntries);
-
-            return new Member(infos[0], Convert.ToInt32(infos[1]));
+            socket.SendText(text);
         }
 
-        static string ReceiveMessage(Socket client)
+        public Message ReceiveServerMessage()
         {
-            var incomingBuffer = new byte[1024];
+            string receivedMsg = socket.ReceiveText();
 
-            string data = string.Empty;
+            var infos = receivedMsg.Split(new char[] { (char)3, (char)4 }, StringSplitOptions.RemoveEmptyEntries);
 
-            while (true)
-            {
-                int bytesRecording = client.Receive(incomingBuffer);
+            var author = new Member(infos[1], Convert.ToInt32(infos[2]));
+            var message = new Message(author, infos[0]);
 
-                string appendData = Encoding.UTF8.GetString(incomingBuffer, 0, bytesRecording);
-
-                data += appendData;
-
-                if (data.EndsWith("\0"))
-                    break;
-            }
-
-            return data;
+            return message;
         }
 
-        //void SendEchoMessage(Socket client, string message)
-        //{
-        //    var echoMsg = Encoding.UTF8.GetBytes(message);
-        //    client.Send(echoMsg);
-        //}
-
-        void Disconnect(Socket client)
+        public void Disconnect()
         {
-            client.Shutdown(SocketShutdown.Both);
-            client.Close();
+            // TEMP, it's because legit disconnect handling has not been set-up yet
+            socket.Disconnect();
+        }
 
-            connectedClients.Remove(client);
+        public void Dispose()
+        {
+            Disconnect();
         }
     }
 }

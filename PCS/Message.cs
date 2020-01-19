@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PCS
 {
-    public class Message
+    public class Message : IDataStream
     {
         public Member Author { get; }
         public string Text { get; }
@@ -17,12 +17,12 @@ namespace PCS
 
         public byte[] GetBytes() // TODO: Make an interface
         {
-            return Encoding.UTF8.GetBytes(GetDataFlag() + '\0');
+            return PcsServerHost.Encoding.GetBytes(GetDataFlag() + (char)4);
         }
 
         public string GetDataFlag()
         {
-            return $"{Text};:!{Author.GetDataFlag()}";
+            return $"{Text}{(char)3}{Author.GetDataFlag()}";
         }
     }
 }
