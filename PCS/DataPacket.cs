@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace PCS
@@ -18,7 +19,7 @@ namespace PCS
                 return null; // Failed
 
             string username = infos[1];
-            int id = Convert.ToInt32(infos[2]);
+            int id = Convert.ToInt32(infos[2], CultureInfo.CurrentCulture);
 
             return new Member(username, id);
         }
@@ -47,7 +48,7 @@ namespace PCS
                 return null; // Failed
 
             string username = infos[1];
-            int id = Convert.ToInt32(infos[2]);
+            int id = Convert.ToInt32(infos[2], CultureInfo.CurrentCulture);
             string text = infos[3];
 
             var author = new Member(username, id); // TODO use member from text data

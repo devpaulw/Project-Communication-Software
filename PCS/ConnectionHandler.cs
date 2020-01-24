@@ -6,7 +6,7 @@ namespace PCS
 {
     class ConnectionHandler
     {
-        readonly Member m_signedInMember;
+        readonly Member m_signedInMember = Member.Unknown;
 
         public ConnectionHandler(PcsClient client, Action<Message> addMessage, Action<PcsClient> clientDisconnect)
         {

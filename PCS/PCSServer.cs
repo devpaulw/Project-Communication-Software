@@ -1,5 +1,9 @@
-﻿using System;
+﻿using FubarDev.FtpServer;
+using FubarDev.FtpServer.FileSystem.DotNet;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -15,6 +19,7 @@ namespace PCS
         private readonly List<PcsClient> connectedClients;
 
         public const ushort Port = 6783;
+        public const ushort FtpPort = 6784;
         public static readonly Encoding Encoding = Encoding.Unicode;
 
         public PcsServer()
@@ -43,6 +48,42 @@ namespace PCS
             catch
             {
                 throw;
+            }
+        }
+
+        public void StartFtp()
+        {
+            // Setup dependency injection
+            var services = new ServiceCollection();
+
+            // use %TEMP%/TestFtpServer as root folder
+            services.Configure<DotNetFileSystemOptions>(opt => opt
+                .RootPath = Path.Combine(Path.GetTempPath(), "PcsFtpServer"));
+
+            // Add FTP server services
+            // DotNetFileSystemProvider = Use the .NET file system functionality
+            // AnonymousMembershipProvider = allow only anonymous logins
+            services.AddFtpServer(builder => builder
+                .UseDotNetFileSystem() // Use the .NET file system functionality
+                .EnableAnonymousAuthentication()); // allow anonymous logins
+
+            // Configure the FTP server
+            services.Configure<FtpServerOptions>(opt => opt.ServerAddress = IPAddressHelper.GetLocalIPAddress().ToString());
+            services.Configure<FtpServerOptions>(opt => opt.Port = FtpPort + 1);
+
+            // Build the service provider
+            using (var serviceProvider = services.BuildServiceProvider())
+            {
+                // Initialize the FTP server
+                var ftpServerHost = serviceProvider.GetRequiredService<IFtpServerHost>();
+
+                // Start the FTP server
+                ftpServerHost.StartAsync(CancellationToken.None).Wait();
+
+                Console.WriteLine("The P.C.S. FTP Server started.");
+
+                // Stop the FTP server
+                // -> ftpServerHost.StopAsync(CancellationToken.None).Wait();
             }
         }
 

@@ -22,6 +22,12 @@ namespace PCS
             return Username + Flags.EndOfText + ID;
         }
 
+        public static Member Unknown {
+            get {
+                return new Member("Unknown member", -1);
+            }
+        }
+
         public override string ToString()
         {
             return "Member " + Username + " (ID " + ID + ")";

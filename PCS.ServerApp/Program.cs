@@ -12,6 +12,7 @@ namespace PCS.ServerApp
         {
             using (var server = new PcsServer())
             {
+                server.StartFtp();
                 server.HostClients();
             }
         }
