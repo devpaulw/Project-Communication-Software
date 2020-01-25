@@ -27,13 +27,13 @@ namespace PCS.WPFClientInterface
 
         PcsClient server;
         Thread serverListening;
-        readonly List<Message> receivedMessages;
+        readonly List<ServerMessage> receivedMessages;
         readonly DispatcherTimer dispatcherTimer;
 
         public MainWindow()
         {
             serverListening = new Thread(() => ListenServer());
-            receivedMessages = new List<Message>();
+            receivedMessages = new List<ServerMessage>();
 
             const int refreshTicks = 50;
             dispatcherTimer = new DispatcherTimer();
@@ -79,12 +79,11 @@ namespace PCS.WPFClientInterface
         {
             if (msgTextBox.Text == "bell") // Troll
             {
-                server.SendText(msgTextBox.Text + ((char)7).ToString());
+                server.SendClientMessage(new ClientMessage(msgTextBox.Text + ((char)7).ToString(), "LOL"));
                 return;
             }
-                
 
-            server.SendText(msgTextBox.Text);
+            server.SendClientMessage(new ClientMessage(msgTextBox.Text, "LOL-CHANNEL"));
             msgTextBox.Text = string.Empty;
         }
 
@@ -121,9 +120,9 @@ namespace PCS.WPFClientInterface
         {
             msgRtbZone.Text = string.Empty;
 
-            foreach (Message message in receivedMessages)
+            foreach (ServerMessage message in receivedMessages)
             {
-                msgRtbZone.Text += "@" + message.Author.Username + ": " + message.Text + "\n";
+                msgRtbZone.Text += $"@{message.Author.Username} <{message.ChannelTitle}>: {message.Text} \n";
             }
 
             msgRtbZone.ScrollToEnd();
@@ -139,8 +138,8 @@ namespace PCS.WPFClientInterface
             }
         }
 
-        delegate void MessageHandler(Message message);
-        void WriteMessage(Message message) // TODO: Separate into another class
+        delegate void MessageHandler(ServerMessage message);
+        void WriteMessage(ServerMessage message) // TODO: Separate into another class
         {
             receivedMessages.Add(message);
         }

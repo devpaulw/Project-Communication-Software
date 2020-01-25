@@ -38,17 +38,17 @@ namespace PCS
 
         public void SignIn(Member member) // TODO should perhaps be separated
         {
-            Send(Flags.SigningIn + Flags.EndOfText + member.GetData());
+            Send(Flags.SigningIn + Flags.EndOfText + member.GetPacketData());
         }
 
-        public void SendText(string text)
+        public void SendClientMessage(ClientMessage message)
         {
-            Send(Flags.Text + Flags.EndOfText + text);
+            Send(Flags.Text + Flags.EndOfText + message.GetPacketData());
         }
 
-        public void SendMessage(Message message)
+        public void SendServerMessage(ServerMessage message)
         {
-            Send(Flags.Message + Flags.EndOfText + message.GetData());
+            Send(Flags.Message + Flags.EndOfText + message.GetPacketData());
         }
 
         public void Disconnect()
@@ -87,10 +87,10 @@ namespace PCS
             return data;
         }
 
-        public Message ReceiveMessage() // Exclusive for clients applications
+        public ServerMessage ReceiveMessage() // Exclusive for clients applications
         {
             string receivedData = Receive();
-            Message message = DataPacket.TryGetMessage(receivedData);
+            ServerMessage message = DataPacket.TryGetMessage(receivedData);
 
             if (message != null)
                 return message;

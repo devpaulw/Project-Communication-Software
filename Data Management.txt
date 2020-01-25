@@ -4,11 +4,16 @@ Sign In: CO<Member>
 	=>SI<EOT>Text<EOTransmission>
 Text: CM<EOT>Username<EOT>Id<EOTransmission>
 	=> TX<EOT>Text<EOTransmission>
+
+Text new with channels: 
+	=> TX<EOT>Channel<EOT>Text<EOTransmission>
+
+
 Disconnect: DC
 	=> DC<EOTransmission>
 Message: SM<Member><Message> 
 	=> MS<EOT>Username<EOT>Id<EOT>Text<EOTransmission>
-
+	=> MS<EOT>Channel<EOT>Username<EOT>Id<EOT>Text<EOTransmission>
 
 
 ---

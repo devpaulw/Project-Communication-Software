@@ -17,7 +17,7 @@ namespace PCS
             ID = id;
         }
 
-        public string GetData()
+        public string GetPacketData()
         {
             return Username + Flags.EndOfText + ID;
         }

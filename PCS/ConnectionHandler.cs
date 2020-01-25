@@ -6,9 +6,9 @@ namespace PCS
 {
     class ConnectionHandler
     {
-        readonly Member m_signedInMember = Member.Unknown;
+        private readonly Member m_signedInMember = Member.Unknown;
 
-        public ConnectionHandler(PcsClient client, Action<Message> addMessage, Action<PcsClient> clientDisconnect)
+        public ConnectionHandler(PcsClient client, Action<ServerMessage> addMessage, Action<PcsClient> clientDisconnect)
         {
             while (true)
             {
@@ -17,21 +17,21 @@ namespace PCS
                     string receivedData = client.Receive();
 
                     Member signedInMember = DataPacket.TryGetSignedInMember(receivedData);
-                    string text = DataPacket.TryGetText(receivedData);
+                    var clientMessage = DataPacket.TryGetClientMessage(receivedData);
                     bool shouldDisconnect = DataPacket.TryDisconnect(receivedData);
 
                     if (signedInMember != null)
                     {
                         m_signedInMember = signedInMember;
 
-                        Console.WriteLine("{0} connected!", signedInMember);
+                        Console.WriteLine("{0} connected!", signedInMember); // TODO: SHould be another palce
                     }
-                    else if (text != null)
+                    else if (clientMessage != null)
                     {
-                        var message = new Message(m_signedInMember, text);
+                        var message = new ServerMessage(m_signedInMember, clientMessage.Text, clientMessage.ChannelTitle);
                         addMessage(message);
 
-                        Console.WriteLine("{0} sent: {1}", m_signedInMember, text);
+                        Console.WriteLine("{0} sent from channel <{2}>: {1}", m_signedInMember, clientMessage, clientMessage.ChannelTitle);
                     }
                     else if (shouldDisconnect != false)
                     {

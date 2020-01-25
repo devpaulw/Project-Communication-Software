@@ -28,7 +28,7 @@ namespace PCS.ConsoleApp
                     if (readLine == "quit")
                         break;
 
-                    client.SendText(readLine);
+                    client.SendClientMessage(readLine);
 
                     //Console.WriteLine("Echoed: {0}", client.ReceiveEchoMessage());
                 }

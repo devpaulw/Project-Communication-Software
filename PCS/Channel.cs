@@ -4,8 +4,9 @@ using System.Text;
 
 namespace PCS
 {
-    interface IDataStream
-    {
-        string GetPacketData();
-    }
+    //class Channel
+    //{
+    //    public string Title { get; set; }
+
+    //}
 }

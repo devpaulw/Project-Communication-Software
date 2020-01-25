@@ -19,7 +19,6 @@ namespace PCS
         private readonly List<PcsClient> connectedClients;
 
         public const ushort Port = 6783;
-        public const ushort FtpPort = 6784;
         public static readonly Encoding Encoding = Encoding.Unicode;
 
         public PcsServer()
@@ -51,43 +50,7 @@ namespace PCS
             }
         }
 
-        public void StartFtp()
-        {
-            // Setup dependency injection
-            var services = new ServiceCollection();
-
-            // use %TEMP%/TestFtpServer as root folder
-            services.Configure<DotNetFileSystemOptions>(opt => opt
-                .RootPath = Path.Combine(Path.GetTempPath(), "PcsFtpServer"));
-
-            // Add FTP server services
-            // DotNetFileSystemProvider = Use the .NET file system functionality
-            // AnonymousMembershipProvider = allow only anonymous logins
-            services.AddFtpServer(builder => builder
-                .UseDotNetFileSystem() // Use the .NET file system functionality
-                .EnableAnonymousAuthentication()); // allow anonymous logins
-
-            // Configure the FTP server
-            services.Configure<FtpServerOptions>(opt => opt.ServerAddress = IPAddressHelper.GetLocalIPAddress().ToString());
-            services.Configure<FtpServerOptions>(opt => opt.Port = FtpPort + 1);
-
-            // Build the service provider
-            using (var serviceProvider = services.BuildServiceProvider())
-            {
-                // Initialize the FTP server
-                var ftpServerHost = serviceProvider.GetRequiredService<IFtpServerHost>();
-
-                // Start the FTP server
-                ftpServerHost.StartAsync(CancellationToken.None).Wait();
-
-                Console.WriteLine("The P.C.S. FTP Server started.");
-
-                // Stop the FTP server
-                // -> ftpServerHost.StopAsync(CancellationToken.None).Wait();
-            }
-        }
-
-        private void OnMessageReceived(Message message)
+        private void OnMessageReceived(ServerMessage message)
         {
             SendToEveryone(message);
             SaveMessage(message);
@@ -98,14 +61,14 @@ namespace PCS
             connectedClients.Remove(client);
         }
 
-        private void SendToEveryone(Message message)
+        private void SendToEveryone(ServerMessage message)
         {
             // Send to all clients
             foreach (var connectedClient in connectedClients)
-                connectedClient.SendMessage(message);
+                connectedClient.SendServerMessage(message);
         }
 
-        private void SaveMessage(Message message)
+        private void SaveMessage(ServerMessage message)
         {
             // Will be filled later
         }

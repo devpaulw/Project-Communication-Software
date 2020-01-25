@@ -12,7 +12,6 @@ namespace PCS
         {
             string[] infos = Flags.Split(textData);
 
-
             string header = infos[0];
 
             if (header != Flags.SigningIn)
@@ -24,7 +23,7 @@ namespace PCS
             return new Member(username, id);
         }
 
-        public static string TryGetText(string textData)
+        public static ClientMessage TryGetClientMessage(string textData)
         {
             string[] infos = Flags.Split(textData);
 
@@ -33,12 +32,13 @@ namespace PCS
             if (header != Flags.Text)
                 return null; // Failed
 
-            string text = infos[1];
+            string channelTitle = infos[1];
+            string text = infos[2];
 
-            return text;
+            return new ClientMessage(text, channelTitle);
         }
 
-        public static Message TryGetMessage(string textData)
+        public static ServerMessage TryGetMessage(string textData)
         {
             string[] infos = Flags.Split(textData);
 
@@ -47,13 +47,14 @@ namespace PCS
             if (header != Flags.Message)
                 return null; // Failed
 
-            string username = infos[1];
-            int id = Convert.ToInt32(infos[2], CultureInfo.CurrentCulture);
-            string text = infos[3];
+            string channelTitle = infos[1];
+            string username = infos[2];
+            int id = Convert.ToInt32(infos[3], CultureInfo.CurrentCulture);
+            string text = infos[4];
 
             var author = new Member(username, id); // TODO use member from text data
 
-            return new Message(author, text);
+            return new ServerMessage(author, text, channelTitle);
         }
 
         public static bool TryDisconnect(string textData)
