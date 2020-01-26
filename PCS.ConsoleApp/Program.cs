@@ -64,7 +64,6 @@ namespace PCS.ConsoleApp
 
             reader.Close();
             response.Close();
-            request.C
         }
 
         static void UploadFile(FtpWebRequest request, string path)
@@ -79,7 +78,7 @@ namespace PCS.ConsoleApp
             request.Method = WebRequestMethods.Ftp.UploadFile;
 
             byte[] fileContents;
-
+            
             using (var sourceStream = new StreamReader(path))
             {
                 fileContents = Encoding.UTF8.GetBytes(sourceStream.ReadToEnd());

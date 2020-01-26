@@ -23,7 +23,7 @@ namespace PCS
             return new Member(username, id);
         }
 
-        public static ClientMessage TryGetClientMessage(string textData)
+        public static Message TryGetClientMessage(string textData)
         {
             string[] infos = Flags.Split(textData);
 
@@ -35,10 +35,10 @@ namespace PCS
             string channelTitle = infos[1];
             string text = infos[2];
 
-            return new ClientMessage(text, channelTitle);
+            return new Message(text, channelTitle, DateTime.Now);
         }
 
-        public static ServerMessage TryGetMessage(string textData)
+        public static Message TryGetMessage(string textData)
         {
             string[] infos = Flags.Split(textData);
 
@@ -54,7 +54,7 @@ namespace PCS
 
             var author = new Member(username, id); // TODO use member from text data
 
-            return new ServerMessage(author, text, channelTitle);
+            return new Message(text, channelTitle, DateTime.Now, author);
         }
 
         public static bool TryDisconnect(string textData)

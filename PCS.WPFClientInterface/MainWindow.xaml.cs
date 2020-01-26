@@ -27,13 +27,13 @@ namespace PCS.WPFClientInterface
 
         PcsClient server;
         Thread serverListening;
-        readonly List<ServerMessage> receivedMessages;
+        readonly List<Message> receivedMessages;
         readonly DispatcherTimer dispatcherTimer;
 
         public MainWindow()
         {
             serverListening = new Thread(() => ListenServer());
-            receivedMessages = new List<ServerMessage>();
+            receivedMessages = new List<Message>();
 
             const int refreshTicks = 50;
             dispatcherTimer = new DispatcherTimer();
@@ -79,11 +79,11 @@ namespace PCS.WPFClientInterface
         {
             if (msgTextBox.Text == "bell") // Troll
             {
-                server.SendClientMessage(new ClientMessage(msgTextBox.Text + ((char)7).ToString(), "LOL"));
+                server.SendClientMessage(new Message(msgTextBox.Text + ((char)7).ToString(), "LOL", DateTime.Now));
                 return;
             }
 
-            server.SendClientMessage(new ClientMessage(msgTextBox.Text, channelTb.Text));
+            server.SendClientMessage(new Message(msgTextBox.Text, channelTb.Text, DateTime.Now));
             msgTextBox.Text = string.Empty;
         }
 
@@ -120,9 +120,9 @@ namespace PCS.WPFClientInterface
         {
             msgRtbZone.Text = string.Empty;
 
-            foreach (ServerMessage message in receivedMessages)
+            foreach (Message message in receivedMessages)
             {
-                msgRtbZone.Text += $"@{message.Author.Username} <{message.ChannelTitle}>: {message.Text} \n";
+                msgRtbZone.Text += $"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text} \n";
             }
 
             msgRtbZone.ScrollToEnd();
@@ -138,8 +138,8 @@ namespace PCS.WPFClientInterface
             }
         }
 
-        delegate void MessageHandler(ServerMessage message);
-        void WriteMessage(ServerMessage message) // TODO: Separate into another class
+        delegate void MessageHandler(Message message);
+        void WriteMessage(Message message) // TODO: Separate into another class
         {
             receivedMessages.Add(message);
         }

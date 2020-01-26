@@ -41,12 +41,12 @@ namespace PCS
             Send(Flags.SigningIn + Flags.EndOfText + member.GetPacketData());
         }
 
-        public void SendClientMessage(ClientMessage message)
+        public void SendClientMessage(Message message)
         {
             Send(Flags.Text + Flags.EndOfText + message.GetPacketData());
         }
 
-        public void SendServerMessage(ServerMessage message)
+        public void SendServerMessage(Message message)
         {
             Send(Flags.Message + Flags.EndOfText + message.GetPacketData());
         }
@@ -86,10 +86,10 @@ namespace PCS
             return data;
         }
 
-        public ServerMessage ReceiveMessage() // Exclusive for clients applications
+        public Message ReceiveMessage() // Exclusive for clients applications
         {
             string receivedData = Receive();
-            ServerMessage message = DataPacket.TryGetMessage(receivedData);
+            Message message = DataPacket.TryGetMessage(receivedData);
 
             if (message != null)
                 return message;

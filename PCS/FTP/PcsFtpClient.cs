@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PCS.FTP
+namespace PCS
 {
     class PcsFtpClient
     {
@@ -10,5 +10,7 @@ namespace PCS.FTP
         {
 
         }
+
+
     }
 }

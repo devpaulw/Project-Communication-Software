@@ -40,7 +40,7 @@ namespace PCS
                     var client = listener.Accept();
                     connectedClients.Add(client);
 
-                    var connectionThread = new Thread(() => new ConnectionHandler(client, OnMessageReceived, OnClientDisconnect));
+                    var connectionThread = new Thread(() => new ConnectionHandler(client, OnClientConnect, OnMessageReceived, OnClientDisconnect));
                     connectionThread.Start();
                 }
             }
@@ -50,10 +50,17 @@ namespace PCS
             }
         }
 
-        private void OnMessageReceived(ServerMessage message)
+        private void OnMessageReceived(Message message)
         {
+            Console.WriteLine("{0} sent from channel {2} at {3}: {1}", message.Author, message.Text, message.ChannelTitle, message.DateTime.ToLongTimeString());
+
             SendToEveryone(message);
             SaveMessage(message);
+        }
+
+        private void OnClientConnect(Member member)
+        {
+            Console.WriteLine("{0} connected!", member);
         }
 
         private void OnClientDisconnect(PcsClient client)
@@ -61,14 +68,14 @@ namespace PCS
             connectedClients.Remove(client);
         }
 
-        private void SendToEveryone(ServerMessage message)
+        private void SendToEveryone(Message message)
         {
             // Send to all clients
             foreach (var connectedClient in connectedClients)
                 connectedClient.SendServerMessage(message);
         }
 
-        private void SaveMessage(ServerMessage message)
+        private void SaveMessage(Message message)
         {
             // Will be filled later
         }

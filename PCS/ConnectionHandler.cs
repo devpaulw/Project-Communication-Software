@@ -8,7 +8,7 @@ namespace PCS
     {
         private readonly Member m_signedInMember = Member.Unknown;
 
-        public ConnectionHandler(PcsClient client, Action<ServerMessage> addMessage, Action<PcsClient> clientDisconnect)
+        public ConnectionHandler(PcsClient client, Action<Member> clientConnect, Action<Message> addMessage, Action<PcsClient> clientDisconnect)
         {
             while (true)
             {
@@ -23,15 +23,12 @@ namespace PCS
                     if (signedInMember != null)
                     {
                         m_signedInMember = signedInMember;
-
-                        Console.WriteLine("{0} connected!", signedInMember); // TODO: SHould be another palce
+                        clientConnect(m_signedInMember);
                     }
-                    else if (clientMessage != null)
+                    else if (clientMessage != null) // TODO System can't send message while client not connected
                     {
-                        var message = new ServerMessage(m_signedInMember, clientMessage.Text, clientMessage.ChannelTitle);
+                        var message = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, m_signedInMember); // TODO Should not be DateTime.Now but the dite sent by the client explicitely with FileTime
                         addMessage(message);
-
-                        Console.WriteLine("{0} sent from channel <{2}>: {1}", m_signedInMember, clientMessage, clientMessage.ChannelTitle);
                     }
                     else if (shouldDisconnect != false)
                     {
