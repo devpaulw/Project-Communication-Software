@@ -6,5 +6,9 @@ namespace PCS.FTP
 {
     class PcsFtpClient
     {
+        public PcsFtpClient()
+        {
+
+        }
     }
 }

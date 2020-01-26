@@ -10,18 +10,20 @@ namespace PCS.ConsoleApp
 {
     class Program
     {
+        
+
         static void Main()
         {
-            //var request = WebRequest.Create("ftp://192.168.0.25:6784/drapeau_fr.py") as FtpWebRequest;
-            var request = WebRequest.Create("ftp://127.0.0.1/") as FtpWebRequest;
+            var request = WebRequest.Create("ftp://192.168.0.25:6784") as FtpWebRequest;
+            //var request = WebRequest.Create("ftp://127.0.0.1/") as FtpWebRequest;
 
-            //request.Credentials = new NetworkCredential("anonymous", "paul@paul.paul");
-            request.Credentials = new NetworkCredential("paul", "lol");
+            request.Credentials = new NetworkCredential("anonymous", "paul@paul.paul");
+            //request.Credentials = new NetworkCredential("paul", "lol");
 
-            //ShowContent(request);
-            //UploadFile(request, @"C:\Users\BluePaul\Documents\tt1.txt");
-            //ShowContent(request);
-            DownloadFile(WebRequest.Create(@"ftp://192.168.0.25:6784/drapeau_fr.py") as FtpWebRequest);
+            ShowContent(request);
+            UploadFile(request, @"C:\Users\BluePaul\Documents\tt1.txt");
+            ShowContent(request);
+            DownloadFile(WebRequest.Create(@"ftp://192.168.0.25:6784/tt1.txt") as FtpWebRequest);
 
             //// SDNMSG: The console app is no longer maintened. Use the WPF interface instead.
 
@@ -62,10 +64,18 @@ namespace PCS.ConsoleApp
 
             reader.Close();
             response.Close();
+            request.C
         }
 
         static void UploadFile(FtpWebRequest request, string path)
         {
+        //    WebClient client = new WebClient();
+        //    client.Credentials = new NetworkCredential("anonymous", "paul@paul.paul");
+        //    client.UploadFile(
+        //        "ftp://192.168.0.25:6784/tt1.txt", @"C:\Users\BluePaul\Documents\tt1.txt");
+
+        //    return;
+
             request.Method = WebRequestMethods.Ftp.UploadFile;
 
             byte[] fileContents;
