@@ -83,7 +83,7 @@ namespace PCS.WPFClientInterface
                 return;
             }
 
-            server.SendClientMessage(new ClientMessage(msgTextBox.Text, "LOL-CHANNEL"));
+            server.SendClientMessage(new ClientMessage(msgTextBox.Text, channelTb.Text));
             msgTextBox.Text = string.Empty;
         }
 

@@ -79,7 +79,6 @@ namespace PCS
 
                 if (data.EndsWith(Flags.EndOfTransmission.ToString(CultureInfo.CurrentCulture), StringComparison.CurrentCulture))
                 {
-                    data = data.Remove(data.Length - 1, 1); // Remove end of transmission char
                     break;
                 }
             }

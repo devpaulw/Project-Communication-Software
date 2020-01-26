@@ -59,7 +59,9 @@ namespace PCS
 
         public static bool TryDisconnect(string textData)
         {
-            if (textData == Flags.Disconnection)
+            var infos = Flags.Split(textData);
+
+            if (infos[0] == Flags.Disconnection)
                 return true;
             else return false;
         }

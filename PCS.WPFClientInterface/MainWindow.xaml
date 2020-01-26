@@ -26,7 +26,7 @@
             <ColumnDefinition Width="92*"/>
         </Grid.ColumnDefinitions>
         <Border BorderBrush="Black" BorderThickness="1" Grid.ColumnSpan="5" HorizontalAlignment="Left" Height="370" Margin="197,10,0,0" VerticalAlignment="Top" Width="511" Grid.RowSpan="3"/>
-        <TextBox x:Name="msgTextBox" HorizontalAlignment="Left" Height="24" Margin="197,153,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="419" Grid.ColumnSpan="4" Grid.Row="2" IsEnabled="False"/>
+        <TextBox x:Name="msgTextBox" HorizontalAlignment="Left" Height="24" Margin="197,153,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="330" Grid.ColumnSpan="4" Grid.Row="2" IsEnabled="False"/>
 
         <Grid Width="511" Height="370" Margin="197,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="5" Grid.RowSpan="3">
             <!--<ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -63,5 +63,6 @@
         <Button x:Name="signInButton" Content="Sign In" HorizontalAlignment="Left" Height="22" Margin="10,87,0,0" VerticalAlignment="Top" Width="149" RenderTransformOrigin="0.653,-0.208" Click="SignInButton_Click" IsEnabled="False"/>
         <Button x:Name="disconnectButton" Content="Disconnect" HorizontalAlignment="Left" Height="22" Margin="10,114,0,0" VerticalAlignment="Top" Width="74" RenderTransformOrigin="0.653,-0.208" Click="DisconnectButton_Click" IsEnabled="False"/>
         <Label Content="Made by SpydotNet and&#xD;&#xA;Binary Bluff" HorizontalAlignment="Left" Height="47" Margin="10,130,0,0" Grid.Row="2" VerticalAlignment="Top" Width="165"/>
+        <TextBox x:Name="channelTb" HorizontalAlignment="Left" Height="24" Margin="174,153,0,0" Grid.Row="2" TextWrapping="Wrap" VerticalAlignment="Top" Width="89" Grid.Column="3"/>
     </Grid>
 </Window>

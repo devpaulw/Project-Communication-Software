@@ -33,7 +33,7 @@ namespace PCS
             {
                 listener.Listen();
 
-                Console.WriteLine("Server started.");
+                Console.WriteLine("Server stared.");
 
                 while (true)
                 {
