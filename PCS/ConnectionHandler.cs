@@ -18,7 +18,7 @@ namespace PCS
 
                     Member signedInMember = DataPacket.TryGetSignedInMember(receivedData);
                     var clientMessage = DataPacket.TryGetClientMessage(receivedData);
-                    bool shouldDisconnect = DataPacket.TryDisconnect(receivedData);
+                    bool shouldDisconnect = DataPacket.WishDisconnect(receivedData);
 
                     if (signedInMember != null)
                     {

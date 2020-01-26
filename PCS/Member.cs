@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PCS
 {
-    public class Member : IDataStream
+    public class Member
     {
         public string Username { get; set; }
         public int ID { get; set; }
@@ -15,11 +15,6 @@ namespace PCS
         {
             Username = username;
             ID = id;
-        }
-
-        public string GetPacketData()
-        {
-            return Username + Flags.EndOfText + ID;
         }
 
         public static Member Unknown {

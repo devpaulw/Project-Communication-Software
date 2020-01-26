@@ -11,6 +11,9 @@ namespace PCS
 
         }
 
+        public void SaveMessage(Message message)
+        {
 
+        }
     }
 }

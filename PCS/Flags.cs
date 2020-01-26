@@ -9,15 +9,9 @@ namespace PCS
         public const char EndOfText = (char)3;
         public const char EndOfTransmission = (char)4;
 
-        public const string Text = "TX";
-        public const string Message = "MS";
-        public const string SigningIn = "SI";
-        public const string Disconnection = "DC";
-
-        public static string[] Split(string textData)
-        {
-            return textData.Split(new char[] { EndOfText, EndOfTransmission },
-                StringSplitOptions.None);
-        }
+        public const string ClientMessage = "TX";
+        public const string ServerMessage = "MS";
+        public const string ClientSigningIn = "SI";
+        public const string ClientDisconnection = "DC";
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PCS
 {
-    public class Message : IDataStream // Deprecate IDataStream, and put every thing in the same class 
+    public class Message
     {
         public Member Author { get; } 
         public string Text { get; }
@@ -19,10 +19,10 @@ namespace PCS
             ChannelTitle = channelTitle;
         }
 
-        public string GetPacketData()
-        {
-            if (Author != null) return ChannelTitle + Flags.EndOfText + Author.GetPacketData() + Flags.EndOfText + Text;
-            else return ChannelTitle + Flags.EndOfText + Text;
-        }
+        //public string GetPacketData()
+        //{
+        //    if (Author != null) return ChannelTitle + Flags.EndOfText + Author.GetPacketData() + Flags.EndOfText + Text;
+        //    else return ChannelTitle + Flags.EndOfText + Text;
+        //}
     }
 }

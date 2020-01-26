@@ -38,24 +38,24 @@ namespace PCS
 
         public void SignIn(Member member) // TODO should perhaps be separated
         {
-            Send(Flags.SigningIn + Flags.EndOfText + member.GetPacketData());
+            Send(Flags.ClientSigningIn + Flags.EndOfText + member.GetDataPacket());
         }
 
         public void SendClientMessage(Message message)
         {
-            Send(Flags.Text + Flags.EndOfText + message.GetPacketData());
+            Send(Flags.ClientMessage + Flags.EndOfText + message.GetDataPacket(true));
         }
 
         public void SendServerMessage(Message message)
         {
-            Send(Flags.Message + Flags.EndOfText + message.GetPacketData());
+            Send(Flags.ServerMessage + Flags.EndOfText + message.GetDataPacket(false));
         }
 
         public void Disconnect()
         {
             try // TEMP Because when the server connection handler try to send DC it crashes
             {
-                Send(Flags.Disconnection);
+                Send(Flags.ClientDisconnection);
             }
             catch (SocketException) { }
 
