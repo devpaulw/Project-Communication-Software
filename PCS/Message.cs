@@ -27,5 +27,10 @@ namespace PCS
             DateTime = DateTime.Now;
             Author = null;
         }
+
+        public override string ToString()
+        {
+            return $"Message from {Author} in {ChannelTitle} at {DateTime}: {Text}";
+        }
     }
 }

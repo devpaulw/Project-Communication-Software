@@ -19,7 +19,7 @@ namespace PCS
         private readonly List<PcsClient> connectedClients;
 
         public const ushort Port = 6783;
-        public static readonly Encoding Encoding = Encoding.Unicode;
+        public static readonly Encoding Encoding = Encoding.UTF8;
 
         public PcsServer()
         {

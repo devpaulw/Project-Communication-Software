@@ -57,15 +57,16 @@ namespace PCS
             return new Message(text, channelTitle, dateTime, author);
         }
 
-        public static string FromMessage(Message message, bool knownAuthor) // Of a Message
+        public static string FromMessage(Message message, bool withAuthor) // Of a Message
         {
-            if (knownAuthor)
+            if (withAuthor) 
                 return CreateDataPacket(message.ChannelTitle,
-                    message.Text);
+                     FromMember(message.Author),
+                     message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
+                     message.Text);
+            
             else
                 return CreateDataPacket(message.ChannelTitle,
-                    FromMember(message.Author),
-                    message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
                     message.Text);
         }
 

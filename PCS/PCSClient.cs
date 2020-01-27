@@ -50,14 +50,14 @@ namespace PCS
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message, true));
+            Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message, false));
         }
 
         public void SendServerMessage(Message message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message, false));
+            Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message, true));
         }
 
         public void Disconnect()
