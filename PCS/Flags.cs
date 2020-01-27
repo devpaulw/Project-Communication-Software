@@ -11,7 +11,19 @@ namespace PCS
 
         public const string ClientMessage = "TX";
         public const string ServerMessage = "MS";
-        public const string ClientSigningIn = "SI";
-        public const string ClientDisconnection = "DC";
+        public const string ClientSignIn = "SI";
+        public const string ClientDisconnect = "DC";
+
+        public static DataPacketType? GetDataPacketType(string flag)
+        {
+            switch (flag)
+            {
+                case ClientSignIn: return DataPacketType.ClientSignIn;
+                case ClientMessage: return DataPacketType.ClientMessage;
+                case ClientDisconnect: return DataPacketType.ClientDisconnect;
+                case ServerMessage: return DataPacketType.ServerMessage;
+                default: return null;
+            }
+        }
     }
 }

@@ -16,21 +16,23 @@ namespace PCS
                 {
                     string receivedData = client.Receive();
 
-                    Member signedInMember = DataPacket.TryGetSignedInMember(receivedData);
-                    var clientMessage = DataPacket.TryGetClientMessage(receivedData);
-                    bool shouldDisconnect = DataPacket.WishDisconnect(receivedData);
+                    var dataPacket = new DataPacket(receivedData);
 
-                    if (signedInMember != null)
+                    if (dataPacket.Type == DataPacketType.ClientSignIn)
                     {
+                        Member signedInMember = dataPacket.GetSignedInMember();
+
                         m_signedInMember = signedInMember;
                         clientConnect(m_signedInMember);
                     }
-                    else if (clientMessage != null) // TODO System can't send message while client not connected
+                    else if (dataPacket.Type == DataPacketType.ClientMessage)
                     {
+                        var clientMessage = dataPacket.GetClientMessage();
+
                         var message = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, m_signedInMember); // TODO Should not be DateTime.Now but the dite sent by the client explicitely with FileTime
                         addMessage(message);
                     }
-                    else if (shouldDisconnect != false)
+                    else if (dataPacket.Type == DataPacketType.ClientDisconnect)
                     {
                         break;
                     }

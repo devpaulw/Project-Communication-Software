@@ -15,5 +15,10 @@ namespace PCS
         {
 
         }
+
+        public MessageCollection GetDailyMessages(DateTime day)
+        {
+            return default;
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace PCS
         public string ChannelTitle { get; }
         public DateTime DateTime { get; }
 
-        public Message(string text, string channelTitle, DateTime dateTime, Member author = null)
+        public Message(string text, string channelTitle, DateTime dateTime, Member author)
         {
             DateTime = dateTime;
             Author = author;
@@ -19,10 +19,13 @@ namespace PCS
             ChannelTitle = channelTitle;
         }
 
-        //public string GetPacketData()
-        //{
-        //    if (Author != null) return ChannelTitle + Flags.EndOfText + Author.GetPacketData() + Flags.EndOfText + Text;
-        //    else return ChannelTitle + Flags.EndOfText + Text;
-        //}
+        public Message(string text, string channelTitle)
+        {
+            Text = text;
+            ChannelTitle = channelTitle;
+
+            DateTime = DateTime.Now;
+            Author = null;
+        }
     }
 }

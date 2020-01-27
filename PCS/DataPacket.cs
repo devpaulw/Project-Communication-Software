@@ -1,87 +1,96 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace PCS
 {
     // In another approach, this class could be not be static, and contain a type "DataType" and easily get data with object function, but that's less clear
-    // TODO: DO IT! It avoids doing 4 times the same algorithm!
-    internal static class DataPacket
+    // SDNMSG LAST: -> I DID IT!
+
+    internal class DataPacket
     {
-        public static string GetDataPacket(this Message message, bool knownAuthor) // Of a Message
+        private string[] m_attributes;
+
+        public DataPacketType Type { get; }
+
+        public DataPacket(string textData)
         {
-            if (!knownAuthor) 
-                return message.ChannelTitle + Flags.EndOfText + 
-                    message.Author.GetDataPacket() + Flags.EndOfText + 
-                    message.Text;
-            else 
-                return message.ChannelTitle + Flags.EndOfText +
-                    message.Text;
+            m_attributes = Split(textData);
+
+            string flag = m_attributes[0];
+
+            var type = Flags.GetDataPacketType(flag);
+            if (type != null)
+                Type = (DataPacketType)type;
+            else // If the Data Packet has a wrong flag header
+                throw new UnknownDataPacketException();
         }
 
-        public static string GetDataPacket(this Member member) // Of a Member
+        public Member GetSignedInMember()
         {
-            return member.Username + Flags.EndOfText + member.ID;
-        }
-
-        public static Member TryGetSignedInMember(string textData)
-        {
-            string[] infos = Split(textData);
-            string header = infos[0];
-
-            if (header != Flags.ClientSigningIn)
-                return null; // Failed
-
-            string username = infos[1];
-            int id = Convert.ToInt32(infos[2], CultureInfo.CurrentCulture);
+            //TODO An exception WrongDataPacket
+            string username = m_attributes[1];
+            int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
 
             return new Member(username, id);
         }
-        
-        public static Message TryGetClientMessage(string textData)
+
+        public Message GetClientMessage()
         {
-            string[] infos = Split(textData);
+            string channelTitle = m_attributes[1];
+            string text = m_attributes[2];
 
-            string header = infos[0];
-
-            if (header != Flags.ClientMessage)
-                return null; // Failed
-
-            string channelTitle = infos[1];
-            string text = infos[2];
-
-            return new Message(text, channelTitle, DateTime.Now);
+            return new Message(text, channelTitle);
         }
 
-        public static Message TryGetMessage(string textData)
+        public Message GetServerMessage()
         {
-            string[] infos = Split(textData);
-
-            string header = infos[0];
-
-            if (header != Flags.ServerMessage)
-                return null; // Failed
-
-            string channelTitle = infos[1];
-            string username = infos[2];
-            int id = Convert.ToInt32(infos[3], CultureInfo.CurrentCulture);
-            string text = infos[4];
+            string channelTitle = m_attributes[1];
+            string username = m_attributes[2];
+            int id = Convert.ToInt32(m_attributes[3], CultureInfo.CurrentCulture);
+            var dateTime = DateTime.FromFileTime(Convert.ToInt64(m_attributes[4], CultureInfo.CurrentCulture));
+            string text = m_attributes[5];
 
             var author = new Member(username, id); // TODO use member from text data
 
-            return new Message(text, channelTitle, DateTime.Now, author);
+            return new Message(text, channelTitle, dateTime, author);
         }
 
-        public static bool WishDisconnect(string textData)
+        public static string FromMessage(Message message, bool knownAuthor) // Of a Message
         {
-            var infos = Split(textData);
+            if (knownAuthor)
+                return CreateDataPacket(message.ChannelTitle,
+                    message.Text);
+            else
+                return CreateDataPacket(message.ChannelTitle,
+                    FromMember(message.Author),
+                    message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
+                    message.Text);
+        }
 
-            string header = infos[0];
+        public static string FromMember(Member member) // Of a Member
+        {
+            return CreateDataPacket(member.Username,
+                member.ID.ToString(CultureInfo.CurrentCulture));
+        }
 
-            if (header == Flags.ClientDisconnection)
-                return true;
-            else return false;
+        private static string CreateDataPacket(params string[] attributes)
+        {
+            string result = string.Empty;
+
+            for (int i = 0; true; i++)
+            {
+                result += attributes[i];
+
+                if (i == attributes.Length - 1)
+                    break;
+
+                result += Flags.EndOfText;
+            }
+
+            return result;
         }
 
         private static string[] Split(string textData)

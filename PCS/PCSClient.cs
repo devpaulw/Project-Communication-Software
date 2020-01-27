@@ -38,24 +38,24 @@ namespace PCS
 
         public void SignIn(Member member) // TODO should perhaps be separated
         {
-            Send(Flags.ClientSigningIn + Flags.EndOfText + member.GetDataPacket());
+            Send(Flags.ClientSignIn + Flags.EndOfText + DataPacket.FromMember(member));
         }
 
         public void SendClientMessage(Message message)
         {
-            Send(Flags.ClientMessage + Flags.EndOfText + message.GetDataPacket(true));
+            Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message, true));
         }
 
         public void SendServerMessage(Message message)
         {
-            Send(Flags.ServerMessage + Flags.EndOfText + message.GetDataPacket(false));
+            Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message, false));
         }
 
         public void Disconnect()
         {
             try // TEMP Because when the server connection handler try to send DC it crashes
             {
-                Send(Flags.ClientDisconnection);
+                Send(Flags.ClientDisconnect);
             }
             catch (SocketException) { }
 
@@ -89,12 +89,10 @@ namespace PCS
         public Message ReceiveMessage() // Exclusive for clients applications
         {
             string receivedData = Receive();
-            Message message = DataPacket.TryGetMessage(receivedData);
+            var dataPacket = new DataPacket(receivedData);
 
-            if (message != null)
-                return message;
-            else
-                throw new Exception("Message receipt failed.");
+            if (dataPacket.Type == DataPacketType.ServerMessage) return dataPacket.GetServerMessage();
+            else throw new Exception("Message receipt failed."); // TODO An exception WrongDataPacket
         }
 
         public void Dispose()

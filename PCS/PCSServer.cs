@@ -33,7 +33,7 @@ namespace PCS
             {
                 listener.Listen();
 
-                Console.WriteLine("Server stared.");
+                Console.WriteLine("P.C.S. Server started {0}.", DateTime.Now);
 
                 while (true)
                 {

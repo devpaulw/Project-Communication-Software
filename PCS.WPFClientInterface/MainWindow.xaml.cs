@@ -79,11 +79,11 @@ namespace PCS.WPFClientInterface
         {
             if (msgTextBox.Text == "bell") // Troll
             {
-                server.SendClientMessage(new Message(msgTextBox.Text + ((char)7).ToString(), "LOL", DateTime.Now));
+                server.SendClientMessage(new Message(msgTextBox.Text + ((char)7).ToString(), "LOL"));
                 return;
             }
 
-            server.SendClientMessage(new Message(msgTextBox.Text, channelTb.Text, DateTime.Now));
+            server.SendClientMessage(new Message(msgTextBox.Text, channelTb.Text));
             msgTextBox.Text = string.Empty;
         }
 
