@@ -11,7 +11,7 @@ namespace PCS
 
     internal class DataPacket
     {
-        private string[] m_attributes;
+        private readonly string[] m_attributes;
 
         public DataPacketType Type { get; }
 
@@ -25,12 +25,11 @@ namespace PCS
             if (type != null)
                 Type = (DataPacketType)type;
             else // If the Data Packet has a wrong flag header
-                throw new UnknownDataPacketException();
+                throw new DataPacketException(Properties.Resources.NotRecognizedDataPacket);
         }
 
         public Member GetSignedInMember()
         {
-            //TODO An exception WrongDataPacket
             string username = m_attributes[1];
             int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
 

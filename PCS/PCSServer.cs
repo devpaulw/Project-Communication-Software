@@ -33,7 +33,7 @@ namespace PCS
             {
                 listener.Listen();
 
-                Console.WriteLine("P.C.S. Server started {0}.", DateTime.Now);
+                Console.WriteLine(Properties.Resources.ServerStarted, DateTime.Now);
 
                 while (true)
                 {
@@ -52,7 +52,7 @@ namespace PCS
 
         private void OnMessageReceived(Message message)
         {
-            Console.WriteLine("{0} sent from channel {2} at {3}: {1}", message.Author, message.Text, message.ChannelTitle, message.DateTime.ToLongTimeString());
+            Console.WriteLine(Properties.Resources.ServerClientSentMessage, message.Author, message.ChannelTitle, message.DateTime.ToLongTimeString(), message.Text);
 
             SendToEveryone(message);
             SaveMessage(message);

@@ -28,7 +28,7 @@ namespace PCS
             try
             {
                 adapteeSocket.Connect(endPoint);
-                Console.WriteLine("Client connected to {0}", ip.MapToIPv4());
+                Console.WriteLine(Properties.Resources.ClientConnected, ip.MapToIPv4());
             }
             catch
             {
@@ -38,24 +38,30 @@ namespace PCS
 
         public void SignIn(Member member) // TODO should perhaps be separated
         {
-            Send(Flags.ClientSignIn + Flags.EndOfText + DataPacket.FromMember(member));
+            if (member != null) 
+                Send(Flags.ClientSignIn + Flags.EndOfText + DataPacket.FromMember(member));
+            else throw new ArgumentNullException(nameof(member));
         }
 
         public void SendClientMessage(Message message)
         {
-            Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message, true));
+            if (message != null) 
+                Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message, true));
+            else throw new ArgumentNullException(nameof(message));
         }
 
         public void SendServerMessage(Message message)
         {
-            Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message, false));
+            if (message != null)
+                Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message, false));
+            else throw new ArgumentNullException(nameof(message));
         }
 
         public void Disconnect()
         {
-            try // TEMP Because when the server connection handler try to send DC it crashes
+            try // TEMP Because when the server connection handler try to send DC it crashes // TODO Separation!
             {
-                Send(Flags.ClientDisconnect);
+                Send(Flags.ClientDisconnect.ToString(CultureInfo.CurrentCulture));
             }
             catch (SocketException) { }
 
@@ -92,7 +98,7 @@ namespace PCS
             var dataPacket = new DataPacket(receivedData);
 
             if (dataPacket.Type == DataPacketType.ServerMessage) return dataPacket.GetServerMessage();
-            else throw new Exception("Message receipt failed."); // TODO An exception WrongDataPacket
+            else throw new DataPacketException(Properties.Resources.NotRecognizedDataPacket);
         }
 
         public void Dispose()
