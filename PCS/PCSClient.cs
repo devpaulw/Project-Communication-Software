@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization.Json;
 using System.Text;
 
 namespace PCS
@@ -21,14 +20,18 @@ namespace PCS
 
         public void Connect(IPAddress ip)
         {
-            if (ip.MapToIPv4().ToString() == "127.0.0.1") ip = IPAddressHelper.GetLocalIPAddress(); // Accept localhost ip
+            if (ip == null) throw new ArgumentNullException(nameof(ip));
+
+            if (ip.MapToIPv4().ToString() == "127.0.0.1") 
+                ip = IPAddressHelper.GetLocalIPAddress(); // Accept localhost ip
+
             adapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
 
             try
             {
                 adapteeSocket.Connect(endPoint);
-                Console.WriteLine(Properties.Resources.ClientConnected, ip.MapToIPv4());
+                Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
             }
             catch
             {
@@ -38,28 +41,28 @@ namespace PCS
 
         public void SignIn(Member member) // TODO should perhaps be separated
         {
-            if (member != null) 
-                Send(Flags.ClientSignIn + Flags.EndOfText + DataPacket.FromMember(member));
-            else throw new ArgumentNullException(nameof(member));
+            if (member == null) throw new ArgumentNullException(nameof(member));
+
+            Send(Flags.ClientSignIn + Flags.EndOfText + DataPacket.FromMember(member));
         }
 
         public void SendClientMessage(Message message)
         {
-            if (message != null) 
-                Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message, true));
-            else throw new ArgumentNullException(nameof(message));
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
+            Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message, true));
         }
 
         public void SendServerMessage(Message message)
         {
-            if (message != null)
-                Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message, false));
-            else throw new ArgumentNullException(nameof(message));
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
+            Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message, false));
         }
 
         public void Disconnect()
         {
-            try // TEMP Because when the server connection handler try to send DC it crashes // TODO Separation!
+            try // TEMP Because when the server connection handler try to send DC it crashes => // TODO Separation!
             {
                 Send(Flags.ClientDisconnect.ToString(CultureInfo.CurrentCulture));
             }
@@ -97,8 +100,9 @@ namespace PCS
             string receivedData = Receive();
             var dataPacket = new DataPacket(receivedData);
 
-            if (dataPacket.Type == DataPacketType.ServerMessage) return dataPacket.GetServerMessage();
-            else throw new DataPacketException(Properties.Resources.NotRecognizedDataPacket);
+            if (dataPacket.Type == DataPacketType.ServerMessage) 
+                return dataPacket.GetServerMessage();
+            else throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
         }
 
         public void Dispose()

@@ -53,6 +53,8 @@ namespace PCS
         {
             // Start the FTP server
             serverHost.StartAsync(CancellationToken.None).Wait();
+
+            Console.WriteLine(Messages.Server.FtpStarted, DateTime.Now);
         }
 
         public void Dispose()

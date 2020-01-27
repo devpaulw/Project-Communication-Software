@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Text;
 
 namespace PCS
 {
-    class ConnectionHandler
+    internal class ClientConnectionHandler
     {
         private readonly Member m_signedInMember = Member.Unknown;
 
-        public ConnectionHandler(PcsClient client, Action<Member> clientConnect, Action<Message> addMessage, Action<PcsClient> clientDisconnect)
+        public ClientConnectionHandler(PcsClient client, 
+            Action<Member> signIn, 
+            Action<Message> addMessage, 
+            Action<PcsClient, Member> disconnect)
         {
             while (true)
             {
@@ -23,7 +27,7 @@ namespace PCS
                         Member signedInMember = dataPacket.GetSignedInMember();
 
                         m_signedInMember = signedInMember;
-                        clientConnect(m_signedInMember);
+                        signIn(m_signedInMember);
                     }
                     else if (dataPacket.Type == DataPacketType.ClientMessage)
                     {
@@ -37,16 +41,14 @@ namespace PCS
                         break;
                     }
                 }
-                catch
+                catch (SocketException) // When An existing connection was forcibly closed by the remote host
                 {
                     break;
                 }
             }
 
             client.Disconnect();
-            clientDisconnect(client);
-
-            Console.WriteLine("{0} disconnected.", m_signedInMember);
+            disconnect(client, m_signedInMember);
         }
     }
 }

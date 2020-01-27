@@ -25,7 +25,7 @@ namespace PCS
             if (type != null)
                 Type = (DataPacketType)type;
             else // If the Data Packet has a wrong flag header
-                throw new DataPacketException(Properties.Resources.NotRecognizedDataPacket);
+                throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
         }
 
         public Member GetSignedInMember()

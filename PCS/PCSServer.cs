@@ -33,14 +33,16 @@ namespace PCS
             {
                 listener.Listen();
 
-                Console.WriteLine(Properties.Resources.ServerStarted, DateTime.Now);
+                Console.WriteLine(Messages.Server.Started, DateTime.Now);
 
                 while (true)
                 {
                     var client = listener.Accept();
                     connectedClients.Add(client);
 
-                    var connectionThread = new Thread(() => new ConnectionHandler(client, OnClientConnect, OnMessageReceived, OnClientDisconnect));
+                    var connectionThread = new Thread(() 
+                        => new ClientConnectionHandler(client, OnClientSignIn, OnMessageReceived, OnClientDisconnect));
+
                     connectionThread.Start();
                 }
             }
@@ -52,20 +54,22 @@ namespace PCS
 
         private void OnMessageReceived(Message message)
         {
-            Console.WriteLine(Properties.Resources.ServerClientSentMessage, message.Author, message.ChannelTitle, message.DateTime.ToLongTimeString(), message.Text);
+            Console.WriteLine(Messages.Server.ClientSentMessage, message.Author, message.ChannelTitle, message.DateTime.ToLongTimeString(), message.Text);
 
             SendToEveryone(message);
             SaveMessage(message);
         }
 
-        private void OnClientConnect(Member member)
+        private void OnClientSignIn(Member member)
         {
-            Console.WriteLine("{0} connected!", member);
+            Console.WriteLine(Messages.Server.ClientConnect, member);;
         }
 
-        private void OnClientDisconnect(PcsClient client)
+        private void OnClientDisconnect(PcsClient client, Member member)
         {
             connectedClients.Remove(client);
+
+            Console.WriteLine(Messages.Server.ClientDisconnect, member);
         }
 
         private void SendToEveryone(Message message)

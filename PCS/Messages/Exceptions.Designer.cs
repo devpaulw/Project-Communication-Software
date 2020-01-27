@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PCS.Properties {
+namespace PCS.Messages {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace PCS.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    internal class Exceptions {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal Exceptions() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace PCS.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PCS.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PCS.Messages.Exceptions", typeof(Exceptions).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,38 +61,11 @@ namespace PCS.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Client connected to {0}..
-        /// </summary>
-        internal static string ClientConnected {
-            get {
-                return ResourceManager.GetString("ClientConnected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This data packet is not recognized.
+        ///   Looks up a localized string similar to This data packet is not recognized..
         /// </summary>
         internal static string NotRecognizedDataPacket {
             get {
                 return ResourceManager.GetString("NotRecognizedDataPacket", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} sent from channel {1} at {2}: {3}.
-        /// </summary>
-        internal static string ServerClientSentMessage {
-            get {
-                return ResourceManager.GetString("ServerClientSentMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to P.C.S. Server started {0}..
-        /// </summary>
-        internal static string ServerStarted {
-            get {
-                return ResourceManager.GetString("ServerStarted", resourceCulture);
             }
         }
     }
