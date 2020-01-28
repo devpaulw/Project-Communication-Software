@@ -6,9 +6,6 @@ using System.Text;
 
 namespace PCS
 {
-    // In another approach, this class could be not be static, and contain a type "DataType" and easily get data with object function, but that's less clear
-    // SDNMSG LAST: -> I DID IT!
-
     internal class DataPacket
     {
         private readonly string[] m_attributes;
@@ -17,49 +14,69 @@ namespace PCS
 
         public DataPacket(string textData)
         {
-            m_attributes = Split(textData);
+            var attributes = Split(textData);
 
-            string flag = m_attributes[0];
+            #region Getting type
+            string headerFlag = attributes[0];
 
-            var type = Flags.GetDataPacketType(flag);
+            var type = Flags.GetDataPacketType(headerFlag);
             if (type != null)
                 Type = (DataPacketType)type;
             else // If the Data Packet has a wrong flag header
                 throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
+            #endregion
+
+            m_attributes = attributes.Skip(1).Take(attributes.Length - 1).ToArray(); // Delete the flagHeader
         }
 
-        public Member GetSignedInMember()
+        public DataPacket(string textData, DataPacketType type)
         {
-            string username = m_attributes[1];
-            int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
+            Type = type;
+            m_attributes = Split(textData);
+        }
+
+        public Member GetMember()
+        {
+            string username = m_attributes[0];
+            int id = Convert.ToInt32(m_attributes[1], CultureInfo.CurrentCulture);
 
             return new Member(username, id);
         }
 
-        public Message GetClientMessage()
+        public Message GetMessage() // Unify Client and ServerMessage 
         {
-            string channelTitle = m_attributes[1];
-            string text = m_attributes[2];
+            if (Type == DataPacketType.ServerMessage)
+                return GetServerMessage();
+            else if (Type == DataPacketType.ClientMessage)
+                return GetClientMessage();
+            else
+                throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
 
-            return new Message(text, channelTitle);
+            Message GetServerMessage()
+            {
+                string channelTitle = m_attributes[0];
+
+                string username = m_attributes[1];
+                int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
+                var dateTime = DateTime.FromFileTime(Convert.ToInt64(m_attributes[3], CultureInfo.CurrentCulture));
+                string text = m_attributes[4];
+
+                var author = new Member(username, id);
+
+                return new Message(text, channelTitle, dateTime, author);
+            }
+            Message GetClientMessage()
+            {
+                string channelTitle = m_attributes[0];
+                string text = m_attributes[1];
+
+                return new Message(text, channelTitle);
+            }
         }
 
-        public Message GetServerMessage()
+        public static string FromMessage(Message message)
         {
-            string channelTitle = m_attributes[1];
-            string username = m_attributes[2];
-            int id = Convert.ToInt32(m_attributes[3], CultureInfo.CurrentCulture);
-            var dateTime = DateTime.FromFileTime(Convert.ToInt64(m_attributes[4], CultureInfo.CurrentCulture));
-            string text = m_attributes[5];
-
-            var author = new Member(username, id); // TODO use member from text data
-
-            return new Message(text, channelTitle, dateTime, author);
-        }
-
-        public static string FromMessage(Message message, bool withAuthor) // Of a Message
-        {
-            if (withAuthor) 
+            if (message.IsForClient) 
                 return CreateDataPacket(message.ChannelTitle,
                      FromMember(message.Author),
                      message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
@@ -70,7 +87,7 @@ namespace PCS
                     message.Text);
         }
 
-        public static string FromMember(Member member) // Of a Member
+        public static string FromMember(Member member)
         {
             return CreateDataPacket(member.Username,
                 member.ID.ToString(CultureInfo.CurrentCulture));
@@ -96,7 +113,7 @@ namespace PCS
         private static string[] Split(string textData)
         {
             return textData.Split(new char[] { Flags.EndOfText, Flags.EndOfTransmission },
-                StringSplitOptions.None);
+                StringSplitOptions.RemoveEmptyEntries); // WARNING, Cannot send void messages with that, get used of it
         }
     }
 }

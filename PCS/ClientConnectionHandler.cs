@@ -24,16 +24,16 @@ namespace PCS
 
                     if (dataPacket.Type == DataPacketType.ClientSignIn)
                     {
-                        Member signedInMember = dataPacket.GetSignedInMember();
+                        Member signedInMember = dataPacket.GetMember();
 
                         m_signedInMember = signedInMember;
                         signIn(m_signedInMember);
                     }
                     else if (dataPacket.Type == DataPacketType.ClientMessage)
                     {
-                        var clientMessage = dataPacket.GetClientMessage();
+                        var clientMessage = dataPacket.GetMessage();
 
-                        var message = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, m_signedInMember); // TODO Should not be DateTime.Now but the dite sent by the client explicitely with FileTime
+                        var message = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, m_signedInMember);
                         addMessage(message);
                     }
                     else if (dataPacket.Type == DataPacketType.ClientDisconnect)

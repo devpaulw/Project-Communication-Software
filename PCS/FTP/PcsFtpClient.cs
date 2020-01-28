@@ -34,15 +34,21 @@ namespace PCS
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
+            if (!PathExists(MessagePath)) 
+                MakeDirectory(MessagePath); 
+
             string path = GetPathFromDate(message.DateTime);
 
             var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
             request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs"); // DOLATER: Find cleaner, use passwords, and SSL
             request.Method = WebRequestMethods.Ftp.AppendFile;
 
-            using (var requestStream = new StreamWriter(request.GetRequestStream(), PcsServer.Encoding))
+            var messagePacket = PcsServer.Encoding.GetBytes(DataPacket.FromMessage(message));
+
+            using (var requestStream = request.GetRequestStream())
             {
-                requestStream.WriteLine(DataPacket.FromMessage(message, true));
+                requestStream.Write(messagePacket, 0, messagePacket.Length);
+                requestStream.WriteByte((byte)'\n');
             }
         }
 
@@ -57,15 +63,16 @@ namespace PCS
             var response = request.GetResponse() as FtpWebResponse;
 
             using (var responseStream = response.GetResponseStream())
-            using (var reader = new StreamReader(responseStream))
+            using (var reader = new StreamReader(responseStream, PcsServer.Encoding))
             {
-                for (int i = 0; i < 2; i++) // TODO: Use a more reliable index!
-                {
-                    var dataPacket = new DataPacket(Flags.ServerMessage + Flags.EndOfText + reader.ReadLine()); // TODO! In DataPacket, we should proceed differently, not force flag headers!
-                    yield return dataPacket.GetServerMessage(); // TODO: Rename this function Message with withAuthor parameter
-                }
+                string[] lines = reader.ReadToEnd().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries); // TODO // BUG: Doesn't work for message with many lines YET! Find a new way!
 
-                Console.WriteLine($"Download Complete, status {response.StatusDescription}");
+                foreach (string line in lines)
+                {
+                    var dataPacket = new DataPacket(line, DataPacketType.ServerMessage);
+
+                    yield return dataPacket.GetMessage();
+                }
             }
         }
 
@@ -81,6 +88,32 @@ namespace PCS
             path += extension;
 
             return path;
+        }
+
+        private void MakeDirectory(string path)
+        {
+            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
+            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
+            request.Method = WebRequestMethods.Ftp.MakeDirectory;
+            request.GetResponse();
+        }
+
+        private bool PathExists(string path)
+        {
+            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
+            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
+            request.Method = WebRequestMethods.Ftp.ListDirectory;
+
+            try
+            {
+                request.GetResponse();
+
+                return true; // The file exists because there are not errors when wishing get infos of it
+            }
+            catch (WebException)
+            {
+                return false;
+            }
         }
     }
 }
