@@ -53,14 +53,14 @@ namespace PCS
 
             Console.WriteLine(Messages.Server.FtpStarted, DateTime.Now);
 
-            /**tmp */
-            var ftpClient = new PcsFtpClient();
-            ftpClient.Connect(IPAddressHelper.GetLocalIPAddress());
-            ftpClient.SaveMessage(new Message("Salut, je suis un test ça va", "general", DateTime.Now, new Member("Paul", 365)));
-            foreach (Message m in ftpClient.GetDailyMessages(DateTime.Now))
-            {
-                Console.WriteLine(m);
-            }
+            ///**tmp */
+            //var ftpClient = new PcsFtpClient();
+            //ftpClient.Connect(IPAddressHelper.GetLocalIPAddress());
+            //ftpClient.SaveMessage(new Message("Salut, je suis un test ça va", "general", DateTime.Now, new Member("Paul", 365)));
+            //foreach (Message m in ftpClient.GetDailyMessages(DateTime.Now))
+            //{
+            //    Console.WriteLine(m);
+            //}
         }
 
         public void Dispose()

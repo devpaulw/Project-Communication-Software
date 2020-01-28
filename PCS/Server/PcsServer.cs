@@ -16,6 +16,7 @@ namespace PCS
     public class PcsServer : IDisposable
     {
         private readonly PcsListener listener;
+        private readonly PcsFtpClient ftpClient;
         private readonly List<PcsClient> connectedClients;
 
         public const ushort Port = 6783;
@@ -23,12 +24,15 @@ namespace PCS
 
         public PcsServer()
         {
+            ftpClient = new PcsFtpClient();
             listener = new PcsListener(IPAddressHelper.GetLocalIPAddress());
             connectedClients = new List<PcsClient>();
         }
         
-        public void HostClients()
+        public void StartHosting()
         {
+            ftpClient.Connect(IPAddressHelper.GetLocalIPAddress());
+
             try
             {
                 listener.Listen();
@@ -88,12 +92,12 @@ namespace PCS
 
         private void SaveMessage(Message message)
         {
-            // Will be filled later
+            ftpClient.SaveMessage(message);
         }
 
         public void Dispose()
         {
-            // Example: Save messages, properly disconnect people...
+            // DOLATER
         }
     }
 }

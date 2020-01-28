@@ -9,6 +9,8 @@ namespace PCS
 {
     public class PcsClientAccessor : PcsClient
     {
+        private PcsFtpClient ftpClient = new PcsFtpClient();
+
         public void Connect(IPAddress ip)
         {
             if (ip == null) throw new ArgumentNullException(nameof(ip));
@@ -28,6 +30,8 @@ namespace PCS
             {
                 throw;
             }
+
+            ftpClient.Connect(ip);
         }
 
         public void SignIn(Member member)
@@ -60,5 +64,8 @@ namespace PCS
 
             base.Disconnect();
         }
+
+        public IEnumerable<Message> GetDailyMessages(DateTime day) 
+            => ftpClient.GetDailyMessages(day);
     }
 }

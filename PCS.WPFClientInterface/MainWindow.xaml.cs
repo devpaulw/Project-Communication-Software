@@ -26,6 +26,7 @@ namespace PCS.WPFClientInterface
         // WARNING: L'application WPF est complètement instable, lente, tout est mal géré et nécessite de recommencer à zero.
 
         PcsClientAccessor clientAccessor;
+        
         Thread serverListening;
         readonly List<Message> receivedMessages;
         readonly DispatcherTimer dispatcherTimer;
@@ -65,6 +66,9 @@ namespace PCS.WPFClientInterface
 
             clientAccessor.SignIn(member);
 
+            foreach (Message messageToday in clientAccessor.GetDailyMessages(DateTime.Today))
+                receivedMessages.Add(messageToday);
+
             signInButton.Content = "Signed In";
             signInButton.IsEnabled = false;
             usernameTextBox.IsEnabled = false;
@@ -89,6 +93,8 @@ namespace PCS.WPFClientInterface
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
+            serverListening.Abort();
+            dispatcherTimer.Stop();
             clientAccessor.Disconnect();
             Environment.Exit(0);
 

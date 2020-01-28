@@ -14,7 +14,7 @@ namespace PCS.ServerApp
             using (var server = new PcsServer())
             {
                 ftpServer.StartAsync();
-                server.HostClients();
+                server.StartHosting();
             }
         }
     }

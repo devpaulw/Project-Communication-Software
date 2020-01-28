@@ -34,8 +34,7 @@ namespace PCS
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            if (!PathExists(MessagePath)) 
-                MakeDirectory(MessagePath); 
+            if (!PathExists(MessagePath)) MakeDirectory(MessagePath); 
 
             string path = GetPathFromDate(message.DateTime);
 
@@ -56,8 +55,8 @@ namespace PCS
         {
             string path = GetPathFromDate(day);
 
-            if (!PathExists(path))
-                CreateFile(path);
+            if (!PathExists(MessagePath)) MakeDirectory(MessagePath);
+            if (!FileExists(path)) CreateFile(path);
 
             var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
             request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
@@ -103,7 +102,11 @@ namespace PCS
 
         private void CreateFile(string path)
         {
-            // TODO
+            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
+            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
+            request.Method = WebRequestMethods.Ftp.UploadFile;
+            request.GetRequestStream().Close();
+            request.GetResponse().Close();
         }
 
         private bool PathExists(string path)
@@ -117,6 +120,24 @@ namespace PCS
                 request.GetResponse();
 
                 return true; // The file exists because there are not errors when wishing get infos of it
+            }
+            catch (WebException)
+            {
+                return false;
+            }
+        }
+
+        private bool FileExists(string path)
+        {
+            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
+            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
+            request.Method = WebRequestMethods.Ftp.GetFileSize;
+
+            try
+            {
+                request.GetResponse();
+
+                return true;
             }
             catch (WebException)
             {
