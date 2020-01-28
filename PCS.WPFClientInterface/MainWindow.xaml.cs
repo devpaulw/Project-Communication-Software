@@ -23,6 +23,7 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
+        // TODO NEXT TIME
         // WARNING: L'application WPF est complètement instable, lente, tout est mal géré et nécessite de recommencer à zero.
 
         PcsClientAccessor clientAccessor;

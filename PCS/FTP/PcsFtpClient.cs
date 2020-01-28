@@ -13,15 +13,6 @@ namespace PCS
 
         private IPAddress m_ip;
 
-        
-        public PcsFtpClient()
-        {
-            //ShowContent(request);
-            //UploadFile(request, @"C:\Users\BluePaul\Documents\tt1.txt");
-            //ShowContent(request);
-            //DownloadFile(WebRequest.Create(@"ftp://192.168.0.25:6784/tt1.txt") as FtpWebRequest);
-        }
-
         public void Connect(IPAddress ip)
         {
             // There are not a lot because it's not a connect/disconnect format of FTP library, but It could be.
@@ -67,11 +58,23 @@ namespace PCS
             using (var responseStream = response.GetResponseStream())
             using (var reader = new StreamReader(responseStream, PcsServer.Encoding))
             {
-                string[] lines = reader.ReadToEnd().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries); // TODO // BUG: Doesn't work for message with many lines YET! Find a new way! (SOT...)
+                //string[] lines = reader.ReadToEnd().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries); 
 
-                foreach (string line in lines)
+                //foreach (string line in lines)
+                //{
+                //    var dataPacket = new DataPacket(line, DataPacketType.ServerMessage);
+
+                //    yield return dataPacket.GetMessage();
+                //}
+
+                while (true)
                 {
-                    var dataPacket = new DataPacket(line, DataPacketType.ServerMessage);
+                    string readLine = reader.ReadLine();
+
+                    if (readLine == null)
+                        break;
+
+                    var dataPacket = new DataPacket(readLine, DataPacketType.ServerMessage);
 
                     yield return dataPacket.GetMessage();
                 }
