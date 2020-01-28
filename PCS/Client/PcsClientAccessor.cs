@@ -30,7 +30,7 @@ namespace PCS
             }
         }
 
-        public void SignIn(Member member) // TODO should perhaps be separated
+        public void SignIn(Member member)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
 

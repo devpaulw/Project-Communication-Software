@@ -54,7 +54,10 @@ namespace PCS
 
         public IEnumerable<Message> GetDailyMessages(DateTime day)
         {
-            string path = GetPathFromDate(day); // TODO: Handle if the file doesn't exist
+            string path = GetPathFromDate(day);
+
+            if (!PathExists(path))
+                CreateFile(path);
 
             var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
             request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
@@ -65,7 +68,7 @@ namespace PCS
             using (var responseStream = response.GetResponseStream())
             using (var reader = new StreamReader(responseStream, PcsServer.Encoding))
             {
-                string[] lines = reader.ReadToEnd().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries); // TODO // BUG: Doesn't work for message with many lines YET! Find a new way!
+                string[] lines = reader.ReadToEnd().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries); // TODO // BUG: Doesn't work for message with many lines YET! Find a new way! (SOT...)
 
                 foreach (string line in lines)
                 {
@@ -96,6 +99,11 @@ namespace PCS
             request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
             request.Method = WebRequestMethods.Ftp.MakeDirectory;
             request.GetResponse();
+        }
+
+        private void CreateFile(string path)
+        {
+            // TODO
         }
 
         private bool PathExists(string path)
