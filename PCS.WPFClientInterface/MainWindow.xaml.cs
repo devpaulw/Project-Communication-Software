@@ -25,7 +25,7 @@ namespace PCS.WPFClientInterface
     {
         // WARNING: L'application WPF est complètement instable, lente, tout est mal géré et nécessite de recommencer à zero.
 
-        PcsClient server;
+        PcsClientAccessor clientAccessor;
         Thread serverListening;
         readonly List<Message> receivedMessages;
         readonly DispatcherTimer dispatcherTimer;
@@ -47,8 +47,8 @@ namespace PCS.WPFClientInterface
         {
             var ipAddress = IPAddress.Parse(ipAddressTextBox.Text);
 
-            server = new PcsClient();
-            server.Connect(ipAddress);
+            clientAccessor = new PcsClientAccessor();
+            clientAccessor.Connect(ipAddress);
 
             connectButton.Content = "Connected";
             connectButton.IsEnabled = false;
@@ -63,7 +63,7 @@ namespace PCS.WPFClientInterface
             int id = new Random().Next(UInt16.MaxValue);
             var member = new Member(usernameTextBox.Text, id);
 
-            server.SignIn(member);
+            clientAccessor.SignIn(member);
 
             signInButton.Content = "Signed In";
             signInButton.IsEnabled = false;
@@ -79,17 +79,17 @@ namespace PCS.WPFClientInterface
         {
             if (msgTextBox.Text == "bell") // Troll
             {
-                server.SendClientMessage(new Message(msgTextBox.Text + ((char)7).ToString(), "LOL"));
+                clientAccessor.SendMessage(new Message(msgTextBox.Text + ((char)7).ToString(), "LOL"));
                 return;
             }
 
-            server.SendClientMessage(new Message(msgTextBox.Text, channelTb.Text));
+            clientAccessor.SendMessage(new Message(msgTextBox.Text, channelTb.Text));
             msgTextBox.Text = string.Empty;
         }
 
         private void DisconnectButton_Click(object sender, RoutedEventArgs e)
         {
-            server.Disconnect();
+            clientAccessor.Disconnect();
             Environment.Exit(0);
 
             //// Below is a way to restart the app; Before we make this WPF App more reliable.
@@ -132,7 +132,7 @@ namespace PCS.WPFClientInterface
         {
             while (true)
             {
-                var receivedMessage = server.ReceiveMessage();
+                var receivedMessage = clientAccessor.ReceiveMessage();
                 //var receivedMessage = Message.FromTextData(server.Receive());
                 new MessageHandler(WriteMessage).Invoke(receivedMessage);
             }

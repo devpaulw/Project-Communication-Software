@@ -76,7 +76,14 @@ namespace PCS
         {
             // Send to all clients
             foreach (var connectedClient in connectedClients)
-                connectedClient.SendServerMessage(message);
+                SendToClientAccessor(connectedClient, message);
+        }
+
+        private void SendToClientAccessor(PcsClient client, Message message)
+        {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
+            client.Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message));
         }
 
         private void SaveMessage(Message message)
