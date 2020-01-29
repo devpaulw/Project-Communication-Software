@@ -88,6 +88,12 @@ namespace PCS.WPFClientInterface
                 return;
             }
 
+            if (msgTextBox.Text == "ln") // Troll
+            {
+                clientAccessor.SendMessage(new Message("TEST MULTILINE\nTHIS IS THE SECOND LINE.", "LOL"));
+                return;
+            }
+
             clientAccessor.SendMessage(new Message(msgTextBox.Text, channelTb.Text));
             msgTextBox.Text = string.Empty;
         }

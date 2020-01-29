@@ -38,14 +38,16 @@ namespace PCS
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
 
-            Send(Flags.ClientSignIn + Flags.EndOfText + DataPacket.FromMember(member));
+            Send(Flags.ClientSignIn + DataPacket.FromMember(member));
         }
 
         public void SendMessage(Message message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
+            if (string.IsNullOrEmpty(message.Text) || string.IsNullOrEmpty(message.ChannelTitle)) 
+                throw new MessageEmptyFieldException(Messages.Exceptions.MessageEmptyField);
 
-            Send(Flags.ClientMessage + Flags.EndOfText + DataPacket.FromMessage(message));
+            Send(Flags.ClientMessage + DataPacket.FromMessage(message));
         }
 
         public Message ReceiveMessage() // Exclusive for clients applications

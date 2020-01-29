@@ -87,7 +87,7 @@ namespace PCS
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            client.Send(Flags.ServerMessage + Flags.EndOfText + DataPacket.FromMessage(message));
+            client.Send(Flags.ServerMessage + DataPacket.FromMessage(message));
         }
 
         private void SaveMessage(Message message)

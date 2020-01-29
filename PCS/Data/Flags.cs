@@ -6,9 +6,10 @@ namespace PCS
 {
     internal static class Flags
     {
-        //public const char StartOfText = (char)2;
+        public const char StartOfText = (char)2;
         public const char EndOfText = (char)3;
         public const char EndOfTransmission = (char)4;
+        public const char EndOfTransBlock = (char)23;
 
         public const string ClientMessage = "TX";
         public const string ServerMessage = "MS";

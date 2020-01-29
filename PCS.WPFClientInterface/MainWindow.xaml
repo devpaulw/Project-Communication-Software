@@ -8,7 +8,7 @@
         Title="Project Communication Software" Height="450" Width="726.091" Closed="Window_Closed">
     <Window.Background>
         <RadialGradientBrush>
-            <GradientStop Color="#FFFFB900" Offset="1"/>
+            <GradientStop Color="#FF00AEFF" Offset="1"/>
             <GradientStop Color="White" Offset="0.562"/>
         </RadialGradientBrush>
     </Window.Background>

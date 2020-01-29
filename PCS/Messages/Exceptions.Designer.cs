@@ -61,6 +61,24 @@ namespace PCS.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No network adapters with an IPv4 address in the system!.
+        /// </summary>
+        internal static string IPv4NotFound {
+            get {
+                return ResourceManager.GetString("IPv4NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A text field in the message is not filled in..
+        /// </summary>
+        internal static string MessageEmptyField {
+            get {
+                return ResourceManager.GetString("MessageEmptyField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This data packet is not recognized..
         /// </summary>
         internal static string NotRecognizedDataPacket {

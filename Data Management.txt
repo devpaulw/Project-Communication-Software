@@ -16,6 +16,19 @@ Message: SM<Member><Message>
 	=> MS<EOT>Channel<EOT>Username<EOT>Id<EOT>Text<EOTransmission>
 
 
+New approach V2:
+
+Start Of Text
+Channel <EOTrBl>
+Username <EOTrBl>
+Id <EOTrBl>
+Text <EOTrBl>
+End Of Text
+End Of Transmission
+
+EXEMPLE WITH CLIENT MESSAGE:
+TX<SOT>ChannelTitle<EOTrBl>Text<EOT><EOTransmission>
+
 ---
 
 Old Approach (deprecated)

@@ -78,7 +78,8 @@ namespace PCS
         {
             if (message.IsForClient) 
                 return CreateDataPacket(message.ChannelTitle,
-                     FromMember(message.Author),
+                     message.Author.Username,
+                     message.Author.ID.ToString(CultureInfo.CurrentCulture),
                      message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
                      message.Text);
             
@@ -96,6 +97,7 @@ namespace PCS
         private static string CreateDataPacket(params string[] attributes)
         {
             string result = string.Empty;
+            result += Flags.StartOfText;
 
             for (int i = 0; true; i++)
             {
@@ -104,15 +106,17 @@ namespace PCS
                 if (i == attributes.Length - 1)
                     break;
 
-                result += Flags.EndOfText;
+                result += Flags.EndOfTransBlock;
             }
+
+            result += Flags.EndOfText;
 
             return result;
         }
 
         private static string[] Split(string textData)
         {
-            return textData.Split(new char[] { Flags.EndOfText, Flags.EndOfTransmission },
+            return textData.Split(new char[] { Flags.StartOfText, Flags.EndOfText, Flags.EndOfTransBlock },
                 StringSplitOptions.RemoveEmptyEntries); // WARNING, Cannot send void messages with that, get used of it
         }
     }

@@ -58,25 +58,36 @@ namespace PCS
             using (var responseStream = response.GetResponseStream())
             using (var reader = new StreamReader(responseStream, PcsServer.Encoding))
             {
-                //string[] lines = reader.ReadToEnd().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries); 
+                var textMessages = GetTextMessages(reader.ReadToEnd());
 
-                //foreach (string line in lines)
-                //{
-                //    var dataPacket = new DataPacket(line, DataPacketType.ServerMessage);
-
-                //    yield return dataPacket.GetMessage();
-                //}
-
-                while (true)
+                foreach (string textMessage in textMessages)
                 {
-                    string readLine = reader.ReadLine();
-
-                    if (readLine == null)
-                        break;
-
-                    var dataPacket = new DataPacket(readLine, DataPacketType.ServerMessage);
+                    var dataPacket = new DataPacket(textMessage, DataPacketType.ServerMessage);
 
                     yield return dataPacket.GetMessage();
+                }
+
+                
+            }
+
+            IEnumerable<string> GetTextMessages(string fullText)
+            {
+                string currentTextMsg = string.Empty;
+                bool readingTextMsg = false;
+
+                foreach (char c in fullText)
+                {
+                    if (c == Flags.StartOfText)
+                        readingTextMsg = true;
+                    else if (c == Flags.EndOfText)
+                    {
+                        readingTextMsg = false;
+                        yield return currentTextMsg;
+                        currentTextMsg = string.Empty;
+                    }
+
+                    if (readingTextMsg)
+                        currentTextMsg += c;
                 }
             }
         }

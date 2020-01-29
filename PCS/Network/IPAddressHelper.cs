@@ -18,7 +18,7 @@ namespace PCS
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                     return ip;
 
-            throw new Exception("No network adapters with an IPv4 address in the system!");
+            throw new Exception(Messages.Exceptions.IPv4NotFound);
         }
     }
 }
