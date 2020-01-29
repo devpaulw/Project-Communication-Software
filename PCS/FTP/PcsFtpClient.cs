@@ -101,6 +101,7 @@ namespace PCS
             request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
             request.Method = WebRequestMethods.Ftp.MakeDirectory;
             request.GetResponse();
+
         }
 
         private void CreateFile(string path)

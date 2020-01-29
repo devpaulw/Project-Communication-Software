@@ -99,7 +99,7 @@ namespace PCS.WPFClientInterface
             clientAccessor.Disconnect();
             Environment.Exit(0);
 
-            //// Below is a way to restart the app; Before we make this WPF App more reliable.
+            // Below is a way to restart the app; Before we make this WPF App more reliable.
             //System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
             //Application.Current.Shutdown();
             //Window_Closed(this, null);
@@ -127,9 +127,16 @@ namespace PCS.WPFClientInterface
         {
             msgRtbZone.Text = string.Empty;
 
-            foreach (Message message in receivedMessages)
+            try
             {
-                msgRtbZone.Text += $"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text} \n";
+                foreach (Message message in receivedMessages)
+                {
+                    msgRtbZone.Text += $"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text} \n";
+                }
+            }
+            catch
+            {
+
             }
 
             msgRtbZone.ScrollToEnd();
