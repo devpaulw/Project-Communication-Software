@@ -116,7 +116,7 @@ namespace PCS
 
         private static string[] Split(string textData)
         {
-            return textData.Split(new char[] { Flags.StartOfText, Flags.EndOfText, Flags.EndOfTransBlock },
+            return textData.Split(new char[] { Flags.StartOfText, Flags.EndOfText, Flags.EndOfTransBlock, Flags.EndOfTransmission },
                 StringSplitOptions.RemoveEmptyEntries); // WARNING, Cannot send void messages with that, get used of it
         }
     }

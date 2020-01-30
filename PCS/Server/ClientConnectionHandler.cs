@@ -42,7 +42,7 @@ namespace PCS
                     }
                 }
                 catch (SocketException) // When An existing connection was forcibly closed by the remote host
-                {
+                { // BUG DOESN'T WORK ANYMORE IN WPF (Task does not finish ?)
                     break;
                 }
             }

@@ -7,7 +7,8 @@ using System.Text;
 
 namespace PCS
 {
-    class PcsFtpClient
+    // TODO: Organize messages in different distincts channels
+    public class PcsFtpClient
     {
         private const string MessagePath = "./messages/";
 

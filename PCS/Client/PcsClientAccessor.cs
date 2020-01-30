@@ -4,12 +4,35 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace PCS
 {
+    // TODO: Install Boolean Is Connected/Signed In
+    // TODO: Maybe mix connect and sign in
     public class PcsClientAccessor : PcsClient
     {
-        private PcsFtpClient ftpClient = new PcsFtpClient();
+        public PcsFtpClient Ftp { get; } = new PcsFtpClient();
+
+        public void StartListenAsync(Action<Message> messageReceived)
+        {
+            var thread = new Thread(() => Listen());
+            thread.Start();
+
+            void Listen()
+            {
+                while (true)
+                {
+                    string receivedData = Receive();
+                    var dataPacket = new DataPacket(receivedData);
+
+                    if (dataPacket.Type == DataPacketType.ServerMessage)
+                        messageReceived(dataPacket.GetMessage());
+                    else
+                        throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
+                }
+            }
+        }
 
         public void Connect(IPAddress ip)
         {
@@ -31,7 +54,7 @@ namespace PCS
                 throw;
             }
 
-            ftpClient.Connect(ip);
+            Ftp.Connect(ip);
         }
 
         public void SignIn(Member member)
@@ -50,24 +73,11 @@ namespace PCS
             Send(Flags.ClientMessage + DataPacket.FromMessage(message));
         }
 
-        public Message ReceiveMessage() // Exclusive for clients applications
-        {
-            string receivedData = Receive();
-            var dataPacket = new DataPacket(receivedData);
-
-            if (dataPacket.Type == DataPacketType.ServerMessage)
-                return dataPacket.GetMessage();
-            else throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
-        }
-
         public override void Disconnect()
         {
             Send(Flags.ClientDisconnect.ToString(CultureInfo.CurrentCulture));
 
             base.Disconnect();
         }
-
-        public IEnumerable<Message> GetDailyMessages(DateTime day) 
-            => ftpClient.GetDailyMessages(day);
     }
 }
