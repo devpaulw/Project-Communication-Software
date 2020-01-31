@@ -23,7 +23,7 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        private PcsClientAccessor clientAccessor;
+        private PcsClientAccessor clientAccessor = new PcsClientAccessor();
 
         public MainWindow()
         {
@@ -33,14 +33,17 @@ namespace PCS.WPFClientInterface
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             messageField.ScrollToEnd();
+
+            ToggleDisconnectMenuItem();
+            ToggleSendMessageButton();
         }
 
-        private void SignInMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
         {
             var signInWindow = new SignInWindow();
             signInWindow.ShowDialog();
 
-            if (signInWindow.TryMakeSignIn(ref clientAccessor))
+            if (signInWindow.TryMakeConnection(ref clientAccessor))
             {
                 clientAccessor.StartListenAsync( // Start get messages dynamically
                     delegate (Message message)
@@ -56,6 +59,10 @@ namespace PCS.WPFClientInterface
                 {
                     messageField.AddMessage(dailyMessage);
                 }
+
+                ToggleConnectMenuItem();
+                ToggleDisconnectMenuItem();
+                ToggleSendMessageButton();
             }
         }
 
@@ -68,6 +75,11 @@ namespace PCS.WPFClientInterface
         private void DisconnectMenuItem_Click(object sender, RoutedEventArgs e)
         {
             clientAccessor.Disconnect();
+            messageField.Clear();
+
+            ToggleDisconnectMenuItem();
+            ToggleConnectMenuItem();
+            ToggleSendMessageButton();
         }
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
@@ -81,14 +93,6 @@ namespace PCS.WPFClientInterface
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ToggleSendMessageButton();
-
-            void ToggleSendMessageButton()
-            {
-                if (messageTextBox.Text == string.Empty)
-                    sendMessageButton.IsEnabled = false;
-                else
-                    sendMessageButton.IsEnabled = true;
-            }
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
@@ -107,8 +111,31 @@ namespace PCS.WPFClientInterface
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (clientAccessor != null) // Check is connected
-                clientAccessor.Dispose();
+            clientAccessor.Dispose();
+        }
+
+        private void ToggleSendMessageButton()
+        {
+            if (messageTextBox.Text == string.Empty || !clientAccessor.IsConnected)
+                sendMessageButton.IsEnabled = false;
+            else
+                sendMessageButton.IsEnabled = true;
+        }
+
+        private void ToggleConnectMenuItem()
+        {
+            if (clientAccessor.IsConnected)
+                connectMenuItem.IsEnabled = false;
+            else
+                connectMenuItem.IsEnabled = true;
+        }
+
+        private void ToggleDisconnectMenuItem()
+        {
+            if (!clientAccessor.IsConnected)
+                disconnectMenuItem.IsEnabled = false;
+            else
+                disconnectMenuItem.IsEnabled = true;
         }
     }
 }

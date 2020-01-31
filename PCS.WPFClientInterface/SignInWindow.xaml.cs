@@ -26,13 +26,12 @@ namespace PCS.WPFClientInterface
             InitializeComponent();
         }
 
-        public bool TryMakeSignIn(ref PcsClientAccessor clientAccessor)
+        public bool TryMakeConnection(ref PcsClientAccessor clientAccessor)
         {
             if (CanSignIn())
             {
-                clientAccessor = new PcsClientAccessor(IPAddress.Parse(serverAddressTextBox.Text));
-
-                clientAccessor.SignIn(new Member(usernameTextBox.Text,
+                clientAccessor.Connect(IPAddress.Parse(serverAddressTextBox.Text),
+                    new Member(usernameTextBox.Text, 
                     Convert.ToInt32(idTextBox.Text, CultureInfo.CurrentCulture)));
 
                 return true;

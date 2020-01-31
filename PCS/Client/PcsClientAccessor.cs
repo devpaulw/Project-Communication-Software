@@ -12,48 +12,48 @@ namespace PCS
     {
         private Thread serverListenThread;
 
-        public PcsFtpClient Ftp { get; }
-        public bool IsSignedIn { get; private set; }
+        public PcsFtpClient Ftp { get; private set; }
+        public bool IsConnected { get; private set; }
 
-        public PcsClientAccessor(IPAddress ip)
+        public void Connect(IPAddress ip, Member member)
         {
-            Connect();
+            if (ip == null) throw new ArgumentNullException(nameof(ip));
+
+            if (ip.MapToIPv4().ToString() == IPAddressHelper.Localhost)
+                ip = IPAddressHelper.GetLocalIPAddress(); // Accept localhost ip
+
+            AdapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            var endPoint = new IPEndPoint(ip, PcsServer.Port);
+
+            try
+            {
+                AdapteeSocket.Connect(endPoint);
+                Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
+            }
+            catch
+            {
+                throw;
+            }
 
             Ftp = new PcsFtpClient(ip);
 
-            void Connect()
+            SignIn();
+
+            void SignIn()
             {
-                if (ip == null) throw new ArgumentNullException(nameof(ip));
+                if (member == null) throw new ArgumentNullException(nameof(member));
 
-                if (ip.MapToIPv4().ToString() == IPAddressHelper.Localhost)
-                    ip = IPAddressHelper.GetLocalIPAddress(); // Accept localhost ip
+                Send(Flags.ClientSignIn + DataPacket.FromMember(member));
 
-                AdapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                var endPoint = new IPEndPoint(ip, PcsServer.Port);
-
-                try
-                {
-                    AdapteeSocket.Connect(endPoint);
-                    Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
-                }
-                catch
-                {
-                    throw;
-                }
+                IsConnected = true;
             }
-        }
-
-        public void SignIn(Member member)
-        {
-            if (member == null) throw new ArgumentNullException(nameof(member));
-
-            Send(Flags.ClientSignIn + DataPacket.FromMember(member));
-
-            IsSignedIn = true;
         }
 
         public void StartListenAsync(Action<Message> messageReceived)
         {
+            if (!IsConnected)
+                throw new Exception(Messages.Exceptions.NotConnected);
+
             serverListenThread = new Thread(() => Listen());
             serverListenThread.Start();
 
@@ -83,21 +83,24 @@ namespace PCS
 
         public override void Disconnect()
         {
-            Send(Flags.ClientDisconnect.ToString(CultureInfo.CurrentCulture));
+            if (IsConnected)
+            {
+                Send(Flags.ClientDisconnect.ToString(CultureInfo.CurrentCulture));
 
-            IsSignedIn = false;
+                serverListenThread.Abort(); // Stop listen server
 
-            base.Disconnect();
+                IsConnected = false;
+
+                base.Disconnect();
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing && IsConnected)
             {
-                serverListenThread.Abort(); // Stop listen server
+                base.Dispose(disposing);
             }
-
-            base.Dispose(disposing);
         }
     }
 }

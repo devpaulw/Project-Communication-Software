@@ -123,6 +123,9 @@
   <data name="MessageEmptyField" xml:space="preserve">
     <value>A text field in the message is not filled in.</value>
   </data>
+  <data name="NotConnected" xml:space="preserve">
+    <value>The socket was not connected to the server.</value>
+  </data>
   <data name="NotRecognizedDataPacket" xml:space="preserve">
     <value>This data packet is not recognized.</value>
   </data>

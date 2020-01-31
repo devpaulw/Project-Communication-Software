@@ -79,6 +79,15 @@ namespace PCS.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The socket was not connected to the server..
+        /// </summary>
+        internal static string NotConnected {
+            get {
+                return ResourceManager.GetString("NotConnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This data packet is not recognized..
         /// </summary>
         internal static string NotRecognizedDataPacket {

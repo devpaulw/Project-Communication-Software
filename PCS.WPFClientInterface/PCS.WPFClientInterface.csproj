@@ -144,7 +144,6 @@
     <Compile Include="MessageField.xaml.cs">
       <DependentUpon>MessageField.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SMessageField.cs" />
     <Compile Include="SignInWindow.xaml.cs">
       <DependentUpon>SignInWindow.xaml</DependentUpon>
     </Compile>

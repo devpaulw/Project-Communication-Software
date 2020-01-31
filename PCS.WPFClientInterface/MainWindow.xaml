@@ -29,7 +29,7 @@
                 <MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
             </MenuItem>
             <MenuItem Header="_Server" Height="25" FontSize="13">
-                <MenuItem x:Name="signInMenuItem" Header="_Sign In" Click="SignInMenuItem_Click" />
+                <MenuItem x:Name="connectMenuItem" Header="_Connect" Click="ConnectMenuItem_Click" />
                 <MenuItem x:Name="disconnectMenuItem" Header="_Disconnect" Click="DisconnectMenuItem_Click" />
                 <!--<Separator />-->
             </MenuItem>

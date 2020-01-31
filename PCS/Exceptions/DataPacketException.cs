@@ -5,7 +5,7 @@ using System.Text;
 namespace PCS
 {
     [Serializable]
-    public class DataPacketException : Exception
+    public class DataPacketException : Exception // TODO Maybe deprecate these exceptions, because it's useless with the Exception classic
     {
         public DataPacketException() : base() { }
         public DataPacketException(string message) : base(message) { }

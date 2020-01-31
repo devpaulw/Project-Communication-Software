@@ -30,6 +30,8 @@ namespace PCS.WPFClientInterface
             fieldTextBox.Text += $"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text} \n";
         }
 
+        public void Clear() => fieldTextBox.Text = string.Empty;
+
         public void ScrollToEnd() => fieldTextBox.ScrollToEnd();
     }
 }
