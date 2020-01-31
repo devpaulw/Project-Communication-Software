@@ -23,15 +23,38 @@ namespace PCS.WPFClientInterface
         public MessageField()
         {
             InitializeComponent();
+
+            fieldRtb.Document.Blocks.Clear();
         }
 
         public void AddMessage(Message message)
         {
-            fieldTextBox.Text += $"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text} \n";
+            if (message.Text == "imgtest")
+            {
+                AddImage(new BitmapImage(new Uri(@"D:\Fichiers personnels\Images\strucpp4.png", UriKind.RelativeOrAbsolute)));
+            }
+
+            var appendParagraph = new Paragraph();
+            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
+            appendParagraph.LineHeight = 3;
+
+            fieldRtb.Document.Blocks.Add(appendParagraph);
         }
 
-        public void Clear() => fieldTextBox.Text = string.Empty;
+        public void AddImage(BitmapImage bitmap)
+        {
+            var image = new Image();
+            image.Source = bitmap;
+            image.Width = bitmap.Width; // TODO: Fix a constant size
+            image.Height = bitmap.Height;
 
-        public void ScrollToEnd() => fieldTextBox.ScrollToEnd();
+            var container = new InlineUIContainer(image);
+            var paragraph = new Paragraph(container);
+            fieldRtb.Document.Blocks.Add(paragraph);
+        }
+
+        public void Clear() => fieldRtb.Document.Blocks.Clear();
+
+        public void ScrollToEnd() => fieldRtb.ScrollToEnd();
     }
 }

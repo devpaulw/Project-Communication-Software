@@ -39,12 +39,10 @@
             </MenuItem>
         </Menu>
 
-        <!--<TextBox x:Name="messageField" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="540"  TextWrapping="Wrap" IsReadOnly="True" Background="#BF000000" Foreground="White" Grid.ColumnSpan="5" Margin="10,30,10,0"/>-->
+        <local:MessageField x:Name="messageField" Margin="10,30,10,111" RenderTransformOrigin="0.479,0.299" Grid.ColumnSpan="6" />
         <TextBox x:Name="messageTextBox" HorizontalAlignment="Right" VerticalAlignment="Top" Height="106" Width="687" TextWrapping="Wrap"  Grid.ColumnSpan="6" RenderTransformOrigin="0.041,0.63" Margin="0,575,179,0" TextChanged="MessageTextBox_TextChanged"/>
         <Button x:Name="sendMessageButton" IsDefault="True" Content="Send message" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142"  Height="40" Grid.Column="5" Margin="188,575,0,0" Click="SendMessageButton_Click" IsEnabled="False"/>
         <Button x:Name="scrollToEndButton" Content="Scroll to end" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142" Grid.Column="5" Margin="188,620,0,0" Click="ScrollToEndButton_Click"/>
-
-        <local:MessageField x:Name="messageField" Margin="10,30,10,111" RenderTransformOrigin="0.479,0.299" Grid.ColumnSpan="6" />
 
     </Grid>
 

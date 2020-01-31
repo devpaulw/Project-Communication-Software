@@ -32,8 +32,6 @@ namespace PCS.WPFClientInterface
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            messageField.ScrollToEnd();
-
             ToggleDisconnectMenuItem();
             ToggleSendMessageButton();
         }
@@ -62,7 +60,8 @@ namespace PCS.WPFClientInterface
 
                 ToggleConnectMenuItem();
                 ToggleDisconnectMenuItem();
-                ToggleSendMessageButton();
+                ToggleSendMessageButton(); 
+                messageField.ScrollToEnd();
             }
         }
 

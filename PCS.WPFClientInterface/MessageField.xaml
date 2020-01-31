@@ -4,9 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PCS.WPFClientInterface"
-             mc:Ignorable="d" >
+             mc:Ignorable="d" d:DesignWidth="415.417" d:DesignHeight="308.916" >
     <Grid>
 
-        <TextBox x:Name="fieldTextBox" TextWrapping="Wrap" IsReadOnly="True" Background="#BF000000" Foreground="White" Grid.ColumnSpan="2" Grid.RowSpan="2"/>
+        <RichTextBox x:Name="fieldRtb" IsReadOnly="True" Background="#BF000000" Foreground="White" VerticalScrollBarVisibility="Visible" Grid.ColumnSpan="2" Grid.RowSpan="2"></RichTextBox>
+
     </Grid>
 </UserControl>
