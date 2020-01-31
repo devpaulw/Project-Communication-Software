@@ -15,6 +15,7 @@ namespace PCS
     {
         private static readonly string directory = Path.Combine(Path.GetTempPath(), "PcsFtpServer");
 
+        private bool disposed;
         private readonly IFtpServerHost serverHost;
 
         public const ushort Port = 6784;
@@ -65,8 +66,22 @@ namespace PCS
 
         public void Dispose()
         {
-            // Stop the FTP server
-            serverHost.StopAsync(CancellationToken.None).Wait();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    // Stop the FTP server
+                    serverHost.StopAsync(CancellationToken.None).Wait();
+                }
+
+                disposed = true;
+            }
         }
     }
 }

@@ -11,9 +11,10 @@ namespace PCS.ServerApp
         static void Main()
         {
             using (var ftpServer = new PcsFtpServer())
-            using (var server = new PcsServer())
             {
                 ftpServer.StartAsync();
+
+                var server = new PcsServer();
                 server.StartHosting();
             }
         }

@@ -13,6 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS.WPFClientInterface", "P
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AE652521-E87B-4B61-8214-E2A5A8718FDC}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		Data Management.txt = Data Management.txt
 		FTP Server Handle.txt = FTP Server Handle.txt
 	EndProjectSection

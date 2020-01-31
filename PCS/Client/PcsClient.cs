@@ -8,6 +8,8 @@ namespace PCS
 {
     public class PcsClient : IDisposable
     {
+        private bool disposed;
+
         protected Socket AdapteeSocket { get; set; }
 
         public PcsClient() { }
@@ -54,9 +56,25 @@ namespace PCS
             AdapteeSocket.Shutdown(SocketShutdown.Both);
             AdapteeSocket.Close();
         }
+
         public void Dispose()
         {
-            Disconnect();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    Disconnect();
+                    AdapteeSocket.Dispose();
+                }
+
+                disposed = true;
+            }
         }
     }
 }

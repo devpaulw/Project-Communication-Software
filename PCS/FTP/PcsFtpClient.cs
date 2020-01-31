@@ -7,16 +7,14 @@ using System.Text;
 
 namespace PCS
 {
-    // TODO: Organize messages in different distincts channels
     public class PcsFtpClient
     {
         private const string MessagePath = "./messages/";
 
         private IPAddress m_ip;
 
-        public void Connect(IPAddress ip)
+        public PcsFtpClient(IPAddress ip)
         {
-            // There are not a lot because it's not a connect/disconnect format of FTP library, but It could be.
             if (ip == null) throw new ArgumentNullException(nameof(ip));
             else
                 m_ip = ip;

@@ -15,6 +15,8 @@ namespace PCS
 {
     public class PcsServer : IDisposable
     {
+        private bool disposed;
+
         private readonly PcsListener listener;
         private readonly PcsFtpClient ftpClient;
         private readonly List<PcsClient> connectedClients;
@@ -24,15 +26,13 @@ namespace PCS
 
         public PcsServer()
         {
-            ftpClient = new PcsFtpClient();
             listener = new PcsListener(IPAddressHelper.GetLocalIPAddress());
+            ftpClient = new PcsFtpClient(IPAddressHelper.GetLocalIPAddress());
             connectedClients = new List<PcsClient>();
         }
         
         public void StartHosting()
         {
-            ftpClient.Connect(IPAddressHelper.GetLocalIPAddress());
-
             try
             {
                 listener.Listen();
@@ -45,7 +45,8 @@ namespace PCS
                     connectedClients.Add(client);
 
                     var connectionThread = new Thread(() 
-                        => new ClientConnectionHandler(client, OnClientSignIn, OnMessageReceived, OnClientDisconnect));
+                        => new ClientConnectionHandler(
+                            client, OnClientSignIn, OnMessageReceived, OnClientDisconnect));
 
                     connectionThread.Start();
                 }
@@ -97,7 +98,21 @@ namespace PCS
 
         public void Dispose()
         {
-            // DOLATER
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    listener.Dispose();
+                }
+
+                disposed = true;
+            }
         }
     }
 }

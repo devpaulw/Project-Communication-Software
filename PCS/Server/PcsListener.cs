@@ -6,8 +6,9 @@ using System.Text;
 
 namespace PCS
 {
-    class PcsListener
+    class PcsListener : IDisposable
     {
+        private bool disposed;
         private readonly Socket adapteeListener;
 
         public PcsListener(IPAddress ip)
@@ -26,6 +27,25 @@ namespace PCS
         public PcsClient Accept()
         {
             return new PcsClient(adapteeListener.Accept());
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    adapteeListener.Dispose();
+                }
+
+                disposed = true;
+            }
         }
     }
 }

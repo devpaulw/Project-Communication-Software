@@ -27,13 +27,12 @@ namespace PCS.WPFClientInterface
 
         public MainWindow()
         {
-            clientAccessor = new PcsClientAccessor();
-
             InitializeComponent();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            messageField.ScrollToEnd();
         }
 
         private void SignInMenuItem_Click(object sender, RoutedEventArgs e)
@@ -81,9 +80,9 @@ namespace PCS.WPFClientInterface
 
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            TryEnableSendMessageButton();
+            ToggleSendMessageButton();
 
-            void TryEnableSendMessageButton()
+            void ToggleSendMessageButton()
             {
                 if (messageTextBox.Text == string.Empty)
                     sendMessageButton.IsEnabled = false;
@@ -95,16 +94,21 @@ namespace PCS.WPFClientInterface
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
-                "Project Communication Software (P.C.S.), developed by SpydotNet and Binary Bluff...",
+                "Project Communication Software (P.C.S.), developed by SpydotNet and Binary Bluff.\n[...]",
                 "About Project Communication Software",
                 MessageBoxButton.OK,
-                MessageBoxImage.Information
-                );
+                MessageBoxImage.Information);
         }
 
         private void ScrollToEndButton_Click(object sender, RoutedEventArgs e)
         {
             messageField.ScrollToEnd();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (clientAccessor != null) // Check is connected
+                clientAccessor.Dispose();
         }
     }
 }

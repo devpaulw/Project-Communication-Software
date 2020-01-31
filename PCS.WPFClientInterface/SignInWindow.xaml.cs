@@ -30,7 +30,7 @@ namespace PCS.WPFClientInterface
         {
             if (CanSignIn())
             {
-                clientAccessor.Connect(IPAddress.Parse(serverAddressTextBox.Text));
+                clientAccessor = new PcsClientAccessor(IPAddress.Parse(serverAddressTextBox.Text));
 
                 clientAccessor.SignIn(new Member(usernameTextBox.Text,
                     Convert.ToInt32(idTextBox.Text, CultureInfo.CurrentCulture)));
@@ -48,20 +48,20 @@ namespace PCS.WPFClientInterface
 
         private void ServerAddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            TryEnableSignInButton();
+            ToggleSignInButton();
         }
 
         private void UsernameTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            TryEnableSignInButton();
+            ToggleSignInButton();
         }
 
         private void IDTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            TryEnableSignInButton();
+            ToggleSignInButton();
         }
 
-        private void TryEnableSignInButton()
+        private void ToggleSignInButton()
         {
             if (CanSignIn())
                 signInButton.IsEnabled = true;
@@ -87,7 +87,7 @@ namespace PCS.WPFClientInterface
             usernameTextBox.Text = "PcsTester1";
             idTextBox.Text = "54312";
 
-            TryEnableSignInButton();
+            ToggleSignInButton();
         }
     }
 }
