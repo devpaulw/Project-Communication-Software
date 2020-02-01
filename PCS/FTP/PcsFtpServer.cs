@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace PCS
 
         public const ushort Port = 6784;
 
-        public PcsFtpServer()
+        public PcsFtpServer(IPAddress serverAddress)
         {
             // Setup dependency injection
             var services = new ServiceCollection();
@@ -37,7 +38,7 @@ namespace PCS
                 .EnableAnonymousAuthentication()); // allow anonymous logins
 
             // Configure the FTP server
-            services.Configure<FtpServerOptions>(opt => opt.ServerAddress = IPAddressHelper.GetLocalIPAddress().ToString());
+            services.Configure<FtpServerOptions>(opt => opt.ServerAddress = serverAddress.ToString());
             services.Configure<FtpServerOptions>(opt => opt.Port = Port);
 
             // Build the service provider

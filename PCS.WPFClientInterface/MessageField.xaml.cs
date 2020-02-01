@@ -20,6 +20,8 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MessageField : UserControl
     {
+        const int ImageHeight = 260;
+
         public MessageField()
         {
             InitializeComponent();
@@ -29,27 +31,32 @@ namespace PCS.WPFClientInterface
 
         public void AddMessage(Message message)
         {
-            if (message.Text == "imgtest")
-            {
-                AddImage(new BitmapImage(new Uri(@"D:\Fichiers personnels\Images\strucpp4.png", UriKind.RelativeOrAbsolute)));
-            }
-
             var appendParagraph = new Paragraph();
             appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
             appendParagraph.LineHeight = 3;
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
+
+            if (message.Text == "imgtestv2")
+            {
+                AddImage(new BitmapImage(new Uri(@"D:\Fichiers personnels\Images\Paysages\Paysage_(landscape)_wallpaper_HD_0024.jpg", UriKind.RelativeOrAbsolute)));
+            }
         }
 
         public void AddImage(BitmapImage bitmap)
         {
-            var image = new Image();
-            image.Source = bitmap;
-            image.Width = bitmap.Width; // TODO: Fix a constant size
-            image.Height = bitmap.Height;
+            double sizeRatio = ImageHeight / bitmap.Height;
+
+            var image = new Image
+            {
+                Source = bitmap,
+                Height = ImageHeight,
+                Width = bitmap.Width * sizeRatio
+            };
 
             var container = new InlineUIContainer(image);
             var paragraph = new Paragraph(container);
+
             fieldRtb.Document.Blocks.Add(paragraph);
         }
 

@@ -10,8 +10,9 @@ namespace PCS
     public class PcsFtpClient
     {
         private const string MessagePath = "./messages/";
+        private const string ImagePath = "./images/";
 
-        private IPAddress m_ip;
+        private readonly IPAddress m_ip;
 
         public PcsFtpClient(IPAddress ip)
         {

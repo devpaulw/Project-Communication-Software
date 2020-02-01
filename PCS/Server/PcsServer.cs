@@ -24,10 +24,13 @@ namespace PCS
         public const ushort Port = 6783;
         public static readonly Encoding Encoding = Encoding.UTF8;
 
-        public PcsServer()
+        public PcsServer(IPAddress serverAddress)
         {
-            listener = new PcsListener(IPAddressHelper.GetLocalIPAddress());
-            ftpClient = new PcsFtpClient(IPAddressHelper.GetLocalIPAddress());
+            if (serverAddress == null)
+                throw new ArgumentNullException(nameof(serverAddress));
+
+            listener = new PcsListener(serverAddress);
+            ftpClient = new PcsFtpClient(serverAddress);
             connectedClients = new List<PcsClient>();
         }
         

@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS.ConsoleApp", "PCS.ConsoleApp\PCS.ConsoleApp.csproj", "{F1B94F0A-36C6-4887-9D62-0DC47C792F30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS.ServerApp", "PCS.ServerApp\PCS.ServerApp.csproj", "{0BC1D883-DEBF-45A5-BF12-EDCD3E89975D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PCS", "PCS\PCS.csproj", "{682414B2-8C4A-42CE-BE85-A1EC8A025D52}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS.WPFClientInterface", "PCS.WPFClientInterface\PCS.WPFClientInterface.csproj", "{545F0682-5A8D-422E-A53F-6E1061FEDA5E}"
@@ -18,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		FTP Server Handle.txt = FTP Server Handle.txt
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCS.ServerAppCore", "PCS.ServerAppCore\PCS.ServerAppCore.csproj", "{5430FBE6-055E-4BF9-B176-AB10D316AEEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,10 +28,6 @@ Global
 		{F1B94F0A-36C6-4887-9D62-0DC47C792F30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1B94F0A-36C6-4887-9D62-0DC47C792F30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1B94F0A-36C6-4887-9D62-0DC47C792F30}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0BC1D883-DEBF-45A5-BF12-EDCD3E89975D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0BC1D883-DEBF-45A5-BF12-EDCD3E89975D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0BC1D883-DEBF-45A5-BF12-EDCD3E89975D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0BC1D883-DEBF-45A5-BF12-EDCD3E89975D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{682414B2-8C4A-42CE-BE85-A1EC8A025D52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{682414B2-8C4A-42CE-BE85-A1EC8A025D52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{682414B2-8C4A-42CE-BE85-A1EC8A025D52}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,6 +36,10 @@ Global
 		{545F0682-5A8D-422E-A53F-6E1061FEDA5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{545F0682-5A8D-422E-A53F-6E1061FEDA5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{545F0682-5A8D-422E-A53F-6E1061FEDA5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5430FBE6-055E-4BF9-B176-AB10D316AEEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5430FBE6-055E-4BF9-B176-AB10D316AEEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5430FBE6-055E-4BF9-B176-AB10D316AEEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5430FBE6-055E-4BF9-B176-AB10D316AEEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
