@@ -19,9 +19,6 @@ namespace PCS
         {
             if (ip == null) throw new ArgumentNullException(nameof(ip));
 
-            if (ip.MapToIPv4().ToString() == IPAddressHelper.Localhost)
-                ip = IPAddressHelper.GetLocalIPAddress(); // Accept localhost ip
-
             AdapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
 
@@ -49,7 +46,7 @@ namespace PCS
             }
         }
 
-        public void StartListenAsync(Action<Message> messageReceived)
+        public void StartListenAsync(Action<ServerMessage> messageReceived)
         {
             if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
@@ -65,20 +62,20 @@ namespace PCS
                     var dataPacket = new DataPacket(receivedData);
 
                     if (dataPacket.Type == DataPacketType.ServerMessage)
-                        messageReceived(dataPacket.GetMessage());
+                        messageReceived(dataPacket.GetServerMessage());
                     else
                         throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
                 }
             }
         }
 
-        public void SendMessage(Message message)
+        public void SendMessage(ClientMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
             if (string.IsNullOrEmpty(message.Text) || string.IsNullOrEmpty(message.ChannelTitle)) 
                 throw new MessageEmptyFieldException(Messages.Exceptions.MessageEmptyField);
 
-            Send(Flags.ClientMessage + DataPacket.FromMessage(message));
+            Send(Flags.ClientMessage + DataPacket.FromClientMessage(message));
         }
 
         public override void Disconnect()

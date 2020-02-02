@@ -29,7 +29,7 @@ namespace PCS.WPFClientInterface
             fieldRtb.Document.Blocks.Clear();
         }
 
-        public void AddMessage(Message message)
+        public void AddMessage(ServerMessage message)
         {
             var appendParagraph = new Paragraph();
             appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");

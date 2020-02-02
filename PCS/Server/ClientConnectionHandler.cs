@@ -11,7 +11,7 @@ namespace PCS
 
         public ClientConnectionHandler(PcsClient client, 
             Action<Member> signIn, 
-            Action<Message> addMessage, 
+            Action<ServerMessage> addMessage, 
             Action<PcsClient, Member> disconnect)
         {
             while (true)
@@ -31,10 +31,10 @@ namespace PCS
                     }
                     else if (dataPacket.Type == DataPacketType.ClientMessage)
                     {
-                        var clientMessage = dataPacket.GetMessage();
+                        var clientMessage = dataPacket.GetClientMessage();
 
-                        var message = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, m_signedInMember);
-                        addMessage(message);
+                        var serverMessage = new ServerMessage(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, m_signedInMember);
+                        addMessage(serverMessage);
                     }
                     else if (dataPacket.Type == DataPacketType.ClientDisconnect)
                     {
@@ -42,7 +42,7 @@ namespace PCS
                     }
                 }
                 catch (SocketException) // When An existing connection was forcibly closed by the remote host
-                { // BUG DOESN'T WORK ANYMORE IN WPF (Task does not finish ?)
+                {
                     break;
                 }
             }

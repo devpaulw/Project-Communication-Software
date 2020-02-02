@@ -60,7 +60,7 @@ namespace PCS
             }
         }
 
-        private void OnMessageReceived(Message message)
+        private void OnMessageReceived(ServerMessage message)
         {
             Console.WriteLine(Messages.Server.ClientSentMessage, message.Author, message.ChannelTitle, message.DateTime.ToLongTimeString(), message.Text);
 
@@ -80,21 +80,21 @@ namespace PCS
             Console.WriteLine(Messages.Server.ClientDisconnect, member);
         }
 
-        private void SendToEveryone(Message message)
+        private void SendToEveryone(ServerMessage message)
         {
             // Send to all clients
             foreach (var connectedClient in connectedClients)
-                SendToClientAccessor(connectedClient, message);
+                SendToClientAccessor(connectedClient);
+
+            void SendToClientAccessor(PcsClient client)
+            {
+                if (message == null) throw new ArgumentNullException(nameof(message));
+
+                client.Send(Flags.ServerMessage + DataPacket.FromServerMessage(message));
+            }
         }
 
-        private void SendToClientAccessor(PcsClient client, Message message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            client.Send(Flags.ServerMessage + DataPacket.FromMessage(message));
-        }
-
-        private void SaveMessage(Message message)
+        private void SaveMessage(ServerMessage message)
         {
             ftpClient.SaveMessage(message);
         }

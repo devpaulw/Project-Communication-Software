@@ -43,49 +43,41 @@ namespace PCS
             return new Member(username, id);
         }
 
-        public Message GetMessage() // Unify Client and ServerMessage 
+        public ClientMessage GetClientMessage()
         {
-            if (Type == DataPacketType.ServerMessage)
-                return GetServerMessage();
-            else if (Type == DataPacketType.ClientMessage)
-                return GetClientMessage();
-            else
-                throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
+            string channelTitle = m_attributes[0];
+            string text = m_attributes[1];
 
-            Message GetServerMessage()
-            {
-                string channelTitle = m_attributes[0];
-
-                string username = m_attributes[1];
-                int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
-                var dateTime = DateTime.FromFileTime(Convert.ToInt64(m_attributes[3], CultureInfo.CurrentCulture));
-                string text = m_attributes[4];
-
-                var author = new Member(username, id);
-
-                return new Message(text, channelTitle, dateTime, author);
-            }
-            Message GetClientMessage()
-            {
-                string channelTitle = m_attributes[0];
-                string text = m_attributes[1];
-
-                return new Message(text, channelTitle);
-            }
+            return new ClientMessage(text, channelTitle);
         }
 
-        public static string FromMessage(Message message)
+        public ServerMessage GetServerMessage()
         {
-            if (message.IsForClient) 
-                return CreateDataPacket(message.ChannelTitle,
-                     message.Author.Username,
-                     message.Author.ID.ToString(CultureInfo.CurrentCulture),
-                     message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
-                     message.Text);
-            
-            else
-                return CreateDataPacket(message.ChannelTitle,
-                    message.Text);
+            string channelTitle = m_attributes[0];
+
+            string username = m_attributes[1];
+            int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
+            var dateTime = DateTime.FromFileTime(Convert.ToInt64(m_attributes[3], CultureInfo.CurrentCulture));
+            string text = m_attributes[4];
+
+            var author = new Member(username, id);
+
+            return new ServerMessage(text, channelTitle, dateTime, author);
+        }
+
+        public static string FromClientMessage(ClientMessage message)
+        {
+            return CreateDataPacket(message.ChannelTitle,
+                message.Text);
+        }
+
+        public static string FromServerMessage(ServerMessage message)
+        {
+            return CreateDataPacket(message.ChannelTitle,
+                 message.Author.Username,
+                 message.Author.ID.ToString(CultureInfo.CurrentCulture),
+                 message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
+                 message.Text);
         }
 
         public static string FromMember(Member member)
