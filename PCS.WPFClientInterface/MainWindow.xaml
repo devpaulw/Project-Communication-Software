@@ -43,6 +43,7 @@
         <TextBox x:Name="messageTextBox" HorizontalAlignment="Right" VerticalAlignment="Top" Height="106" Width="687" TextWrapping="Wrap"  Grid.ColumnSpan="6" RenderTransformOrigin="0.041,0.63" Margin="0,575,179,0" TextChanged="MessageTextBox_TextChanged"/>
         <Button x:Name="sendMessageButton" IsDefault="True" Content="Send message" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142"  Height="40" Grid.Column="5" Margin="188,575,0,0" Click="SendMessageButton_Click" IsEnabled="False"/>
         <Button x:Name="scrollToEndButton" Content="Scroll to end" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142" Grid.Column="5" Margin="188,620,0,0" Click="ScrollToEndButton_Click"/>
+        <Button x:Name="testButton" Content="Test Button (experimental)" Grid.Column="5" HorizontalAlignment="Left" Height="36" Margin="188,645,0,0" VerticalAlignment="Top" Width="142" Click="TestButton_Click"/>
 
     </Grid>
 

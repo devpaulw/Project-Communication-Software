@@ -33,8 +33,7 @@ namespace PCS.WPFClientInterface
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ToggleDisconnectMenuItem();
-            ToggleSendMessageButton();
+            ToggleAll();
         }
 
         private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
@@ -48,21 +47,13 @@ namespace PCS.WPFClientInterface
                     delegate (Message message)
                     {
                         Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                        {
-                            messageField.AddMessage(message);
-                            messageField.ScrollToEnd();
-                        });
+                            messageField.AddMessage(message));
                     });
 
                 foreach (var dailyMessage in clientAccessor.Ftp.GetDailyMessages(DateTime.Now)) // Get FTP Messages
-                {
                     messageField.AddMessage(dailyMessage);
-                }
 
-                ToggleConnectMenuItem();
-                ToggleDisconnectMenuItem();
-                ToggleSendMessageButton(); 
-                messageField.ScrollToEnd();
+                ToggleAll();
             }
         }
 
@@ -76,10 +67,7 @@ namespace PCS.WPFClientInterface
         {
             clientAccessor.Disconnect();
             messageField.Clear();
-
-            ToggleDisconnectMenuItem();
-            ToggleConnectMenuItem();
-            ToggleSendMessageButton();
+            ToggleAll();
         }
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
@@ -114,28 +102,31 @@ namespace PCS.WPFClientInterface
             clientAccessor.Dispose();
         }
 
+        private void ToggleAll()
+        {
+            ToggleDisconnectMenuItem();
+            ToggleConnectMenuItem();
+            ToggleSendMessageButton();
+        }
+
         private void ToggleSendMessageButton()
-        {
-            if (messageTextBox.Text == string.Empty || !clientAccessor.IsConnected)
-                sendMessageButton.IsEnabled = false;
-            else
-                sendMessageButton.IsEnabled = true;
-        }
+            => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty && clientAccessor.IsConnected;
 
-        private void ToggleConnectMenuItem()
-        {
-            if (clientAccessor.IsConnected)
-                connectMenuItem.IsEnabled = false;
-            else
-                connectMenuItem.IsEnabled = true;
-        }
+        private void ToggleConnectMenuItem() 
+            => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
 
-        private void ToggleDisconnectMenuItem()
+        private void ToggleDisconnectMenuItem() 
+            => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
+
+        private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!clientAccessor.IsConnected)
-                disconnectMenuItem.IsEnabled = false;
-            else
-                disconnectMenuItem.IsEnabled = true;
+            clientAccessor.SendMessage(new Message(
+                "TEST RESOURCE",
+                "TESTCHANNEL",
+                DateTime.Now,
+                new Member("TESTER", 99999),
+                new List<string>() { @"C:\Users\Paul\Pictures\OpenGL-Wide.png" }
+                ));
         }
     }
 }

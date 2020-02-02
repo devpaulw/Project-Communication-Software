@@ -62,7 +62,7 @@ namespace PCS
 
         private void OnMessageReceived(Message message)
         {
-            Console.WriteLine(Messages.Server.ClientSentMessage, message.Author, message.ChannelTitle, message.DateTime.ToLongTimeString(), message.Text);
+            Console.WriteLine("Received: " + message);
 
             SendToEveryone(message);
             SaveMessage(message);

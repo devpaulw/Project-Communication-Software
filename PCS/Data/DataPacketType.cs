@@ -4,7 +4,6 @@ using System.Text;
 
 namespace PCS
 {
-
     enum DataPacketType
     {
         ClientSignIn, ClientMessage, ClientDisconnect, ServerMessage

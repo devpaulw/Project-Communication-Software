@@ -62,23 +62,13 @@ namespace PCS.WPFClientInterface
         }
 
         private void ToggleSignInButton()
-        {
-            if (CanSignIn())
-                signInButton.IsEnabled = true;
-            else
-                signInButton.IsEnabled = false;
-        }
+            => signInButton.IsEnabled = CanSignIn();
 
         private bool CanSignIn()
         {
-            if (serverAddressTextBox.Text == string.Empty ||
-                usernameTextBox.Text == string.Empty ||
-                idTextBox.Text == string.Empty || int.TryParse(idTextBox.Text, out _) == false)
-            {
-               return false;
-            }
-            else
-                return true;
+            return serverAddressTextBox.Text != string.Empty &&
+                usernameTextBox.Text != string.Empty &&
+                idTextBox.Text != string.Empty && int.TryParse(idTextBox.Text, out _) == true;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

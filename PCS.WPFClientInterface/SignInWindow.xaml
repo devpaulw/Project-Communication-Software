@@ -15,7 +15,7 @@
     </Window.Background>
     <Grid>
         <TextBox x:Name="serverAddressTextBox" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" Margin="10,26,0,0" TextChanged="ServerAddressTextBox_TextChanged"/>
-        <Button x:Name="signInButton" Content="Connect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,103,0,0" Click="SignInButton_Click"/>
+        <Button x:Name="signInButton" IsDefault="True" Content="Connect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="10,103,0,0" Click="SignInButton_Click"/>
         <TextBox x:Name="usernameTextBox" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="137" Margin="10,75,0,0" TextChanged="UsernameTextBox_TextChanged"/>
         <Label Content="Username:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,49,0,0"/>
         <Label Content="Server address:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0"/>

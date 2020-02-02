@@ -10,7 +10,7 @@ namespace PCS
     public class PcsFtpClient
     {
         private const string MessagePath = "./messages/";
-        private const string ImagePath = "./images/";
+        private const string ResourcePath = "./resources/";
 
         private readonly IPAddress m_ip;
 
@@ -33,12 +33,11 @@ namespace PCS
             request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs"); // DOLATER: Find cleaner, use passwords, and SSL
             request.Method = WebRequestMethods.Ftp.AppendFile;
 
-            var messagePacket = PcsServer.Encoding.GetBytes(DataPacket.FromMessage(message));
-
             using (var requestStream = request.GetRequestStream())
+            using (var writer = new StreamWriter(requestStream, PcsServer.Encoding))
             {
-                requestStream.Write(messagePacket, 0, messagePacket.Length);
-                requestStream.WriteByte((byte)'\n');
+                var messagePacket = DataPacket.FromMessage(message);
+                writer.WriteLine(messagePacket);
             }
         }
 
@@ -66,8 +65,6 @@ namespace PCS
 
                     yield return dataPacket.GetMessage();
                 }
-
-                
             }
 
             IEnumerable<string> GetTextMessages(string fullText)
@@ -89,6 +86,36 @@ namespace PCS
                     if (readingTextMsg)
                         currentTextMsg += c;
                 }
+            }
+        }
+
+        public void UploadResource(string localFilePath, out string generatedFileName)
+        {
+            if (!PathExists(ResourcePath)) MakeDirectory(MessagePath);
+            
+            generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
+            string generatedFilePath = Path.Combine(ResourcePath, generatedFileName);
+
+            UploadFile(localFilePath, generatedFilePath);
+        }
+
+        public void UploadFile(string localFilePath, string path)
+        {
+            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
+            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs"); // DOLATER: Find cleaner, use passwords, and SSL
+            request.Method = WebRequestMethods.Ftp.UploadFile;
+
+            byte[] buffer;
+
+            using (FileStream stream = File.OpenRead(localFilePath))
+            {
+                buffer = new byte[stream.Length];
+                stream.Read(buffer, 0, buffer.Length);
+            }
+
+            using (var requestStream = request.GetRequestStream())
+            {
+                requestStream.Write(buffer, 0, buffer.Length);
             }
         }
 

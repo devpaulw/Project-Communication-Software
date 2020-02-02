@@ -37,6 +37,8 @@ namespace PCS.WPFClientInterface
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
 
+            ScrollToEnd();
+
             if (message.Text == "imgtestv2")
             {
                 AddImage(new BitmapImage(new Uri(@"D:\Fichiers personnels\Images\Paysages\Paysage_(landscape)_wallpaper_HD_0024.jpg", UriKind.RelativeOrAbsolute)));

@@ -54,7 +54,8 @@ namespace PCS
             var attachedFiles = new List<string>();
 
             foreach (string attachedFile in m_attributes.Skip(5))
-                attachedFiles.Add(attachedFile);
+                if (!string.IsNullOrEmpty(attachedFile)) // DOLATER: Remove that and instead don't take after end of text in Split
+                    attachedFiles.Add(attachedFile);
 
             var author = new Member(username, id);
 
@@ -68,10 +69,11 @@ namespace PCS
                  message.Author.Username,
                  message.Author.ID.ToString(CultureInfo.CurrentCulture),
                  message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
-                 message.Text };
+                 message.Text 
+            };
 
             if (message.AttachedResources != null)
-                attributes = attributes.Concat(message.AttachedResources).ToArray(); // If there are any resource
+                attributes = attributes.Concat(message.AttachedResources).ToArray(); // If there are any resource, add them
 
             return CreateDataPacket(attributes);
         }
@@ -108,7 +110,7 @@ namespace PCS
         private static string[] Split(string textData)
         {
             return textData.Split(new char[] { Flags.StartOfText, Flags.EndOfText, Flags.EndOfTransBlock, Flags.EndOfTransmission },
-                StringSplitOptions.RemoveEmptyEntries); // WARNING, Cannot send void messages with that, get used of it
+                StringSplitOptions.RemoveEmptyEntries);
         }
     }
 }

@@ -71,11 +71,19 @@ namespace PCS
 
         public void SendMessage(Message message)
         {
+            if (!IsConnected)
+                throw new Exception(Messages.Exceptions.NotConnected);
+
             if (message == null) throw new ArgumentNullException(nameof(message));
-            if (string.IsNullOrEmpty(message.Text) || string.IsNullOrEmpty(message.ChannelTitle)) 
-                throw new MessageEmptyFieldException(Messages.Exceptions.MessageEmptyField);
 
-
+            if (message.AttachedResources != null)
+            {
+                for (int i = 0; i < message.AttachedResources.Count; i++) // Transition of local path to ftp path
+                {
+                    Ftp.UploadResource(message.AttachedResources[i], out string generatedFileName);
+                    message.AttachedResources[i] = generatedFileName;
+                }
+            }
 
             Send(Flags.ClientMessage + DataPacket.FromMessage(message));
         }
