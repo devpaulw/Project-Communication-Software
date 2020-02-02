@@ -70,8 +70,8 @@ namespace PCS
                  message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
                  message.Text };
 
-            if (message.AttachedFiles != null)
-                attributes = attributes.Concat(message.AttachedFiles).ToArray(); // If there are any resource
+            if (message.AttachedResources != null)
+                attributes = attributes.Concat(message.AttachedResources).ToArray(); // If there are any resource
 
             return CreateDataPacket(attributes);
         }

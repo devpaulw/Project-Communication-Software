@@ -33,7 +33,7 @@ namespace PCS
                     {
                         var clientMessage = dataPacket.GetMessage();
 
-                        var serverMessage = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, clientMessage.Author, clientMessage.AttachedFiles);
+                        var serverMessage = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, clientMessage.Author, clientMessage.AttachedResources);
                         addMessage(serverMessage);
                     }
                     else if (dataPacket.Type == DataPacketType.ClientDisconnect)

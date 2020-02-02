@@ -10,7 +10,7 @@ namespace PCS
         public string ChannelTitle { get; set; }
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
-        public IEnumerable<string> AttachedFiles { get; set; }
+        public IEnumerable<string> AttachedResources { get; set; }
 
         public Message(string text, string channelTitle, DateTime dateTime, Member author, IEnumerable<string> attachedFiles)
         {
@@ -19,7 +19,7 @@ namespace PCS
             
             Author = author;
             DateTime = dateTime;
-            AttachedFiles = attachedFiles;
+            AttachedResources = attachedFiles;
         }
 
         public override string ToString()
