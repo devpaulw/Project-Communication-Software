@@ -11,7 +11,7 @@ namespace PCS
 
         public ClientConnectionHandler(PcsClient client, 
             Action<Member> signIn, 
-            Action<ServerMessage> addMessage, 
+            Action<Message> addMessage, 
             Action<PcsClient, Member> disconnect)
         {
             while (true)
@@ -31,9 +31,9 @@ namespace PCS
                     }
                     else if (dataPacket.Type == DataPacketType.ClientMessage)
                     {
-                        var clientMessage = dataPacket.GetClientMessage();
+                        var clientMessage = dataPacket.GetMessage();
 
-                        var serverMessage = new ServerMessage(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, m_signedInMember);
+                        var serverMessage = new Message(clientMessage.Text, clientMessage.ChannelTitle, DateTime.Now, clientMessage.Author, clientMessage.AttachedFiles);
                         addMessage(serverMessage);
                     }
                     else if (dataPacket.Type == DataPacketType.ClientDisconnect)

@@ -21,7 +21,7 @@ namespace PCS
                 m_ip = ip;
         }
 
-        public void SaveMessage(ServerMessage message)
+        public void SaveMessage(Message message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
@@ -33,7 +33,7 @@ namespace PCS
             request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs"); // DOLATER: Find cleaner, use passwords, and SSL
             request.Method = WebRequestMethods.Ftp.AppendFile;
 
-            var messagePacket = PcsServer.Encoding.GetBytes(DataPacket.FromServerMessage(message));
+            var messagePacket = PcsServer.Encoding.GetBytes(DataPacket.FromMessage(message));
 
             using (var requestStream = request.GetRequestStream())
             {
@@ -42,7 +42,7 @@ namespace PCS
             }
         }
 
-        public IEnumerable<ServerMessage> GetDailyMessages(DateTime day)
+        public IEnumerable<Message> GetDailyMessages(DateTime day)
         {
             string path = GetPathFromDate(day);
 
@@ -64,7 +64,7 @@ namespace PCS
                 {
                     var dataPacket = new DataPacket(textMessage, DataPacketType.ServerMessage);
 
-                    yield return dataPacket.GetServerMessage();
+                    yield return dataPacket.GetMessage();
                 }
 
                 

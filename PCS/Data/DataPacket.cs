@@ -43,15 +43,7 @@ namespace PCS
             return new Member(username, id);
         }
 
-        public ClientMessage GetClientMessage()
-        {
-            string channelTitle = m_attributes[0];
-            string text = m_attributes[1];
-
-            return new ClientMessage(text, channelTitle);
-        }
-
-        public ServerMessage GetServerMessage()
+        public Message GetMessage()
         {
             string channelTitle = m_attributes[0];
 
@@ -59,34 +51,41 @@ namespace PCS
             int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
             var dateTime = DateTime.FromFileTime(Convert.ToInt64(m_attributes[3], CultureInfo.CurrentCulture));
             string text = m_attributes[4];
+            var attachedFiles = new List<string>();
+
+            foreach (string attachedFile in m_attributes.Skip(5))
+                attachedFiles.Add(attachedFile);
 
             var author = new Member(username, id);
 
-            return new ServerMessage(text, channelTitle, dateTime, author);
+            return new Message(text, channelTitle, dateTime, author, attachedFiles);
         }
 
-        public static string FromClientMessage(ClientMessage message)
+        public static string FromMessage(Message message)
         {
-            return CreateDataPacket(message.ChannelTitle,
-                message.Text);
-        }
-
-        public static string FromServerMessage(ServerMessage message)
-        {
-            return CreateDataPacket(message.ChannelTitle,
+            var attributes = new string[] {
+                 message.ChannelTitle,
                  message.Author.Username,
                  message.Author.ID.ToString(CultureInfo.CurrentCulture),
                  message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
-                 message.Text);
+                 message.Text };
+
+            if (message.AttachedFiles != null)
+                attributes = attributes.Concat(message.AttachedFiles).ToArray(); // If there are any resource
+
+            return CreateDataPacket(attributes);
         }
 
         public static string FromMember(Member member)
         {
-            return CreateDataPacket(member.Username,
-                member.ID.ToString(CultureInfo.CurrentCulture));
+            return CreateDataPacket(new string[] {
+                member.Username,
+                member.ID.ToString(CultureInfo.CurrentCulture) 
+            });
         }
+        
 
-        private static string CreateDataPacket(params string[] attributes)
+        private static string CreateDataPacket(string[] attributes)
         {
             string result = string.Empty;
             result += Flags.StartOfText;

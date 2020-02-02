@@ -3,5 +3,5 @@ messages
 	20190126.txt
 	20190127.txt
 
-images
+files
 ...

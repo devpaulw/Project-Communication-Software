@@ -46,7 +46,7 @@ namespace PCS
             }
         }
 
-        public void StartListenAsync(Action<ServerMessage> messageReceived)
+        public void StartListenAsync(Action<Message> messageReceived)
         {
             if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
@@ -62,20 +62,22 @@ namespace PCS
                     var dataPacket = new DataPacket(receivedData);
 
                     if (dataPacket.Type == DataPacketType.ServerMessage)
-                        messageReceived(dataPacket.GetServerMessage());
+                        messageReceived(dataPacket.GetMessage());
                     else
                         throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
                 }
             }
         }
 
-        public void SendMessage(ClientMessage message)
+        public void SendMessage(Message message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
             if (string.IsNullOrEmpty(message.Text) || string.IsNullOrEmpty(message.ChannelTitle)) 
                 throw new MessageEmptyFieldException(Messages.Exceptions.MessageEmptyField);
 
-            Send(Flags.ClientMessage + DataPacket.FromClientMessage(message));
+
+
+            Send(Flags.ClientMessage + DataPacket.FromMessage(message));
         }
 
         public override void Disconnect()

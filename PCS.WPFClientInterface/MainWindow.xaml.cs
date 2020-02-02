@@ -24,6 +24,7 @@ namespace PCS.WPFClientInterface
     public partial class MainWindow : Window
     {
         private PcsClientAccessor clientAccessor = new PcsClientAccessor();
+        private Member activeMember;
 
         public MainWindow()
         {
@@ -41,10 +42,10 @@ namespace PCS.WPFClientInterface
             var signInWindow = new SignInWindow();
             signInWindow.ShowDialog();
 
-            if (signInWindow.TryMakeConnection(ref clientAccessor))
+            if (signInWindow.TryMakeConnection(ref clientAccessor, out activeMember))
             {
                 clientAccessor.StartListenAsync( // Start get messages dynamically
-                    delegate (ServerMessage message)
+                    delegate (Message message)
                     {
                         Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
                         {
@@ -83,7 +84,7 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new ClientMessage(messageTextBox.Text, "Default"/*tmp*/);
+            var message = new Message(messageTextBox.Text, "Default"/*tmp*/, DateTime.Now, activeMember, null);
             clientAccessor.SendMessage(message);
 
             messageTextBox.Text = string.Empty;
