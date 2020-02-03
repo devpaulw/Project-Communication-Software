@@ -51,11 +51,12 @@ namespace PCS
             int id = Convert.ToInt32(m_attributes[2], CultureInfo.CurrentCulture);
             var dateTime = DateTime.FromFileTime(Convert.ToInt64(m_attributes[3], CultureInfo.CurrentCulture));
             string text = m_attributes[4];
-            var attachedFiles = new List<string>();
+            var attachedFiles = new List<Resource>();
 
             foreach (string attachedFile in m_attributes.Skip(5))
                 if (!string.IsNullOrEmpty(attachedFile)) // DOLATER: Remove that and instead don't take after end of text in Split
-                    attachedFiles.Add(attachedFile);
+                    attachedFiles.Add(new Resource(ftpUri: 
+                        new Uri(attachedFile)));
 
             var author = new Member(username, id);
 
@@ -72,8 +73,9 @@ namespace PCS
                  message.Text 
             };
 
-            if (message.AttachedResources != null)
-                attributes = attributes.Concat(message.AttachedResources).ToArray(); // If there are any resource, add them
+            if (message.AttachedResources != null) // If there are any resource, add them
+                attributes = attributes.Concat(from resourceUri in message.AttachedResources 
+                                               select resourceUri.FtpUri.AbsoluteUri).ToArray();
 
             return CreateDataPacket(attributes);
         }

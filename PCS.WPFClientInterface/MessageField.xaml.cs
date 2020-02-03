@@ -37,11 +37,19 @@ namespace PCS.WPFClientInterface
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
 
+            if (message.AttachedResources != null)
+            {
+                foreach (Resource attachedResource in message.AttachedResources)
+                    AddImage(new BitmapImage(attachedResource.FtpUri));
+            }
+
             ScrollToEnd();
 
             if (message.Text == "imgtestv2")
             {
-                AddImage(new BitmapImage(new Uri(@"D:\Fichiers personnels\Images\Paysages\Paysage_(landscape)_wallpaper_HD_0024.jpg", UriKind.RelativeOrAbsolute)));
+                //AddImage(new BitmapImage(new Uri(@"D:\Fichiers personnels\Images\Paysages\Paysage_(landscape)_wallpaper_HD_0024.jpg", UriKind.RelativeOrAbsolute)));
+                AddImage(new BitmapImage(
+                    new Uri(@"ftp://127.0.0.1:6784/resources/steve.png", UriKind.RelativeOrAbsolute)));
             }
         }
 

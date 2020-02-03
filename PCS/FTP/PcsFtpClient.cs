@@ -89,12 +89,13 @@ namespace PCS
             }
         }
 
-        public void UploadResource(string localFilePath, out string generatedFileName)
+        public void UploadResource(string localFilePath, out Uri generatedUri)
         {
             if (!PathExists(ResourcePath)) MakeDirectory(MessagePath);
             
-            generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
+            string generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
             string generatedFilePath = Path.Combine(ResourcePath, generatedFileName);
+            generatedUri = new Uri($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{generatedFilePath}");
 
             UploadFile(localFilePath, generatedFilePath);
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace PCS
@@ -10,9 +11,9 @@ namespace PCS
         public string ChannelTitle { get; set; }
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
-        public List<string> AttachedResources { get; }
+        public List<Resource> AttachedResources { get; }
 
-        public Message(string text, string channelTitle, DateTime dateTime, Member author, List<string> attachedFiles)
+        public Message(string text, string channelTitle, DateTime dateTime, Member author, List<Resource> attachedFiles)
         {
             Text = text;
             ChannelTitle = channelTitle;
@@ -33,8 +34,8 @@ namespace PCS
         {
             string resources = string.Empty;
             if (AttachedResources != null)
-                foreach (string attachedResource in AttachedResources)
-                    resources += attachedResource + " ; ";
+                foreach (Resource attachedResource in AttachedResources)
+                    resources += attachedResource.FtpUri.AbsoluteUri + " ; ";
 
             return $"Message from {Author} in {ChannelTitle} at {DateTime}: {Text}" 
                 + (HasNoResource() ? "" : "\nResources: " + resources);

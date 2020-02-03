@@ -125,7 +125,7 @@ namespace PCS.WPFClientInterface
                 "TESTCHANNEL",
                 DateTime.Now,
                 new Member("TESTER", 99999),
-                new List<string>() { @"C:\Users\Paul\Pictures\OpenGL-Wide.png" }
+                new List<Resource>() { new Resource(localPath: @"C:\Users\Paul\Pictures\OpenGL-Wide.png", type: ResourceType.Image) }
                 ));
         }
     }
