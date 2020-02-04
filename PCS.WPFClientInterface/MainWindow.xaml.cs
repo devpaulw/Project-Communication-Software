@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -25,6 +26,7 @@ namespace PCS.WPFClientInterface
     {
         private PcsClientAccessor clientAccessor = new PcsClientAccessor();
         private Member activeMember;
+        private List<Resource> attachedResources = new List<Resource>(); // Add it to a kind of messageField class but for sendmessage TB and send button...
 
         public MainWindow()
         {
@@ -72,11 +74,27 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(messageTextBox.Text, "Default"/*tmp*/, DateTime.Now, activeMember, null);
+            var message = new Message(messageTextBox.Text, "Default"/*tmp*/, DateTime.Now, activeMember, attachedResources);
             clientAccessor.SendMessage(message);
 
             messageTextBox.Text = string.Empty;
+            attachedResources = new List<Resource>();
         }
+
+        private void AddResourceButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Only images are accepted at this time.", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            string path = null;
+            var openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+
+            if (openFileDialog.ShowDialog() == true)
+                path = openFileDialog.FileName;
+
+            attachedResources.Add(new Resource(localPath: path, type: ResourceType.Image));
+        }
+
 
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -107,19 +125,26 @@ namespace PCS.WPFClientInterface
             ToggleDisconnectMenuItem();
             ToggleConnectMenuItem();
             ToggleSendMessageButton();
+            ToggleAddResourceButton();
         }
 
         private void ToggleSendMessageButton()
-            => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty && clientAccessor.IsConnected;
+            => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
+            && clientAccessor.IsConnected;
 
-        private void ToggleConnectMenuItem() 
+        private void ToggleAddResourceButton()
+            => addResourceButton.IsEnabled = clientAccessor.IsConnected;
+
+        private void ToggleConnectMenuItem()
             => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
 
-        private void ToggleDisconnectMenuItem() 
+        private void ToggleDisconnectMenuItem()
             => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
+            return;
+
             clientAccessor.SendMessage(new Message(
                 "TEST RESOURCE",
                 "TESTCHANNEL",
@@ -128,5 +153,6 @@ namespace PCS.WPFClientInterface
                 new List<Resource>() { new Resource(localPath: @"C:\Users\Paul\Pictures\OpenGL-Wide.png", type: ResourceType.Image) }
                 ));
         }
+
     }
 }

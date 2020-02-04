@@ -91,7 +91,7 @@ namespace PCS
 
         public void UploadResource(string localFilePath, out Uri generatedUri)
         {
-            if (!PathExists(ResourcePath)) MakeDirectory(MessagePath);
+            if (!PathExists(ResourcePath)) MakeDirectory(ResourcePath);
             
             string generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
             string generatedFilePath = Path.Combine(ResourcePath, generatedFileName);
