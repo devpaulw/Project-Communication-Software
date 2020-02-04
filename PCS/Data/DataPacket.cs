@@ -87,7 +87,6 @@ namespace PCS
                 member.ID.ToString(CultureInfo.CurrentCulture) 
             });
         }
-        
 
         private static string CreateDataPacket(string[] attributes)
         {
