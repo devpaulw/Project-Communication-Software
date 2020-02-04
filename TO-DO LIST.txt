@@ -1,0 +1,2 @@
+- automatic connect when start (but handle by user settings)
+- lock thread security system

@@ -25,8 +25,9 @@ namespace PCS.WPFClientInterface
     public partial class MainWindow : Window
     {
         private PcsClientAccessor clientAccessor = new PcsClientAccessor();
-        private Member activeMember;
         private List<Resource> attachedResources = new List<Resource>(); // Add it to a kind of messageField class but for sendmessage TB and send button...
+
+        public Member ActiveMember { get; private set; }
 
         public MainWindow()
         {
@@ -40,20 +41,22 @@ namespace PCS.WPFClientInterface
 
         private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var signInWindow = new SignInWindow();
+            var signInWindow = new ConnectionWindow(ref clientAccessor);
             signInWindow.ShowDialog();
 
-            if (signInWindow.TryMakeConnection(ref clientAccessor, out activeMember))
+            if (signInWindow.Connected)
             {
+                ActiveMember = signInWindow.SignedInMember;
+
                 clientAccessor.StartListenAsync( // Start get messages dynamically
                     delegate (Message message)
                     {
                         Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                            messageField.AddMessage(message));
+                            messageField.AddMessage(message, message.Author != ActiveMember, this));
                     });
 
                 foreach (var dailyMessage in clientAccessor.Ftp.GetDailyMessages(DateTime.Now)) // Get FTP Messages
-                    messageField.AddMessage(dailyMessage);
+                    messageField.AddMessage(dailyMessage, false, this);
 
                 ToggleAll();
             }
@@ -74,7 +77,7 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(messageTextBox.Text, "Default"/*tmp*/, DateTime.Now, activeMember, attachedResources);
+            var message = new Message(messageTextBox.Text, "Default"/*tmp*/, DateTime.Now, ActiveMember, attachedResources);
             clientAccessor.SendMessage(message);
 
             messageTextBox.Text = string.Empty;
@@ -143,6 +146,8 @@ namespace PCS.WPFClientInterface
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
+            PcsNotifier.Notify(this, null);
+
             return;
 
             clientAccessor.SendMessage(new Message(

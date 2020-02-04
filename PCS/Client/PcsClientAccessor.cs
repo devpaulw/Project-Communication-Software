@@ -22,15 +22,8 @@ namespace PCS
             AdapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
 
-            try
-            {
-                AdapteeSocket.Connect(endPoint);
-                Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
-            }
-            catch
-            {
-                throw;
-            }
+            AdapteeSocket.Connect(endPoint);
+            Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
 
             Ftp = new PcsFtpClient(ip);
 

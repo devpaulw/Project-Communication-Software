@@ -26,11 +26,14 @@ namespace PCS.WPFClientInterface
         {
             InitializeComponent();
 
-            fieldRtb.Document.Blocks.Clear();
+            Clear();
         }
 
-        public void AddMessage(Message message)
+        public void AddMessage(Message message, bool notify, MainWindow mainWindow) // TODO: mainWindow argument is weird for notify
         {
+            if (notify)
+                PcsNotifier.Notify(mainWindow, message);
+
             var appendParagraph = new Paragraph();
             appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
             appendParagraph.LineHeight = 3;

@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		Data Management.txt = Data Management.txt
 		FTP Server Handle.txt = FTP Server Handle.txt
+		TO-DO LIST.txt = TO-DO LIST.txt
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PCS.ServerAppCore", "PCS.ServerAppCore\PCS.ServerAppCore.csproj", "{5430FBE6-055E-4BF9-B176-AB10D316AEEF}"
