@@ -88,7 +88,7 @@ namespace PCS.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to P.C.S. FTP Server started {0}..
+        ///   Looks up a localized string similar to FTP Server started {0}..
         /// </summary>
         internal static string FtpStarted {
             get {
@@ -97,7 +97,7 @@ namespace PCS.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to P.C.S. Server started {0}..
+        ///   Looks up a localized string similar to Server started {0}..
         /// </summary>
         internal static string Started {
             get {

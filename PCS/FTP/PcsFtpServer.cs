@@ -14,7 +14,7 @@ namespace PCS
 {
     public class PcsFtpServer : IDisposable
     {
-        private static readonly string directory = Path.Combine(Path.GetTempPath(), "PcsFtpServer");
+        private const string Directory = @"./ftp_server/";
 
         private bool disposed;
         private readonly IFtpServerHost serverHost;
@@ -28,7 +28,7 @@ namespace PCS
 
             // use %TEMP%/TestFtpServer as root folder
             services.Configure<DotNetFileSystemOptions>(opt => opt
-                .RootPath = directory);
+                .RootPath = Directory);
 
             // Add FTP server services
             // DotNetFileSystemProvider = Use the .NET file system functionality

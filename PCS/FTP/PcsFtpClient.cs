@@ -12,29 +12,23 @@ namespace PCS
         private const string MessagePath = "./messages/";
         private const string ResourcePath = "./resources/";
 
-        private readonly IPAddress m_ip;
+        private readonly SdnFtpClient ftpClient;
 
         public PcsFtpClient(IPAddress ip)
         {
-            if (ip == null) throw new ArgumentNullException(nameof(ip));
-            else
-                m_ip = ip;
+            ftpClient = new SdnFtpClient(ip, PcsFtpServer.Port);
         }
 
         public void SaveMessage(Message message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            if (!PathExists(MessagePath)) MakeDirectory(MessagePath); 
+            if (!ftpClient.DirectoryExists(MessagePath)) ftpClient.MakeDirectory(MessagePath); 
 
             string path = GetPathFromDate(message.DateTime);
 
-            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
-            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs"); // DOLATER: Find cleaner, use passwords, and SSL
-            request.Method = WebRequestMethods.Ftp.AppendFile;
-
-            using (var requestStream = request.GetRequestStream())
-            using (var writer = new StreamWriter(requestStream, PcsServer.Encoding))
+            using (var appendStream = ftpClient.GetAppendStream(path))
+            using (var writer = new StreamWriter(appendStream, PcsServer.Encoding))
             {
                 var messagePacket = DataPacket.FromMessage(message);
                 writer.WriteLine(messagePacket);
@@ -45,17 +39,11 @@ namespace PCS
         {
             string path = GetPathFromDate(day);
 
-            if (!PathExists(MessagePath)) MakeDirectory(MessagePath);
-            if (!FileExists(path)) CreateFile(path);
+            if (!ftpClient.DirectoryExists(MessagePath)) ftpClient.MakeDirectory(MessagePath);
+            if (!ftpClient.FileExists(path)) ftpClient.CreateFile(path);
 
-            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
-            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
-            request.Method = WebRequestMethods.Ftp.DownloadFile;
-
-            var response = request.GetResponse() as FtpWebResponse;
-
-            using (var responseStream = response.GetResponseStream())
-            using (var reader = new StreamReader(responseStream, PcsServer.Encoding))
+            using (var downloadStream = ftpClient.GetDownloadStream(path))
+            using (var reader = new StreamReader(downloadStream, PcsServer.Encoding))
             {
                 var textMessages = GetTextMessages(reader.ReadToEnd());
 
@@ -91,33 +79,11 @@ namespace PCS
 
         public void UploadResource(string localFilePath, out Uri generatedUri)
         {
-            if (!PathExists(ResourcePath)) MakeDirectory(ResourcePath);
-            
             string generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
             string generatedFilePath = Path.Combine(ResourcePath, generatedFileName);
-            generatedUri = new Uri($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{generatedFilePath}");
+            generatedUri = new Uri($"ftp://{ftpClient.IP.MapToIPv4()}:{PcsFtpServer.Port}/{generatedFilePath}");
 
-            UploadFile(localFilePath, generatedFilePath);
-        }
-
-        public void UploadFile(string localFilePath, string path)
-        {
-            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
-            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs"); // DOLATER: Find cleaner, use passwords, and SSL
-            request.Method = WebRequestMethods.Ftp.UploadFile;
-
-            byte[] buffer;
-
-            using (FileStream stream = File.OpenRead(localFilePath))
-            {
-                buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, buffer.Length);
-            }
-
-            using (var requestStream = request.GetRequestStream())
-            {
-                requestStream.Write(buffer, 0, buffer.Length);
-            }
+            ftpClient.UploadFile(localFilePath, generatedFilePath);
         }
 
         private static string GetPathFromDate(DateTime date)
@@ -132,60 +98,6 @@ namespace PCS
             path += extension;
 
             return path;
-        }
-
-        private void MakeDirectory(string path)
-        {
-            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
-            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
-            request.Method = WebRequestMethods.Ftp.MakeDirectory;
-            request.GetResponse();
-
-        }
-
-        private void CreateFile(string path)
-        {
-            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
-            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
-            request.Method = WebRequestMethods.Ftp.UploadFile;
-            request.GetRequestStream().Close();
-            request.GetResponse().Close();
-        }
-
-        private bool PathExists(string path)
-        {
-            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
-            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
-            request.Method = WebRequestMethods.Ftp.ListDirectory;
-
-            try
-            {
-                request.GetResponse();
-
-                return true; // The file exists because there are not errors when wishing get infos of it
-            }
-            catch (WebException)
-            {
-                return false;
-            }
-        }
-
-        private bool FileExists(string path)
-        {
-            var request = WebRequest.Create($"ftp://{m_ip.MapToIPv4()}:{PcsFtpServer.Port}/{path}") as FtpWebRequest;
-            request.Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs");
-            request.Method = WebRequestMethods.Ftp.GetFileSize;
-
-            try
-            {
-                request.GetResponse();
-
-                return true;
-            }
-            catch (WebException)
-            {
-                return false;
-            }
         }
     }
 }

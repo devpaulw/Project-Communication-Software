@@ -7,6 +7,8 @@ namespace PCS.ServerAppCore
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("P.C.S. Server Core - Version 0.2");
+
             Console.Write("SERVER ADDRESS: ");
             var serverAddress = IPAddress.Parse(Console.ReadLine());
 
