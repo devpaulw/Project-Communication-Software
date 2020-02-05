@@ -6,45 +6,46 @@
         xmlns:local="clr-namespace:PCS.WPFClientInterface"
         mc:Ignorable="d"
         ResizeMode="CanMinimize"
-        Title="Project Communication Software" Height="720" Width="900" Loaded="Window_Loaded" Closing="Window_Closing">
-    <Window.Background>
-        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
-            <GradientStop Color="#FF616161" Offset="1"/>
-            <GradientStop Color="White"/>
-        </LinearGradientBrush>
-    </Window.Background>
+        Title="Project Communication Software" Height="679.5" Width="1050" Loaded="Window_Loaded" Closing="Window_Closing">
+	<Window.Background>
+		<LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+			<GradientStop Color="#FF616161" Offset="1"/>
+			<GradientStop Color="White"/>
+		</LinearGradientBrush>
+	</Window.Background>
 
-    <Grid Margin="0,0,2,10">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="249*"/>
-            <ColumnDefinition Width="74*"/>
-            <ColumnDefinition Width="76*"/>
-            <ColumnDefinition Width="54*"/>
-            <ColumnDefinition Width="77*"/>
-            <ColumnDefinition Width="362*"/>
-        </Grid.ColumnDefinitions>
-        <Menu VerticalAlignment="Top" Height="25" Grid.ColumnSpan="6">
-            <MenuItem Header="_File" Height="25" FontSize="13">
-                <!--<Separator />-->
-                <MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
-            </MenuItem>
-            <MenuItem Header="_Server" Height="25" FontSize="13">
-                <MenuItem x:Name="connectMenuItem" Header="_Connect" Click="ConnectMenuItem_Click" />
-                <MenuItem x:Name="disconnectMenuItem" Header="_Disconnect" Click="DisconnectMenuItem_Click" />
-                <!--<Separator />-->
-            </MenuItem>
-            <MenuItem Header="_Help" Height="25" FontSize="13">
-                <MenuItem x:Name="aboutMenuItem" Header="_About P.C.S." Click="AboutMenuItem_Click" />
-                <!--<Separator />-->
-            </MenuItem>
-        </Menu>
+	<Grid Margin="0,0,46,10">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="249*"/>
+			<ColumnDefinition Width="74*"/>
+			<ColumnDefinition Width="76*"/>
+			<ColumnDefinition Width="54*"/>
+			<ColumnDefinition Width="77*"/>
+			<ColumnDefinition Width="362*"/>
+		</Grid.ColumnDefinitions>
+		<Menu VerticalAlignment="Top" Height="25" Grid.ColumnSpan="6">
+			<MenuItem Header="_File" Height="25" FontSize="13">
+				<!--<Separator />-->
+				<MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
+			</MenuItem>
+			<MenuItem Header="_Server" Height="25" FontSize="13">
+				<MenuItem x:Name="connectMenuItem" Header="_Connect" Click="ConnectMenuItem_Click" />
+				<MenuItem x:Name="disconnectMenuItem" Header="_Disconnect" Click="DisconnectMenuItem_Click" />
+				<!--<Separator />-->
+			</MenuItem>
+			<MenuItem Header="_Help" Height="25" FontSize="13">
+				<MenuItem x:Name="aboutMenuItem" Header="_About P.C.S." Click="AboutMenuItem_Click" />
+				<!--<Separator />-->
+			</MenuItem>
+		</Menu>
 
-        <local:MessageField x:Name="messageField" Margin="10,30,10,111" RenderTransformOrigin="0.479,0.299" Grid.ColumnSpan="6" />
-        <TextBox x:Name="messageTextBox" HorizontalAlignment="Right" VerticalAlignment="Top" Height="106" Width="687" TextWrapping="Wrap"  Grid.ColumnSpan="6" RenderTransformOrigin="0.041,0.63" Margin="0,575,179,0" TextChanged="MessageTextBox_TextChanged"/>
-        <Button x:Name="sendMessageButton" IsDefault="True" Content="Send message" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142"  Height="40" Grid.Column="5" Margin="188,575,0,0" Click="SendMessageButton_Click" IsEnabled="False"/>
-        <Button x:Name="testButton" Content="Test Button (experimental)" Grid.Column="5" HorizontalAlignment="Left" Height="21" Margin="188,660,0,0" VerticalAlignment="Top" Width="142" Click="TestButton_Click"/>
-        <Button x:Name="addResourceButton" Content="Add Resource" Grid.Column="5" HorizontalAlignment="Left" Height="35" Margin="188,620,0,0" VerticalAlignment="Top" Width="142" Click="AddResourceButton_Click"/>
+		<local:MessageField x:Name="messageField" Margin="182,30,-32,0" RenderTransformOrigin="0.479,0.299" Grid.ColumnSpan="6" Loaded="messageField_Loaded" Height="495" VerticalAlignment="Top" />
+		<TextBox x:Name="messageTextBox" TextWrapping="Wrap"  Grid.ColumnSpan="6" RenderTransformOrigin="0.041,0.63" Margin="182,530,115,0" TextChanged="MessageTextBox_TextChanged" Height="110" VerticalAlignment="Top"/>
+		<Button x:Name="sendMessageButton" IsDefault="True" Content="Send message" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142"  Height="40" Grid.Column="5" Margin="295,530,-32,0" Click="SendMessageButton_Click" IsEnabled="False"/>
+		<Button x:Name="testButton" Content="Test Button (experimental)" Grid.Column="5" HorizontalAlignment="Left" Height="25" Margin="295,615,-32,0" VerticalAlignment="Top" Width="142" Click="TestButton_Click"/>
+		<Button x:Name="addResourceButton" Content="Add Resource" Grid.Column="5" HorizontalAlignment="Left" Height="35" Margin="295,575,-32,0" VerticalAlignment="Top" Width="142" Click="AddResourceButton_Click"/>
+		<ListBox x:Name="ChannelList" HorizontalAlignment="Left" Height="495" Margin="10,30,0,0" VerticalAlignment="Top" Width="172" SelectionChanged="ChannelList_SelectionChanged"/>
 
-    </Grid>
+	</Grid>
 
 </Window>

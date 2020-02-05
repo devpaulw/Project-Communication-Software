@@ -26,6 +26,7 @@ namespace PCS.WPFClientInterface
     {
         private PcsClientAccessor clientAccessor = new PcsClientAccessor();
         private List<Resource> attachedResources = new List<Resource>(); // Add it to a kind of messageField class but for sendmessage TB and send button...
+        private string focusedChannelName;
 
         public Member ActiveMember { get; private set; }
 
@@ -59,6 +60,11 @@ namespace PCS.WPFClientInterface
                     messageField.AddMessage(dailyMessage, false, this);
 
                 ToggleAll();
+
+                // TODO receive the channels from the server
+                ChannelList.Items.Add("channel1");
+                ChannelList.Items.Add("channel2");
+                focusedChannelName = ChannelList.Items[0].ToString();
             }
         }
 
@@ -77,7 +83,7 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(messageTextBox.Text, "Default"/*tmp*/, DateTime.Now, ActiveMember, attachedResources);
+            var message = new Message(messageTextBox.Text, focusedChannelName, DateTime.Now, ActiveMember, attachedResources);
             clientAccessor.SendMessage(message);
 
             messageTextBox.Text = string.Empty;
@@ -159,5 +165,14 @@ namespace PCS.WPFClientInterface
                 ));
         }
 
+        private void messageField_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            focusedChannelName = ChannelList.SelectedItem.ToString();
+        }
     }
 }
