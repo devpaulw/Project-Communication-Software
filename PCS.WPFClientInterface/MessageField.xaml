@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="415.417" d:DesignHeight="308.916" >
     <Grid>
 
-        <RichTextBox x:Name="fieldRtb" IsReadOnly="True" Background="#BF000000" Foreground="White" VerticalScrollBarVisibility="Visible" Grid.ColumnSpan="2" Grid.RowSpan="2"></RichTextBox>
+        <RichTextBox x:Name="fieldRtb" IsReadOnly="True" Background="#BF000000" Foreground="White" VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Bottom" Grid.ColumnSpan="2" Grid.RowSpan="2"></RichTextBox>
 
     </Grid>
 </UserControl>

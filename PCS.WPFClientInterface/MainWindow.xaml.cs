@@ -26,7 +26,7 @@ namespace PCS.WPFClientInterface
     {
         private PcsClientAccessor clientAccessor = new PcsClientAccessor();
         private List<Resource> attachedResources = new List<Resource>(); // Add it to a kind of messageField class but for sendmessage TB and send button...
-        private string focusedChannelName;
+        private string focusedChannelName; // SDNMSG: I advise you do a UserControl like the MessageField example
 
         public Member ActiveMember { get; private set; }
 
@@ -49,15 +49,18 @@ namespace PCS.WPFClientInterface
             {
                 ActiveMember = signInWindow.SignedInMember;
 
-                clientAccessor.StartListenAsync( // Start get messages dynamically
-                    delegate (Message message)
-                    {
-                        Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                            messageField.AddMessage(message, message.Author != ActiveMember, this));
-                    });
+                clientAccessor.StartListenAsync((Message message) => // Start get messages dynamically
+                {
+                    Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+                        messageField.AddMessage(message, () =>
+                        {
+                            if (message.Author != ActiveMember)
+                                PcsNotifier.Notify(this, message); // Notify when it's not us
+                        }));
+                });
 
                 foreach (var dailyMessage in clientAccessor.Ftp.GetDailyMessages(DateTime.Now)) // Get FTP Messages
-                    messageField.AddMessage(dailyMessage, false, this);
+                    messageField.AddMessage(dailyMessage, () => { });
 
                 ToggleAll();
 
@@ -99,8 +102,10 @@ namespace PCS.WPFClientInterface
             MessageBox.Show("Only images are accepted at this time.", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
 
             string path = null;
-            var openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"
+            };
 
             if (openFileDialog.ShowDialog() == true)
                 path = openFileDialog.FileName;
@@ -156,22 +161,19 @@ namespace PCS.WPFClientInterface
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            PcsNotifier.Notify(this, null);
+            testButton.IsEnabled = false;
 
-            return;
+            //PcsNotifier.Notify(this, null);
 
-            clientAccessor.SendMessage(new Message(
-                "TEST RESOURCE",
-                "TESTCHANNEL",
-                DateTime.Now,
-                new Member("TESTER", 99999),
-                new List<Resource>() { new Resource(localPath: @"C:\Users\Paul\Pictures\OpenGL-Wide.png", type: ResourceType.Image) }
-                ));
-        }
+            //return;
 
-        private void messageField_Loaded(object sender, RoutedEventArgs e)
-        {
-
+            //clientAccessor.SendMessage(new Message(
+            //    "TEST RESOURCE",
+            //    "TESTCHANNEL",
+            //    DateTime.Now,
+            //    new Member("TESTER", 99999),
+            //    new List<Resource>() { new Resource(localPath: @"C:\Users\Paul\Pictures\OpenGL-Wide.png", type: ResourceType.Image) }
+            //    ));
         }
 
         private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)

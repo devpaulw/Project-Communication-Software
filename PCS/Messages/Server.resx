@@ -127,9 +127,9 @@
     <value>{0} sent from channel {1} at {2}: {3}</value>
   </data>
   <data name="FtpStarted" xml:space="preserve">
-    <value>P.C.S. FTP Server started {0}.</value>
+    <value>FTP Server started {0}.</value>
   </data>
   <data name="Started" xml:space="preserve">
-    <value>P.C.S. Server started {0}.</value>
+    <value>Server started {0}.</value>
   </data>
 </root>

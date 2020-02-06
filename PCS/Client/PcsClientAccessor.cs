@@ -73,8 +73,8 @@ namespace PCS
             {
                 for (int i = 0; i < message.AttachedResources.Count; i++) // Transition of local path to ftp path
                 {
-                    Ftp.UploadResource(message.AttachedResources[i].LocalPath, out Uri generatedFtpUri);
-                    message.AttachedResources[i].FtpUri = generatedFtpUri;
+                    Ftp.UploadResource(message.AttachedResources[i].LocalPath, out string generatedFileName);
+                    message.AttachedResources[i].RemoteFileName = generatedFileName;
                 }
             }
 
