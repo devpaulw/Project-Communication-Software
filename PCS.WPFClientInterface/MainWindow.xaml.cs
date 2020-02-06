@@ -78,6 +78,10 @@ namespace PCS.WPFClientInterface
         {
             clientAccessor.Disconnect();
             messageField.Clear();
+            
+            focusedChannelName = null;
+            ChannelList.Items.Clear();
+
             ToggleAll();
         }
 
