@@ -112,6 +112,7 @@ namespace PCS
                 if (disposing)
                 {
                     listener.Dispose();
+                    ftpClient.Dispose();
                 }
 
                 disposed = true;

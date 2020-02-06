@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentFTP;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -7,27 +8,32 @@ using System.Text;
 
 namespace PCS
 {
-    public class PcsFtpClient
+    // TODO: This same class but with System.IO copied to the local machine, there will be an interface, and the Client Accessor will save data to same directories of FTP server by copied constants ; The FtpClient of Accessor will be private now
+    public class PcsFtpClient : IDisposable
     {
-        private const string MessagePath = "./messages/";
-        private const string ResourcePath = "./resources/";
-
-        private readonly SdnFtpClient ftpClient;
+        private readonly FtpClient ftpClient;
 
         public PcsFtpClient(IPAddress ip)
         {
-            ftpClient = new SdnFtpClient(ip, PcsFtpServer.Port);
+            ftpClient = new FtpClient
+            {
+                Host = ip.MapToIPv4().ToString() ?? throw new ArgumentNullException(nameof(ip)),
+                Port = PcsFtpServer.Port,
+                Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs")
+            };
+            ftpClient.Connect();
         }
 
         public void SaveMessage(Message message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
 
-            if (!ftpClient.DirectoryExists(MessagePath)) ftpClient.MakeDirectory(MessagePath); 
+            string remotePath = GetPathFromDate(message.DateTime);
 
-            string path = GetPathFromDate(message.DateTime);
+            CreateMissingDirectories(remotePath, true);
 
-            using (var appendStream = ftpClient.GetAppendStream(path))
+            using (var appendStream = ftpClient.OpenAppend(remotePath))
             using (var writer = new StreamWriter(appendStream, PcsServer.Encoding))
             {
                 var messagePacket = DataPacket.FromMessage(message);
@@ -37,22 +43,23 @@ namespace PCS
 
         public IEnumerable<Message> GetDailyMessages(DateTime day)
         {
-            string path = GetPathFromDate(day);
+            string remotePath = GetPathFromDate(day);
 
-            if (!ftpClient.DirectoryExists(MessagePath)) ftpClient.MakeDirectory(MessagePath);
-            if (!ftpClient.FileExists(path)) ftpClient.CreateFile(path);
+            CreateMissingDirectories(remotePath, true);
+            if (!ftpClient.FileExists(remotePath))
+                yield break;
 
-            using (var downloadStream = ftpClient.GetDownloadStream(path))
-            using (var reader = new StreamReader(downloadStream, PcsServer.Encoding))
+            ftpClient.Download(out byte[] buffer, remotePath);
+
+            string fileContent = PcsServer.Encoding.GetString(buffer, 0, buffer.Length);
+
+            var textMessages = GetTextMessages(fileContent);
+
+            foreach (string textMessage in textMessages)
             {
-                var textMessages = GetTextMessages(reader.ReadToEnd());
+                var dataPacket = new DataPacket(textMessage, DataPacketType.ServerMessage);
 
-                foreach (string textMessage in textMessages)
-                {
-                    var dataPacket = new DataPacket(textMessage, DataPacketType.ServerMessage);
-
-                    yield return dataPacket.GetMessage();
-                }
+                yield return dataPacket.GetMessage();
             }
 
             IEnumerable<string> GetTextMessages(string fullText)
@@ -77,13 +84,42 @@ namespace PCS
             }
         }
 
-        public void UploadResource(string localFilePath, out Uri generatedUri)
+        public void UploadResource(string localFilePath, out string generatedFileName)
         {
-            string generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
-            string generatedFilePath = Path.Combine(ResourcePath, generatedFileName);
-            generatedUri = new Uri($"ftp://{ftpClient.IP.MapToIPv4()}:{PcsFtpServer.Port}/{generatedFilePath}");
+            generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
+            string generatedRemotePath = Path.Combine(PcsFtpServer.ResourcePath, generatedFileName);
 
-            ftpClient.UploadFile(localFilePath, generatedFilePath);
+            CreateMissingDirectories(generatedRemotePath, true);
+
+            ftpClient.UploadFile(localFilePath, generatedRemotePath);
+        }
+
+        private void CreateMissingDirectories(string remotePath, bool isFilePath)
+        {
+            var parentDirs = new List<string>(GetParentDirectories());
+            parentDirs.Reverse();
+
+            foreach (var parentDir in parentDirs)
+            {
+                if (!ftpClient.DirectoryExists(parentDir))
+                    ftpClient.CreateDirectory(parentDir);
+            }
+
+            IEnumerable<string> GetParentDirectories()
+            {
+                string directory = remotePath;
+
+                if (!isFilePath)
+                    yield return remotePath;
+
+                while (!string.IsNullOrEmpty(directory))
+                {
+                    directory = Path.GetDirectoryName(directory);
+
+                    if (!string.IsNullOrEmpty(directory))
+                        yield return directory;
+                }
+            }
         }
 
         private static string GetPathFromDate(DateTime date)
@@ -91,13 +127,36 @@ namespace PCS
             string path = string.Empty;
             string extension = ".txt";
 
-            path += MessagePath;
             path += date.Year;
             path += date.Month.ToString(CultureInfo.CurrentCulture).PadLeft(2, '0');
             path += date.Day.ToString(CultureInfo.CurrentCulture).PadLeft(2, '0');
             path += extension;
+            path = Path.Combine(PcsFtpServer.MessagePath, path);
 
             return path;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    ftpClient.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }

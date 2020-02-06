@@ -35,7 +35,7 @@ namespace PCS
             string resources = string.Empty;
             if (AttachedResources != null)
                 foreach (Resource attachedResource in AttachedResources)
-                    resources += attachedResource.FtpUri.AbsoluteUri + " ; ";
+                    resources += attachedResource.RemoteFileName + " ; ";
 
             return $"Message from {Author} in {ChannelTitle} at {DateTime}: {Text}" 
                 + (HasNoResource() ? "" : "\nResources: " + resources);

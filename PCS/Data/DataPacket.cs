@@ -55,8 +55,7 @@ namespace PCS
 
             foreach (string attachedFile in m_attributes.Skip(5))
                 if (!string.IsNullOrEmpty(attachedFile)) // DOLATER: Remove that and instead don't take after end of text in Split
-                    attachedFiles.Add(new Resource(ftpUri: 
-                        new Uri(attachedFile)));
+                    attachedFiles.Add(new Resource(remoteFileName: attachedFile));
 
             var author = new Member(username, id);
 
@@ -75,7 +74,7 @@ namespace PCS
 
             if (message.AttachedResources != null) // If there are any resource, add them
                 attributes = attributes.Concat(from resourceUri in message.AttachedResources 
-                                               select resourceUri.FtpUri.AbsoluteUri).ToArray();
+                                               select resourceUri.RemoteFileName).ToArray();
 
             return CreateDataPacket(attributes);
         }

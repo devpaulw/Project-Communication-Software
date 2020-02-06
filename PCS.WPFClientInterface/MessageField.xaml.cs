@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,10 +30,9 @@ namespace PCS.WPFClientInterface
             Clear();
         }
 
-        public void AddMessage(Message message, bool notify, MainWindow mainWindow) // TODO: mainWindow argument is weird for notify
+        public void AddMessage(Message message, Action notify)
         {
-            if (notify)
-                PcsNotifier.Notify(mainWindow, message);
+            notify();
 
             var appendParagraph = new Paragraph();
             appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelTitle}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
@@ -42,9 +42,10 @@ namespace PCS.WPFClientInterface
 
             if (message.AttachedResources != null)
             {
-                foreach (Resource attachedResource in message.AttachedResources)
-                    if (attachedResource.Type == ResourceType.Image)
-                        AddImage(new BitmapImage(attachedResource.FtpUri));
+                // TODO Waiting local
+                //foreach (Resource attachedResource in message.AttachedResources)
+                //    if (attachedResource.Type == ResourceType.Image)
+                //        AddImage(new BitmapImage(new Uri($"ftp://{ipAddress}:{PcsFtpServer.Port}/{PcsFtpServer.ResourcePath}/{attachedResource.RemoteFileName}"))); // TEMP
             }
 
             ScrollToEnd();

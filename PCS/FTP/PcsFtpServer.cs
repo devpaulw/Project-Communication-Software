@@ -14,11 +14,12 @@ namespace PCS
 {
     public class PcsFtpServer : IDisposable
     {
-        private const string Directory = @"./ftp_server/";
-
         private bool disposed;
         private readonly IFtpServerHost serverHost;
 
+        public const string Directory = @"./ftp_server/";
+        public const string MessagePath = "messages"; // TODO: It's to the server to do that
+        public const string ResourcePath = "resources";
         public const ushort Port = 6784;
 
         public PcsFtpServer(IPAddress serverAddress)
