@@ -6,3 +6,6 @@
 - Channels folders (BB)
 - WPF resize ability
 - Settings page (e.g. with enable automatic connecion)
+
+FOUND BUGS:
+- With the linux server core, the WPF client can't disconnect and then reconnect

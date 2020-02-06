@@ -15,9 +15,12 @@ namespace PCS
 
         public PcsFtpClient(IPAddress ip)
         {
+            if (ip == null)
+                throw new ArgumentNullException(nameof(ip));
+
             ftpClient = new FtpClient
             {
-                Host = ip.MapToIPv4().ToString() ?? throw new ArgumentNullException(nameof(ip)),
+                Host = ip.MapToIPv4().ToString(),
                 Port = PcsFtpServer.Port,
                 Credentials = new NetworkCredential("anonymous", "pcs@pcs.pcs")
             };
