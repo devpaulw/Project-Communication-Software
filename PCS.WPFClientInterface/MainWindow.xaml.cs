@@ -24,7 +24,7 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        private PcsClientAccessor clientAccessor = new PcsClientAccessor();
+        private PcsClientAccessor clientAccessor = new PcsClientAccessor(@"files");
         private List<Resource> attachedResources = new List<Resource>(); // Add it to a kind of messageField class but for sendmessage TB and send button...
         private string focusedChannelName; // SDNMSG: I advise you do a UserControl like the MessageField example
 
@@ -52,14 +52,10 @@ namespace PCS.WPFClientInterface
                 clientAccessor.StartListenAsync((Message message) => // Start get messages dynamically
                 {
                     Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                        messageField.AddMessage(message, () =>
-                        {
-                            if (message.Author != ActiveMember)
-                                PcsNotifier.Notify(this, message); // Notify when it's not us
-                        }));
+                        messageField.AddMessage(message, () => Notify(message)));
                 });
 
-                foreach (var dailyMessage in clientAccessor.Ftp.GetDailyMessages(DateTime.Now)) // Get FTP Messages
+                foreach (var dailyMessage in clientAccessor.GetDailyMessages(DateTime.Now)) // Get FTP Messages
                     messageField.AddMessage(dailyMessage, () => { });
 
                 ToggleAll();
@@ -68,6 +64,12 @@ namespace PCS.WPFClientInterface
                 ChannelList.Items.Add("channel1");
                 ChannelList.Items.Add("channel2");
                 focusedChannelName = ChannelList.Items[0].ToString();
+            }
+
+            void Notify(Message message)
+            {
+                if (message.Author != ActiveMember)
+                    PcsNotifier.Notify(this, message); // Notify when it's not us
             }
         }
 
@@ -99,7 +101,7 @@ namespace PCS.WPFClientInterface
 
         private void AddResourceButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Only images are accepted at this time.", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
+            //MessageBox.Show("Only images are accepted at this time.", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
 
             string path = null;
             var openFileDialog = new OpenFileDialog

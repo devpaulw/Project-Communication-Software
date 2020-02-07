@@ -87,14 +87,20 @@ namespace PCS
             }
         }
 
-        public void UploadResource(string localFilePath, out string generatedFileName)
+        public void UploadResource(string localFilePath, out string generatedRemoteFileName)
         {
-            generatedFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
-            string generatedRemotePath = Path.Combine(PcsFtpServer.ResourcePath, generatedFileName);
+            generatedRemoteFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
+            string generatedRemotePath = Path.Combine(PcsFtpServer.ResourcePath, generatedRemoteFileName);
 
             CreateMissingDirectories(generatedRemotePath, true);
 
             ftpClient.UploadFile(localFilePath, generatedRemotePath);
+        }
+
+        public void DownloadResource(string remoteFileName, string localFilePath)
+        {
+            ftpClient.DownloadFile(localFilePath,
+                Path.Combine(PcsFtpServer.ResourcePath, remoteFileName));
         }
 
         private void CreateMissingDirectories(string remotePath, bool isFilePath)

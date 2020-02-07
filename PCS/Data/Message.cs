@@ -21,13 +21,13 @@ namespace PCS
             DateTime = dateTime;
             AttachedResources = attachedFiles;
 
-            if (HasEmptyField()) throw new MessageEmptyFieldException(Messages.Exceptions.MessageEmptyField);
+            if (HasEmptyField) throw new MessageEmptyFieldException(Messages.Exceptions.MessageEmptyField);
         }
 
-        public bool HasEmptyField()
+        public bool HasEmptyField
             => string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(ChannelTitle);
 
-        public bool HasNoResource()
+        public bool HasNoResource
             => AttachedResources == null || AttachedResources.Count == 0;
 
         public override string ToString()
@@ -38,7 +38,7 @@ namespace PCS
                     resources += attachedResource.RemoteFileName + " ; ";
 
             return $"Message from {Author} in {ChannelTitle} at {DateTime}: {Text}" 
-                + (HasNoResource() ? "" : "\nResources: " + resources);
+                + (HasNoResource ? "" : "\nResources: " + resources);
         }
     }
 }

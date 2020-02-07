@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,9 +12,15 @@ namespace PCS
     public class PcsClientAccessor : PcsClient
     {
         private Thread serverListenThread;
+        private PcsFtpClient ftp;
 
-        public PcsFtpClient Ftp { get; private set; }
+        public string ReceiveStorePath { get; }
         public bool IsConnected { get; private set; }
+
+        public PcsClientAccessor(string receiveStorePath)
+        {
+            ReceiveStorePath = receiveStorePath ?? throw new ArgumentNullException(nameof(receiveStorePath));
+        }
 
         public void Connect(IPAddress ip, Member member)
         {
@@ -25,13 +32,14 @@ namespace PCS
             AdapteeSocket.Connect(endPoint);
             Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
 
-            Ftp = new PcsFtpClient(ip);
+            ftp = new PcsFtpClient(ip);
 
             SignIn();
 
             void SignIn()
             {
-                if (member == null) throw new ArgumentNullException(nameof(member));
+                if (member == null)
+                    throw new ArgumentNullException(nameof(member));
 
                 Send(Flags.ClientSignIn + DataPacket.FromMember(member));
 
@@ -39,6 +47,12 @@ namespace PCS
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messageReceived">
+        /// Receive a message with filled LocalFilePath for possible attached resources.
+        /// </param>
         public void StartListenAsync(Action<Message> messageReceived)
         {
             if (!IsConnected)
@@ -52,12 +66,17 @@ namespace PCS
                 while (true)
                 {
                     string receivedData = Receive();
+
                     var dataPacket = new DataPacket(receivedData);
 
-                    if (dataPacket.Type == DataPacketType.ServerMessage)
-                        messageReceived(dataPacket.GetMessage());
-                    else
+                    var gotMessage = dataPacket.GetMessage();
+
+                    if (dataPacket.Type != DataPacketType.ServerMessage)
                         throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
+
+                    gotMessage = GetLocalResources(gotMessage); // DOLATER: Handle better save messages on the PC, not just resources
+
+                    messageReceived(gotMessage);
                 }
             }
         }
@@ -69,16 +88,26 @@ namespace PCS
 
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            if (message.AttachedResources != null)
+            if (!message.HasNoResource)
             {
                 for (int i = 0; i < message.AttachedResources.Count; i++) // Transition of local path to ftp path
                 {
-                    Ftp.UploadResource(message.AttachedResources[i].LocalPath, out string generatedFileName);
+                    ftp.UploadResource(message.AttachedResources[i].LocalPath, out string generatedFileName);
                     message.AttachedResources[i].RemoteFileName = generatedFileName;
                 }
             }
 
             Send(Flags.ClientMessage + DataPacket.FromMessage(message));
+        }
+
+        public IEnumerable<Message> GetDailyMessages(DateTime day)
+        {
+            var dailyMessages = new List<Message>(ftp.GetDailyMessages(day));
+
+            for (int i = 0; i < dailyMessages.Count; i++)
+                dailyMessages[i] = GetLocalResources(dailyMessages[i]); // TODO Not clean
+
+            return dailyMessages;
         }
 
         public override void Disconnect()
@@ -101,6 +130,24 @@ namespace PCS
             {
                 base.Dispose(disposing);
             }
+        }
+
+        private Message GetLocalResources(Message message)
+        {
+            if (!message.HasNoResource)
+            {
+                for (int i = 0; i < message.AttachedResources.Count; i++)
+                {
+                    string localPath = Path.Combine(ReceiveStorePath, message.AttachedResources[i].RemoteFileName);
+                    
+                    if (!File.Exists(localPath))
+                        ftp.DownloadResource(message.AttachedResources[i].RemoteFileName, localPath);
+                    
+                    message.AttachedResources[i].LocalPath = localPath;
+                }
+            }
+
+            return message;
         }
     }
 }

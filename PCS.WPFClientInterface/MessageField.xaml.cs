@@ -40,12 +40,11 @@ namespace PCS.WPFClientInterface
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
 
-            if (message.AttachedResources != null)
+            if (!message.HasNoResource)
             {
-                // TODO Waiting local
-                //foreach (Resource attachedResource in message.AttachedResources)
-                //    if (attachedResource.Type == ResourceType.Image)
-                //        AddImage(new BitmapImage(new Uri($"ftp://{ipAddress}:{PcsFtpServer.Port}/{PcsFtpServer.ResourcePath}/{attachedResource.RemoteFileName}"))); // TEMP
+                foreach (Resource attachedResource in message.AttachedResources)
+                    if (attachedResource.Type == ResourceType.Image)
+                        AddImage(new BitmapImage(new Uri(System.IO.Path.GetFullPath(attachedResource.LocalPath))));
             }
 
             ScrollToEnd();
