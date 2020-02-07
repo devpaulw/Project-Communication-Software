@@ -26,8 +26,6 @@ namespace PCS.WPFClientInterface
     {
         private PcsClientAccessor clientAccessor = new PcsClientAccessor();
         private List<Resource> attachedResources = new List<Resource>(); // Add it to a kind of messageField class but for sendmessage TB and send button...
-        private string focusedChannelName; // SDNMSG: I advise you do a UserControl like the MessageField example
-
         public Member ActiveMember { get; private set; }
 
         public MainWindow()
@@ -62,12 +60,8 @@ namespace PCS.WPFClientInterface
                 foreach (var dailyMessage in clientAccessor.Ftp.GetDailyMessages(DateTime.Now)) // Get FTP Messages
                     messageField.AddMessage(dailyMessage, () => { });
 
+                channelSelector.Initialize();
                 ToggleAll();
-
-                // TODO receive the channels from the server
-                ChannelList.Items.Add("channel1");
-                ChannelList.Items.Add("channel2");
-                focusedChannelName = ChannelList.Items[0].ToString();
             }
         }
 
@@ -81,16 +75,15 @@ namespace PCS.WPFClientInterface
         {
             clientAccessor.Disconnect();
             messageField.Clear();
-            
-            focusedChannelName = null;
-            ChannelList.Items.Clear();
+
+            channelSelector.Clear();
 
             ToggleAll();
         }
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(messageTextBox.Text, focusedChannelName, DateTime.Now, ActiveMember, attachedResources);
+            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel, DateTime.Now, ActiveMember, attachedResources);
             clientAccessor.SendMessage(message);
 
             messageTextBox.Text = string.Empty;
@@ -174,11 +167,6 @@ namespace PCS.WPFClientInterface
             //    new Member("TESTER", 99999),
             //    new List<Resource>() { new Resource(localPath: @"C:\Users\Paul\Pictures\OpenGL-Wide.png", type: ResourceType.Image) }
             //    ));
-        }
-
-        private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            focusedChannelName = ChannelList.SelectedItem.ToString();
         }
     }
 }
