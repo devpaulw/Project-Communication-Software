@@ -145,6 +145,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ChannelSelector.xaml.cs">
+      <DependentUpon>ChannelSelector.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MessageField.xaml.cs">
       <DependentUpon>MessageField.xaml</DependentUpon>
     </Compile>
@@ -152,6 +155,10 @@
     <Compile Include="ConnectionWindow.xaml.cs">
       <DependentUpon>ConnectionWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="ChannelSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

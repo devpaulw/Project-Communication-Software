@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="PCS.WPFClientInterface.ChannelSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" Width="172.165" Height="654.722">
+	<Grid Margin="0,0,611,0">
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<ListBox x:Name="ChannelList" Margin="-2,1,-172,0"/>
+	</Grid>
+</UserControl>
