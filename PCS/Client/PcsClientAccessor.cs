@@ -100,9 +100,9 @@ namespace PCS
             Send(Flags.ClientMessage + DataPacket.FromMessage(message));
         }
 
-        public IEnumerable<Message> GetDailyMessages(DateTime day)
+        public IEnumerable<Message> GetDailyMessages(string channelName, DateTime day)
         {
-            var dailyMessages = new List<Message>(ftp.GetDailyMessages(day));
+            var dailyMessages = new List<Message>(ftp.GetDailyMessages(channelName, day));
 
             for (int i = 0; i < dailyMessages.Count; i++)
                 dailyMessages[i] = GetLocalResources(dailyMessages[i]); // TODO Not clean

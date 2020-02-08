@@ -65,7 +65,7 @@ namespace PCS
         public static string FromMessage(Message message)
         {
             var attributes = new string[] {
-                 message.ChannelTitle,
+                 message.ChannelName,
                  message.Author.Username,
                  message.Author.ID.ToString(CultureInfo.CurrentCulture),
                  message.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),

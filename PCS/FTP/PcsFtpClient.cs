@@ -13,7 +13,7 @@ namespace PCS
     {
         private readonly FtpClient ftpClient;
 
-        public PcsFtpClient(IPAddress ip)
+        public PcsFtpClient(IPAddress ip)   
         {
             if (ip == null)
                 throw new ArgumentNullException(nameof(ip));
@@ -32,7 +32,7 @@ namespace PCS
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            string remotePath = GetPathFromDate(message.DateTime);
+            string remotePath = GetMessagePath(message.ChannelName, message.DateTime);
 
             CreateMissingDirectories(remotePath, true);
 
@@ -44,11 +44,12 @@ namespace PCS
             }
         }
 
-        public IEnumerable<Message> GetDailyMessages(DateTime day)
+        public IEnumerable<Message> GetDailyMessages(string channelName, DateTime day)
         {
-            string remotePath = GetPathFromDate(day);
+            string remotePath = GetMessagePath(channelName, day);
 
             CreateMissingDirectories(remotePath, true);
+
             if (!ftpClient.FileExists(remotePath))
                 yield break;
 
@@ -131,18 +132,15 @@ namespace PCS
             }
         }
 
-        private static string GetPathFromDate(DateTime date)
+        private static string GetMessagePath(string channelName, DateTime date)
         {
-            string path = string.Empty;
             string extension = ".txt";
+            string dayFormat = "yyyyMMdd";
 
-            path += date.Year;
-            path += date.Month.ToString(CultureInfo.CurrentCulture).PadLeft(2, '0');
-            path += date.Day.ToString(CultureInfo.CurrentCulture).PadLeft(2, '0');
-            path += extension;
-            path = Path.Combine(PcsFtpServer.MessagePath, path);
-
-            return path;
+            return Path.Combine(
+                PcsFtpServer.MessagePath,
+                channelName,
+                date.ToString(dayFormat, CultureInfo.InvariantCulture) + extension);
         }
 
         #region IDisposable Support

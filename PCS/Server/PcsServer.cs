@@ -70,7 +70,7 @@ namespace PCS
 
         private void OnClientSignIn(Member member)
         {
-            Console.WriteLine(Messages.Server.ClientConnect, member);;
+            Console.WriteLine(Messages.Server.ClientConnect, member);
         }
 
         private void OnClientDisconnect(PcsClient client, Member member)

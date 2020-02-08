@@ -27,14 +27,15 @@ namespace PCS.WPFClientInterface
 			InitializeComponent();
 		}
 
-		public void Initialize()
+		public void Enable()
 		{
 			// TODO retrieve the channels from the server
 			ChannelList.Items.Add("channel1");
 			ChannelList.Items.Add("channel2");
+			ChannelList.SelectedItem = ChannelList.Items[0];
 		}
 
-		public void Clear()
+		public void Disable()
 		{
 			ChannelList.Items.Clear();
 		}

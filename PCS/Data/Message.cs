@@ -8,7 +8,7 @@ namespace PCS
     public class Message
     {
         public string Text { get; set; }
-        public string ChannelTitle { get; set; }
+        public string ChannelName { get; set; }
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
         public List<Resource> AttachedResources { get; }
@@ -16,7 +16,7 @@ namespace PCS
         public Message(string text, string channelTitle, DateTime dateTime, Member author, List<Resource> attachedFiles)
         {
             Text = text;
-            ChannelTitle = channelTitle;
+            ChannelName = channelTitle;
             Author = author;
             DateTime = dateTime;
             AttachedResources = attachedFiles;
@@ -25,7 +25,7 @@ namespace PCS
         }
 
         public bool HasEmptyField
-            => string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(ChannelTitle);
+            => string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(ChannelName);
 
         public bool HasNoResource
             => AttachedResources == null || AttachedResources.Count == 0;
@@ -37,7 +37,7 @@ namespace PCS
                 foreach (Resource attachedResource in AttachedResources)
                     resources += attachedResource.RemoteFileName + " ; ";
 
-            return $"Message from {Author} in {ChannelTitle} at {DateTime}: {Text}" 
+            return $"Message from {Author} in {ChannelName} at {DateTime}: {Text}" 
                 + (HasNoResource ? "" : "\nResources: " + resources);
         }
     }

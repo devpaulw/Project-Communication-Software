@@ -53,10 +53,12 @@ namespace PCS.WPFClientInterface
                         messageField.AddMessage(message, () => Notify(message)));
                 });
 
-                foreach (var dailyMessage in clientAccessor.GetDailyMessages(DateTime.Now)) // Get FTP Messages
+                channelSelector.Enable();
+
+                // Get FTP Messages
+                foreach (var dailyMessage in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, DateTime.Now))
                     messageField.AddMessage(dailyMessage, () => { });
 
-                channelSelector.Initialize();
                 ToggleAll();
             }
 
@@ -78,7 +80,7 @@ namespace PCS.WPFClientInterface
             clientAccessor.Disconnect();
             messageField.Clear();
 
-            channelSelector.Clear();
+            channelSelector.Disable();
 
             ToggleAll();
         }
