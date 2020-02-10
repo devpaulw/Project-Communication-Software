@@ -19,34 +19,51 @@ namespace PCS
             AdapteeSocket = socket;
         }
 
-        public string Receive()
+        internal DataPacket ReceivePacket()
         {
-            var incomingBuffer = new byte[1024];
+            string receivedData = Receive();
 
-            string data = string.Empty;
+            var dataPacket = DataPacket.FromTextData(receivedData);
 
-            while (true)
+            return dataPacket;
+
+            string Receive()
             {
-                int bytesRecording = AdapteeSocket.Receive(incomingBuffer);
+                var incomingBuffer = new byte[1024];
 
-                string appendData = PcsServer.Encoding.GetString(incomingBuffer, 0, bytesRecording);
+                string data = string.Empty;
 
-                data += appendData;
-
-                if (data.EndsWith(Flags.EndOfTransmission.ToString(CultureInfo.CurrentCulture), StringComparison.CurrentCulture))
+                while (true)
                 {
-                    break;
-                }
-            }
+                    int bytesRecording = AdapteeSocket.Receive(incomingBuffer);
 
-            return data;
+                    string appendData = PcsServer.Encoding.GetString(incomingBuffer, 0, bytesRecording);
+
+                    data += appendData;
+
+                    if (data.EndsWith(Flags.EndOfTransmission.ToString(CultureInfo.CurrentCulture), StringComparison.CurrentCulture))
+                    {
+                        break;
+                    }
+                }
+
+                return data;
+            }
         }
 
-        public void Send(string text)
+        internal void SendPacket(DataPacket packet)
         {
-            text += Flags.EndOfTransmission;
+            if (packet == null)
+                throw new ArgumentNullException(nameof(packet));
 
-            byte[] encodedMessage = PcsServer.Encoding.GetBytes(text);
+            string textData = "";
+
+            textData += Flags.GetFlag(packet.Type);
+            textData += packet.GetTextData();
+
+            textData += Flags.EndOfTransmission;
+
+            byte[] encodedMessage = PcsServer.Encoding.GetBytes(textData);
 
             AdapteeSocket.Send(encodedMessage);
         }

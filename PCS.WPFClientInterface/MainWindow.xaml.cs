@@ -24,8 +24,8 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        private PcsClientAccessor clientAccessor = new PcsClientAccessor(@"files");
-        private List<Resource> attachedResources = new List<Resource>(); // Add it to a kind of messageField class but for sendmessage TB and send button...
+        private PcsAccessor clientAccessor = new PcsAccessor();
+
         public Member ActiveMember { get; private set; }
 
         public MainWindow()
@@ -87,11 +87,10 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel, DateTime.Now, ActiveMember, attachedResources);
+            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel, DateTime.Now, ActiveMember);
             clientAccessor.SendMessage(message);
 
             messageTextBox.Text = string.Empty;
-            attachedResources = new List<Resource>();
         }
 
         private void AddResourceButton_Click(object sender, RoutedEventArgs e)
@@ -106,8 +105,6 @@ namespace PCS.WPFClientInterface
 
             if (openFileDialog.ShowDialog() == true)
                 path = openFileDialog.FileName;
-
-            attachedResources.Add(new Resource(localPath: path, type: ResourceType.Image));
         }
 
 
@@ -140,15 +137,15 @@ namespace PCS.WPFClientInterface
             ToggleDisconnectMenuItem();
             ToggleConnectMenuItem();
             ToggleSendMessageButton();
-            ToggleAddResourceButton();
+            //ToggleAddResourceButton();
         }
 
         private void ToggleSendMessageButton()
             => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
             && clientAccessor.IsConnected;
 
-        private void ToggleAddResourceButton()
-            => addResourceButton.IsEnabled = clientAccessor.IsConnected;
+        //private void ToggleAddResourceButton()
+        //    => new Action(() {}).Invoke(); addResourceButton.IsEnabled = clientAccessor.IsConnected;
 
         private void ToggleConnectMenuItem()
             => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
@@ -159,18 +156,6 @@ namespace PCS.WPFClientInterface
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
             testButton.IsEnabled = false;
-
-            //PcsNotifier.Notify(this, null);
-
-            //return;
-
-            //clientAccessor.SendMessage(new Message(
-            //    "TEST RESOURCE",
-            //    "TESTCHANNEL",
-            //    DateTime.Now,
-            //    new Member("TESTER", 99999),
-            //    new List<Resource>() { new Resource(localPath: @"C:\Users\Paul\Pictures\OpenGL-Wide.png", type: ResourceType.Image) }
-            //    ));
         }
     }
 }

@@ -9,17 +9,15 @@ using System.Threading;
 
 namespace PCS
 {
-    public class PcsClientAccessor : PcsClient
+    public class PcsAccessor : PcsClient
     {
         private Thread serverListenThread;
         private PcsFtpClient ftp;
 
-        public string ReceiveStorePath { get; }
         public bool IsConnected { get; private set; }
 
-        public PcsClientAccessor(string receiveStorePath)
+        public PcsAccessor()
         {
-            ReceiveStorePath = receiveStorePath ?? throw new ArgumentNullException(nameof(receiveStorePath));
         }
 
         public void Connect(IPAddress ip, Member member)
@@ -41,7 +39,7 @@ namespace PCS
                 if (member == null)
                     throw new ArgumentNullException(nameof(member));
 
-                Send(Flags.ClientSignIn + DataPacket.FromMember(member));
+                SendPacket(new DataPacket(DataPacketType.MemberSignIn, member));
 
                 IsConnected = true;
             }
@@ -65,16 +63,12 @@ namespace PCS
             {
                 while (true)
                 {
-                    string receivedData = Receive();
+                    var receivedPacket = ReceivePacket();
 
-                    var dataPacket = new DataPacket(receivedData);
+                    if (receivedPacket.Type != DataPacketType.Message)
+                        throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 
-                    var gotMessage = dataPacket.GetMessage();
-
-                    if (dataPacket.Type != DataPacketType.ServerMessage)
-                        throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
-
-                    gotMessage = GetLocalResources(gotMessage); // DOLATER: Handle better save messages on the PC, not just resources
+                    var gotMessage = (Message)receivedPacket.Object;
 
                     messageReceived(gotMessage);
                 }
@@ -88,24 +82,12 @@ namespace PCS
 
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            if (!message.HasNoResource)
-            {
-                for (int i = 0; i < message.AttachedResources.Count; i++) // Transition of local path to ftp path
-                {
-                    ftp.UploadResource(message.AttachedResources[i].LocalPath, out string generatedFileName);
-                    message.AttachedResources[i].RemoteFileName = generatedFileName;
-                }
-            }
-
-            Send(Flags.ClientMessage + DataPacket.FromMessage(message));
+            SendPacket(new DataPacket(DataPacketType.Message, message));
         }
 
         public IEnumerable<Message> GetDailyMessages(string channelName, DateTime day)
         {
             var dailyMessages = new List<Message>(ftp.GetDailyMessages(channelName, day));
-
-            for (int i = 0; i < dailyMessages.Count; i++)
-                dailyMessages[i] = GetLocalResources(dailyMessages[i]); // TODO Not clean
 
             return dailyMessages;
         }
@@ -114,7 +96,7 @@ namespace PCS
         {
             if (IsConnected)
             {
-                Send(Flags.ClientDisconnect.ToString(CultureInfo.CurrentCulture));
+                SendPacket(new DataPacket(DataPacketType.ClientDisconnect));
 
                 serverListenThread.Abort(); // Stop listen server
 
@@ -130,24 +112,6 @@ namespace PCS
             {
                 base.Dispose(disposing);
             }
-        }
-
-        private Message GetLocalResources(Message message)
-        {
-            if (!message.HasNoResource)
-            {
-                for (int i = 0; i < message.AttachedResources.Count; i++)
-                {
-                    string localPath = Path.Combine(ReceiveStorePath, message.AttachedResources[i].RemoteFileName);
-                    
-                    if (!File.Exists(localPath))
-                        ftp.DownloadResource(message.AttachedResources[i].RemoteFileName, localPath);
-                    
-                    message.AttachedResources[i].LocalPath = localPath;
-                }
-            }
-
-            return message;
         }
     }
 }

@@ -39,8 +39,8 @@ namespace PCS
             using (var appendStream = ftpClient.OpenAppend(remotePath))
             using (var writer = new StreamWriter(appendStream, PcsServer.Encoding))
             {
-                var messagePacket = DataPacket.FromMessage(message);
-                writer.WriteLine(messagePacket);
+                string fileMessage = (char)2 + message.ToFileMessage() + (char)3; // TODO Do something for these variables
+                writer.WriteLine(fileMessage);
             }
         }
 
@@ -57,13 +57,11 @@ namespace PCS
 
             string fileContent = PcsServer.Encoding.GetString(buffer, 0, buffer.Length);
 
-            var textMessages = GetTextMessages(fileContent);
+            var fileMessages = GetTextMessages(fileContent);
 
-            foreach (string textMessage in textMessages)
+            foreach (string fileMessage in fileMessages)
             {
-                var dataPacket = new DataPacket(textMessage, DataPacketType.ServerMessage);
-
-                yield return dataPacket.GetMessage();
+                yield return Message.FromFileMessage(fileMessage);
             }
 
             IEnumerable<string> GetTextMessages(string fullText)
@@ -73,9 +71,9 @@ namespace PCS
 
                 foreach (char c in fullText)
                 {
-                    if (c == Flags.StartOfText)
+                    if (c == (char)2)
                         readingTextMsg = true;
-                    else if (c == Flags.EndOfText)
+                    else if (c == (char)3)
                     {
                         readingTextMsg = false;
                         yield return currentTextMsg;

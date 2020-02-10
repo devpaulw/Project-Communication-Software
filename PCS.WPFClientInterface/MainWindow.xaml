@@ -44,8 +44,7 @@
 		<TextBox x:Name="messageTextBox" TextWrapping="Wrap"  Grid.ColumnSpan="6" RenderTransformOrigin="0.041,0.63" Margin="182,530,115,0" TextChanged="MessageTextBox_TextChanged" Height="110" VerticalAlignment="Top"/>
 		<Button x:Name="sendMessageButton" IsDefault="True" Content="Send message" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142"  Height="40" Grid.Column="5" Margin="295,530,-32,0" Click="SendMessageButton_Click" IsEnabled="False"/>
 		<Button x:Name="testButton" Content="Test Button (experimental)" Grid.Column="5" HorizontalAlignment="Left" Height="25" Margin="295,615,-32,0" VerticalAlignment="Top" Width="142" Click="TestButton_Click"/>
-		<Button x:Name="addResourceButton" Content="Add Resource" Grid.Column="5" HorizontalAlignment="Left" Height="35" Margin="295,575,-32,0" VerticalAlignment="Top" Width="142" Click="AddResourceButton_Click"/>
 
-	</Grid>
+    </Grid>
 
 </Window>

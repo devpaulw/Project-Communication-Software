@@ -6,6 +6,6 @@ namespace PCS
 {
     enum DataPacketType
     {
-        ClientSignIn, ClientMessage, ClientDisconnect, ServerMessage
+        MemberSignIn, Message, ClientDisconnect
     }
 }

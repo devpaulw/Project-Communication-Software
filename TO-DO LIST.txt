@@ -1,5 +1,6 @@
 - automatic connect when start (but handle by user settings)
 - lock thread security system
+- try catch everywhere for security: Exceptions update
 - fix names conflict of images
 - Can get older messages in WPF ; Change messages direction: down to up
 - Local machine handling interface

@@ -11,21 +11,35 @@ namespace PCS
         public const char EndOfTransmission = (char)4;
         public const char EndOfTransBlock = (char)23;
 
-        public const string ClientMessage = "TX";
-        public const string ServerMessage = "MS";
-        public const string ClientSignIn = "SI";
+        public const string Message = "TX";
+        public const string MemberSignIn = "SI";
         public const string ClientDisconnect = "DC";
 
-        public static DataPacketType? GetDataPacketType(string flag)
+        public static DataPacketType GetDataPacketType(string flag)
         {
             switch (flag)
             {
-                case ClientSignIn: return DataPacketType.ClientSignIn;
-                case ClientMessage: return DataPacketType.ClientMessage;
+                case MemberSignIn: return DataPacketType.MemberSignIn;
+                case Message: return DataPacketType.Message;
                 case ClientDisconnect: return DataPacketType.ClientDisconnect;
-                case ServerMessage: return DataPacketType.ServerMessage;
-                default: return null;
+                default:
+                    throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
             }
+        }
+
+        public static string GetFlag(DataPacketType dataPacketType)
+        {
+            switch (dataPacketType)
+            {
+                case DataPacketType.MemberSignIn:
+                    return MemberSignIn;
+                case DataPacketType.Message:
+                    return Message;
+                case DataPacketType.ClientDisconnect:
+                    return ClientDisconnect;
+            }
+
+            return null; // Impossible, it's just to please the compiler.
         }
     }
 }

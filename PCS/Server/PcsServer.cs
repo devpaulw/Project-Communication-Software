@@ -84,13 +84,13 @@ namespace PCS
         {
             // Send to all clients
             foreach (var connectedClient in connectedClients)
-                SendToClientAccessor(connectedClient);
+                SendToAccessor(connectedClient);
 
-            void SendToClientAccessor(PcsClient client)
+            void SendToAccessor(PcsClient client)
             {
                 if (message == null) throw new ArgumentNullException(nameof(message));
 
-                client.Send(Flags.ServerMessage + DataPacket.FromMessage(message));
+                client.SendPacket(new DataPacket(DataPacketType.Message, message));
             }
         }
 

@@ -14,36 +14,38 @@ namespace PCS
             Action<Message> addMessage, 
             Action<PcsClient, Member> disconnect)
         {
-            while (true)
+            bool connected = true;
+            while (connected)
             {
                 try
                 {
-                    string receivedData = client.Receive();
+                    var dataPacket = client.ReceivePacket();
 
-                    var dataPacket = new DataPacket(receivedData);
-
-                    if (dataPacket.Type == DataPacketType.ClientSignIn)
+                    switch (dataPacket.Type)
                     {
-                        Member signedInMember = dataPacket.GetMember();
-
-                        m_signedInMember = signedInMember;
-                        signIn(m_signedInMember);
-                    }
-                    else if (dataPacket.Type == DataPacketType.ClientMessage)
-                    {
-                        var clientMessage = dataPacket.GetMessage();
-
-                        var serverMessage = new Message(clientMessage.Text, clientMessage.ChannelName, DateTime.Now, clientMessage.Author, clientMessage.AttachedResources);
-                        addMessage(serverMessage);
-                    }
-                    else if (dataPacket.Type == DataPacketType.ClientDisconnect)
-                    {
-                        break;
+                        case DataPacketType.MemberSignIn:
+                            {
+                                m_signedInMember = (Member)dataPacket.Object;
+                                signIn(m_signedInMember);
+                            }
+                            break;
+                        case DataPacketType.Message:
+                            {
+                                var clientMessage = (Message)dataPacket.Object;
+                                var serverMessage = new Message(clientMessage.Text, clientMessage.ChannelName, DateTime.Now, clientMessage.Author);
+                                addMessage(serverMessage);
+                            }
+                            break;
+                        case DataPacketType.ClientDisconnect:
+                            {
+                                connected = false;
+                            }
+                            break;
                     }
                 }
                 catch (SocketException) // When An existing connection was forcibly closed by the remote host
                 {
-                    break;
+                    connected = false;
                 }
             }
 

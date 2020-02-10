@@ -40,17 +40,10 @@ namespace PCS.WPFClientInterface
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
 
-            if (!message.HasNoResource)
-            {
-                foreach (Resource attachedResource in message.AttachedResources)
-                    if (attachedResource.Type == ResourceType.Image)
-                        AddImage(new BitmapImage(new Uri(System.IO.Path.GetFullPath(attachedResource.LocalPath))));
-            }
-
             ScrollToEnd();
         }
 
-        public void AddImage(BitmapImage bitmap)
+        public void AddImage(BitmapImage bitmap) 
         {
             double sizeRatio = ImageHeight / bitmap.Height;
 

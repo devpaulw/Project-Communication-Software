@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,20 +12,30 @@ namespace PCS.ConsoleApp
 {
     class Program
     {
-        
+
 
         static void Main()
         {
-            var request = WebRequest.Create("ftp://192.168.0.25:6784") as FtpWebRequest;
-            //var request = WebRequest.Create("ftp://127.0.0.1/") as FtpWebRequest;
+            var msg = new Message[] { new Message("Salut", "Test", DateTime.Now, Member.Unknown),
+                new Message("Salut", "Test", DateTime.Now, Member.Unknown),
+                new Message("Salut", "Test", DateTime.Now, Member.Unknown),
+            };
 
-            request.Credentials = new NetworkCredential("anonymous", "paul@paul.paul");
-            //request.Credentials = new NetworkCredential("paul", "lol");
+            IFormatter formatter = new BinaryFormatter();
+            var steam = new FileStream("Test.txt", FileMode.Create, FileAccess.Write);
+            formatter.Serialize(steam, msg);
+            steam.Close();
 
-            ShowContent(request);
-            UploadFile(request, @"C:\Users\BluePaul\Documents\tt1.txt");
-            ShowContent(request);
-            DownloadFile(WebRequest.Create(@"ftp://192.168.0.25:6784/tt1.txt") as FtpWebRequest);
+            //var request = WebRequest.Create("ftp://192.168.0.25:6784") as FtpWebRequest;
+            ////var request = WebRequest.Create("ftp://127.0.0.1/") as FtpWebRequest;
+
+            //request.Credentials = new NetworkCredential("anonymous", "paul@paul.paul");
+            ////request.Credentials = new NetworkCredential("paul", "lol");
+
+            //ShowContent(request);
+            //UploadFile(request, @"C:\Users\BluePaul\Documents\tt1.txt");
+            //ShowContent(request);
+            //DownloadFile(WebRequest.Create(@"ftp://192.168.0.25:6784/tt1.txt") as FtpWebRequest);
 
             //// SDNMSG: The console app is no longer maintened. Use the WPF interface instead.
 
@@ -68,17 +80,17 @@ namespace PCS.ConsoleApp
 
         static void UploadFile(FtpWebRequest request, string path)
         {
-        //    WebClient client = new WebClient();
-        //    client.Credentials = new NetworkCredential("anonymous", "paul@paul.paul");
-        //    client.UploadFile(
-        //        "ftp://192.168.0.25:6784/tt1.txt", @"C:\Users\BluePaul\Documents\tt1.txt");
+            //    WebClient client = new WebClient();
+            //    client.Credentials = new NetworkCredential("anonymous", "paul@paul.paul");
+            //    client.UploadFile(
+            //        "ftp://192.168.0.25:6784/tt1.txt", @"C:\Users\BluePaul\Documents\tt1.txt");
 
-        //    return;
+            //    return;
 
             request.Method = WebRequestMethods.Ftp.UploadFile;
 
             byte[] fileContents;
-            
+
             using (var sourceStream = new StreamReader(path))
             {
                 fileContents = Encoding.UTF8.GetBytes(sourceStream.ReadToEnd());
@@ -106,8 +118,8 @@ namespace PCS.ConsoleApp
             var responseStream = response.GetResponseStream();
             var reader = new StreamReader(responseStream);
 
-            Console.WriteLine(reader.ReadToEnd()); 
-            
+            Console.WriteLine(reader.ReadToEnd());
+
             Console.WriteLine($"Download Complete, status {response.StatusDescription}");
 
             reader.Close();

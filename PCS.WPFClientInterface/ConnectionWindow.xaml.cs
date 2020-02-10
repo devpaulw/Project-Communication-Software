@@ -28,12 +28,12 @@ namespace PCS.WPFClientInterface
     {
         const string fieldSavePath = "./connection_infos.xml";
 
-        private readonly PcsClientAccessor m_clientAccessor;
+        private readonly PcsAccessor m_clientAccessor;
 
         public bool Connected { get; private set; }
         public Member SignedInMember { get; private set; }
 
-        public ConnectionWindow(ref PcsClientAccessor clientAccessor)
+        public ConnectionWindow(ref PcsAccessor clientAccessor)
         {
             m_clientAccessor = clientAccessor;
 
