@@ -45,12 +45,6 @@ namespace PCS
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="messageReceived">
-        /// Receive a message with filled LocalFilePath for possible attached resources.
-        /// </param>
         public void StartListenAsync(Action<Message> messageReceived)
         {
             if (!IsConnected)
@@ -61,16 +55,24 @@ namespace PCS
 
             void Listen()
             {
-                while (true)
+                while (IsConnected)
                 {
-                    var receivedPacket = ReceivePacket();
+                    try
+                    {
+                        var receivedPacket = ReceivePacket();
 
-                    if (receivedPacket.Type != DataPacketType.Message)
-                        throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+                        if (receivedPacket.Type != DataPacketType.Message)
+                            throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 
-                    var gotMessage = (Message)receivedPacket.Object;
+                        var gotMessage = (Message)receivedPacket.Object;
 
-                    messageReceived(gotMessage);
+                        messageReceived(gotMessage);
+                    }
+                    catch (SocketException)
+                    {
+                        if (IsConnected) 
+                            throw;
+                    }
                 }
             }
         }
@@ -97,8 +99,6 @@ namespace PCS
             if (IsConnected)
             {
                 SendPacket(new DataPacket(DataPacketType.ClientDisconnect));
-
-                serverListenThread.Abort(); // Stop listen server
 
                 IsConnected = false;
 

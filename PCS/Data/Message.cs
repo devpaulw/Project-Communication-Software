@@ -36,7 +36,7 @@ namespace PCS
                 + DateTime.ToFileTime() + endOfTB
                 + Text;
         }
-
+        // DOLATER: When It will be C# 8.0, implement interface with static functions: IDataObject and discontinue DataPacket(Attributes)/(Objects)
         public static Message FromFileMessage(string fileMessage)
         {
             if (fileMessage == null)
