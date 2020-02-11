@@ -8,7 +8,7 @@ namespace PCS
 {
     public class PcsClient : IDisposable
     {
-        private bool disposed;
+        private protected bool disposedValue;
 
         protected Socket AdapteeSocket { get; set; }
 
@@ -81,7 +81,7 @@ namespace PCS
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!disposedValue)
             {
                 if (disposing)
                 {
@@ -89,7 +89,7 @@ namespace PCS
                     AdapteeSocket.Dispose();
                 }
 
-                disposed = true;
+                disposedValue = true;
             }
         }
     }

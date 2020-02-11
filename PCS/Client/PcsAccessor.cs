@@ -70,7 +70,7 @@ namespace PCS
                     }
                     catch (SocketException)
                     {
-                        if (IsConnected) 
+                        if (IsConnected)
                             throw;
                     }
                 }
@@ -108,8 +108,13 @@ namespace PCS
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing && IsConnected)
+            if (!IsConnected)
+                return;
+
+            if (!disposedValue && disposing)
             {
+                ftp.Dispose();
+
                 base.Dispose(disposing);
             }
         }
