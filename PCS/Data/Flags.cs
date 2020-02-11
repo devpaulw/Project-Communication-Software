@@ -15,27 +15,27 @@ namespace PCS
         public const string MemberSignIn = "SI";
         public const string ClientDisconnect = "DC";
 
-        public static DataPacketType GetDataPacketType(string flag)
+        public static PacketType GetDataPacketType(string flag)
         {
             switch (flag)
             {
-                case MemberSignIn: return DataPacketType.MemberSignIn;
-                case Message: return DataPacketType.Message;
-                case ClientDisconnect: return DataPacketType.ClientDisconnect;
+                case MemberSignIn: return PacketType.MemberSignIn;
+                case Message: return PacketType.Message;
+                case ClientDisconnect: return PacketType.ClientDisconnect;
                 default:
                     throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket);
             }
         }
 
-        public static string GetFlag(DataPacketType dataPacketType)
+        public static string GetFlag(PacketType dataPacketType)
         {
             switch (dataPacketType)
             {
-                case DataPacketType.MemberSignIn:
+                case PacketType.MemberSignIn:
                     return MemberSignIn;
-                case DataPacketType.Message:
+                case PacketType.Message:
                     return Message;
-                case DataPacketType.ClientDisconnect:
+                case PacketType.ClientDisconnect:
                     return ClientDisconnect;
             }
 

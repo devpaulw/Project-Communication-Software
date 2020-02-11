@@ -23,20 +23,20 @@ namespace PCS
 
                     switch (dataPacket.Type)
                     {
-                        case DataPacketType.MemberSignIn:
+                        case PacketType.MemberSignIn:
                             {
                                 m_signedInMember = (Member)dataPacket.Object;
                                 signIn(m_signedInMember);
                             }
                             break;
-                        case DataPacketType.Message:
+                        case PacketType.Message:
                             {
                                 var clientMessage = (Message)dataPacket.Object;
                                 var serverMessage = new Message(clientMessage.Text, clientMessage.ChannelName, DateTime.Now, clientMessage.Author);
                                 addMessage(serverMessage);
                             }
                             break;
-                        case DataPacketType.ClientDisconnect:
+                        case PacketType.ClientDisconnect:
                             {
                                 connected = false;
                             }

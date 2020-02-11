@@ -10,7 +10,7 @@ namespace PCS
     {
         private readonly string[] m_attributes;
 
-        public DataPacketType Type { get; }
+        public PacketType Type { get; }
         public object Object { get; }
 
         //public DataPacket(string textData)
@@ -24,7 +24,7 @@ namespace PCS
         //    m_attributes = Split(textData);
         //}
 
-        public DataPacket(DataPacketType type, object @object)
+        public DataPacket(PacketType type, object @object)
         {
             Object = @object;
             Type = type;
@@ -35,9 +35,9 @@ namespace PCS
             {
                 switch (Type)
                 {
-                    case DataPacketType.MemberSignIn:
+                    case PacketType.MemberSignIn:
                         return DataPacketAttributes.FromMemberSignIn(@object as Member);
-                    case DataPacketType.Message:
+                    case PacketType.Message:
                         return  DataPacketAttributes.FromMessage(@object as Message);
                     default:
                         return null;
@@ -45,22 +45,22 @@ namespace PCS
             }
         }
 
-        public DataPacket(DataPacketType type)
+        public DataPacket(PacketType type)
         {
             Type = type;
         }
 
-        private DataPacket(DataPacketType type, string[] attributes)
+        private DataPacket(PacketType type, string[] attributes)
         {
             Type = type;
             m_attributes = attributes;
 
             switch (type)
             {
-                case DataPacketType.MemberSignIn:
+                case PacketType.MemberSignIn:
                     Object = DataPacketObjects.GetMemberSignIn(m_attributes);
                     break;
-                case DataPacketType.Message:
+                case PacketType.Message:
                     Object = DataPacketObjects.GetMessage(m_attributes);
                     break;
             }
@@ -81,6 +81,7 @@ namespace PCS
         public string GetTextData()
         {
             string result = string.Empty;
+            result += Flags.GetFlag(Type);
 
             if (m_attributes != null) // Is not only a flag like Disconnect Packet
             {

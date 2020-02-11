@@ -82,7 +82,7 @@ namespace PCS
                     if (message == null)
                         throw new ArgumentNullException(nameof(message));
 
-                    client.SendPacket(new DataPacket(DataPacketType.Message, message));
+                    client.SendPacket(new DataPacket(PacketType.Message, message));
                 }
             }
 

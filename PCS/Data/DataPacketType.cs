@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PCS
 {
-    enum DataPacketType
+    enum PacketType
     {
         MemberSignIn, Message, ClientDisconnect
     }

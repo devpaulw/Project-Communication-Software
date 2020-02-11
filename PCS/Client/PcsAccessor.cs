@@ -39,7 +39,7 @@ namespace PCS
                 if (member == null)
                     throw new ArgumentNullException(nameof(member));
 
-                SendPacket(new DataPacket(DataPacketType.MemberSignIn, member));
+                SendPacket(new DataPacket(PacketType.MemberSignIn, member));
 
                 IsConnected = true;
             }
@@ -61,7 +61,7 @@ namespace PCS
                     {
                         var receivedPacket = ReceivePacket();
 
-                        if (receivedPacket.Type != DataPacketType.Message)
+                        if (receivedPacket.Type != PacketType.Message)
                             throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 
                         var gotMessage = (Message)receivedPacket.Object;
@@ -84,7 +84,7 @@ namespace PCS
 
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            SendPacket(new DataPacket(DataPacketType.Message, message));
+            SendPacket(new DataPacket(PacketType.Message, message));
         }
 
         public IEnumerable<Message> GetDailyMessages(string channelName, DateTime day)
@@ -98,7 +98,7 @@ namespace PCS
         {
             if (IsConnected)
             {
-                SendPacket(new DataPacket(DataPacketType.ClientDisconnect));
+                SendPacket(new DataPacket(PacketType.ClientDisconnect));
 
                 IsConnected = false;
 

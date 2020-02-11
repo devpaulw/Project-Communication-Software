@@ -58,7 +58,6 @@ namespace PCS
 
             string textData = "";
 
-            textData += Flags.GetFlag(packet.Type);
             textData += packet.GetTextData();
 
             textData += Flags.EndOfTransmission;
