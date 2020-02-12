@@ -35,7 +35,7 @@ namespace PCS.WPFClientInterface
             notify();
 
             var appendParagraph = new Paragraph();
-            appendParagraph.Inlines.Add($"@{broadcastMsg.Author.Username} <{broadcastMsg.Message.ChannelName}> [{broadcastMsg.DateTime.ToLongTimeString()}]: {broadcastMsg.Message.Text}");
+            appendParagraph.Inlines.Add($"@{broadcastMsg.Author.Username} <{broadcastMsg.BaseMessage.ChannelName}> [{broadcastMsg.DateTime.ToLongTimeString()}]: {broadcastMsg.BaseMessage.Text}");
             appendParagraph.LineHeight = 3;
 
             fieldRtb.Document.Blocks.Add(appendParagraph);

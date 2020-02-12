@@ -6,7 +6,7 @@ namespace PCS
 {
     class DisconnectPacket : Packet
     {
-        public DisconnectPacket() : base(Flags.ClientDisconnect) { } // TODO Discontinue PacketType and use only Flags string (simpler)
+        public DisconnectPacket() : base(Flags.ClientDisconnect) { }
 
         protected override string[] GetAttributes()
         {

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace PCS
 {
-    public class Message
+    public sealed class Message
     {
         public string Text { get; set; }
         public string ChannelName { get; set; }
@@ -15,7 +16,7 @@ namespace PCS
             ChannelName = channelName;
 
             if (HasEmptyField)
-                throw new MessageEmptyFieldException(Messages.Exceptions.MessageEmptyField);
+                throw new Exception(Messages.Exceptions.MessageEmptyField);
         }
 
         public bool HasEmptyField

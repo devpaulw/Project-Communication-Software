@@ -7,8 +7,8 @@ namespace PCS
 {
     internal class ClientConnectionHandler
     {
-        private Member m_signedInMember = Member.Unknown;
-        private bool signedIn = false;
+        private readonly Member m_signedInMember = Member.Unknown;
+        private readonly bool signedIn = false;
 
         public ClientConnectionHandler(PcsClient client, 
             Action<Member> signIn, 
@@ -52,11 +52,6 @@ namespace PCS
 
             client.Disconnect();
             disconnect(client, m_signedInMember);
-        }
-
-        public void HandleConnection()
-        {
-
         }
     }
 }

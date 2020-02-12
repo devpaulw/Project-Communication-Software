@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PCS
 {
-    class ControlChars
+    static class ControlChars
     {
         public const char StartOfText = (char)2;
         public const char EndOfText = (char)3;

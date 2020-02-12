@@ -16,10 +16,7 @@ namespace PCS
 
         public static Packet FromTextData(string textData)
         {
-            var attributes = Split(textData);
-            string headerFlag = attributes[0];
-
-            attributes = attributes.Skip(1).Take(attributes.Length - 1).ToArray(); // Delete the flagHeader
+            var attributes = Split(textData, out string headerFlag);
                                                        
             switch (headerFlag)
             {
@@ -69,10 +66,36 @@ namespace PCS
 
         protected abstract string[] GetAttributes();
 
-        private static string[] Split(string textData) // TODO REDO
+        private static string[] Split(string textData, out string headerFlag)
         {
-            return textData.Split(new char[] { ControlChars.StartOfText, ControlChars.EndOfText, ControlChars.EndOfTransBlock, ControlChars.EndOfTransmission },
-                StringSplitOptions.RemoveEmptyEntries);
+            headerFlag = string.Empty;
+
+            var ret = new List<string>();
+            bool textStarted = false;
+
+            foreach (char c in textData)
+            {
+                if (c == ControlChars.StartOfText)
+                {
+                    textStarted = true;
+                    ret.Add(string.Empty);
+                    continue;
+                }
+                else if (c == ControlChars.EndOfTransBlock)
+                {
+                    ret.Add(string.Empty);
+                    continue;
+                }
+                else if (c == ControlChars.EndOfText || c == ControlChars.EndOfTransmission)
+                    break;
+
+                if (!textStarted)
+                    headerFlag += c;
+                else
+                    ret[ret.Count - 1] += c;
+            }
+
+            return ret.ToArray();
         }
     }
 }

@@ -8,13 +8,13 @@ namespace PCS
 {
     public class BroadcastMessage
     {
-        public Message Message { get; set; }
+        public Message BaseMessage { get; set; }
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
 
-        public BroadcastMessage(Message message, DateTime dateTime, Member author)
+        public BroadcastMessage(Message baseMessage, DateTime dateTime, Member author)
         {
-            Message = message;
+            BaseMessage = baseMessage;
             Author = author;
             DateTime = dateTime;
         }
@@ -22,11 +22,11 @@ namespace PCS
         public string ToFileMessage()
         {
             const char endOfTB = (char)23;
-            return Message.ChannelName + endOfTB
+            return BaseMessage.ChannelName + endOfTB
                 + Author.Username + endOfTB
                 + Author.ID + endOfTB
                 + DateTime.ToFileTime() + endOfTB
-                + Message.Text;
+                + BaseMessage.Text;
         }
         // DOLATER: When It will be C# 8.0, implement interface with static functions: IDataObject and discontinue DataPacket(Attributes)/(Objects)
         public static BroadcastMessage FromFileMessage(string fileMessage)
@@ -48,7 +48,7 @@ namespace PCS
 
         public override string ToString()
         {
-            return $"Message from {Author} in {Message.ChannelName} at {DateTime}: {Message.Text}";
+            return $"Message from {Author} in {BaseMessage.ChannelName} at {DateTime}: {BaseMessage.Text}";
         }
     }
 }

@@ -17,11 +17,11 @@ namespace PCS
         protected override string[] GetAttributes()
         {
             return new string[] {
-                 BroadcastMessage.Message.ChannelName,
+                 BroadcastMessage.BaseMessage.ChannelName,
                  BroadcastMessage.Author.Username,
                  BroadcastMessage.Author.ID.ToString(CultureInfo.CurrentCulture),
                  BroadcastMessage.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
-                 BroadcastMessage.Message.Text
+                 BroadcastMessage.BaseMessage.Text
             };
         }
     }

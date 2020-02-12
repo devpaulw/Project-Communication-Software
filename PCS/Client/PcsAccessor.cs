@@ -22,12 +22,13 @@ namespace PCS
 
         public void Connect(IPAddress ip, Member member)
         {
-            if (ip == null) throw new ArgumentNullException(nameof(ip));
+            if (ip == null)
+                throw new ArgumentNullException(nameof(ip));
 
-            AdapteeSocket = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            AdapteeClient = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
 
-            AdapteeSocket.Connect(endPoint);
+            AdapteeClient.Connect(endPoint);
             Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
 
             ftp = new PcsFtpClient(ip);
@@ -62,7 +63,7 @@ namespace PCS
                         Packet receivedPacket = ReceivePacket();
 
                         if (receivedPacket is BroadcastMessagePacket == false)
-                            throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 
                         messageReceived((receivedPacket as BroadcastMessagePacket).BroadcastMessage);
                     }

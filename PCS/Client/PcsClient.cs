@@ -10,13 +10,13 @@ namespace PCS
     {
         private protected bool disposedValue;
 
-        protected Socket AdapteeSocket { get; set; }
+        protected Socket AdapteeClient { get; set; }
 
         public PcsClient() { }
 
-        public PcsClient(Socket socket)
+        public PcsClient(Socket client)
         {
-            AdapteeSocket = socket;
+            AdapteeClient = client;
         }
 
         internal Packet ReceivePacket()
@@ -35,7 +35,7 @@ namespace PCS
 
                 while (true)
                 {
-                    int bytesRecording = AdapteeSocket.Receive(incomingBuffer);
+                    int bytesRecording = AdapteeClient.Receive(incomingBuffer);
 
                     string appendData = PcsServer.Encoding.GetString(incomingBuffer, 0, bytesRecording);
 
@@ -60,13 +60,13 @@ namespace PCS
             textData += ControlChars.EndOfTransmission;
 
             byte[] encodedMessage = PcsServer.Encoding.GetBytes(textData);
-            AdapteeSocket.Send(encodedMessage);
+            AdapteeClient.Send(encodedMessage);
         }
 
         public virtual void Disconnect()
         {
-            AdapteeSocket.Shutdown(SocketShutdown.Both);
-            AdapteeSocket.Close();
+            AdapteeClient.Shutdown(SocketShutdown.Both);
+            AdapteeClient.Close();
         }
 
         public void Dispose()
@@ -82,7 +82,7 @@ namespace PCS
                 if (disposing)
                 {
                     Disconnect();
-                    AdapteeSocket.Dispose();
+                    AdapteeClient.Dispose();
                 }
 
                 disposedValue = true;

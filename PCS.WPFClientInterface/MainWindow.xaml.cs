@@ -24,6 +24,8 @@ namespace PCS.WPFClientInterface
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly object @lock = new object();
+
         private PcsAccessor clientAccessor = new PcsAccessor();
 
         public Member ActiveMember { get; private set; }
@@ -47,11 +49,7 @@ namespace PCS.WPFClientInterface
             {
                 ActiveMember = signInWindow.SignedInMember;
 
-                clientAccessor.StartListenAsync((BroadcastMessage message) => // Start get messages dynamically
-                {
-                    Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                        messageField.AddMessage(message, () => Notify(message)));
-                });
+                clientAccessor.StartListenAsync((BroadcastMessage broadcastMsg) => MessageReceived(broadcastMsg));
 
                 channelSelector.Enable();
 
@@ -62,10 +60,19 @@ namespace PCS.WPFClientInterface
                 ToggleAll();
             }
 
-            void Notify(BroadcastMessage message)
+            void MessageReceived(BroadcastMessage broadcastMsg)
             {
-                if (message.Author != ActiveMember)
-                    PcsNotifier.Notify(this, message); // Notify when it's not us
+                lock (@lock)
+                {
+                    Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+                            messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
+                }
+
+                void Notify(BroadcastMessage message)
+                {
+                    if (message.Author != ActiveMember)
+                        PcsNotifier.Notify(this, message); // Notify when it's not us
+                }
             }
         }
 
@@ -92,21 +99,6 @@ namespace PCS.WPFClientInterface
 
             messageTextBox.Text = string.Empty;
         }
-
-        private void AddResourceButton_Click(object sender, RoutedEventArgs e)
-        {
-            //MessageBox.Show("Only images are accepted at this time.", "Warning", MessageBoxButton.OK, MessageBoxImage.Information);
-
-            string path = null;
-            var openFileDialog = new OpenFileDialog
-            {
-                Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png"
-            };
-
-            if (openFileDialog.ShowDialog() == true)
-                path = openFileDialog.FileName;
-        }
-
 
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {

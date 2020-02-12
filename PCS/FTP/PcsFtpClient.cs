@@ -32,14 +32,14 @@ namespace PCS
             if (broadcastMsg == null)
                 throw new ArgumentNullException(nameof(broadcastMsg));
 
-            string remotePath = GetMessagePath(broadcastMsg.Message.ChannelName, broadcastMsg.DateTime);
+            string remotePath = GetMessagePath(broadcastMsg.BaseMessage.ChannelName, broadcastMsg.DateTime);
 
             CreateMissingDirectories(remotePath, true);
 
             using (var appendStream = ftpClient.OpenAppend(remotePath))
             using (var writer = new StreamWriter(appendStream, PcsServer.Encoding))
             {
-                string fileMessage = (char)2 + broadcastMsg.ToFileMessage() + (char)3; // TODO Do something for these variables
+                string fileMessage = ControlChars.StartOfText + broadcastMsg.ToFileMessage() + ControlChars.EndOfText; // TODO Do something for these variables
                 writer.WriteLine(fileMessage);
             }
         }
@@ -71,9 +71,9 @@ namespace PCS
 
                 foreach (char c in fullText)
                 {
-                    if (c == (char)2)
+                    if (c == ControlChars.StartOfText)
                         readingTextMsg = true;
-                    else if (c == (char)3)
+                    else if (c == ControlChars.EndOfText)
                     {
                         readingTextMsg = false;
                         yield return currentTextMsg;
@@ -84,22 +84,6 @@ namespace PCS
                         currentTextMsg += c;
                 }
             }
-        }
-
-        public void UploadResource(string localFilePath, out string generatedRemoteFileName)
-        {
-            generatedRemoteFileName = Path.GetFileName(localFilePath); // DOLATER: possible bug when two images have the same name!
-            string generatedRemotePath = Path.Combine(PcsFtpServer.ResourcePath, generatedRemoteFileName);
-
-            CreateMissingDirectories(generatedRemotePath, true);
-
-            ftpClient.UploadFile(localFilePath, generatedRemotePath);
-        }
-
-        public void DownloadResource(string remoteFileName, string localFilePath)
-        {
-            ftpClient.DownloadFile(localFilePath,
-                Path.Combine(PcsFtpServer.ResourcePath, remoteFileName));
         }
 
         private void CreateMissingDirectories(string remotePath, bool isFilePath)
