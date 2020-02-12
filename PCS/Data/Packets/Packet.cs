@@ -5,49 +5,53 @@ using System.Text;
 
 namespace PCS
 {
-    abstract class Packet
+    internal abstract class Packet
     {
-        //protected TransmissionPacket
+        public string Flag { get; }
 
-        //private TransmissionPacket(PacketType type)
-        //{
-
-        //}
-
-        public PacketType Type { get; }
-
-        protected Packet(PacketType type, string[] attributes)
+        public Packet(string flag)
         {
-            Type = type;
-            SetAttributes(attributes);
+            Flag = flag;
         }
 
         public static Packet FromTextData(string textData)
         {
             var attributes = Split(textData);
-
             string headerFlag = attributes[0];
-            var type = Flags.GetDataPacketType(headerFlag);
 
             attributes = attributes.Skip(1).Take(attributes.Length - 1).ToArray(); // Delete the flagHeader
                                                        
-            switch (type)
+            switch (headerFlag)
             {
-                case PacketType.MemberSignIn:
-                    return new SignInPacket(new Member());
+                case Flags.MemberSignIn:
+                    return PacketObjects.GetMemberSignIn(attributes);
+                case Flags.BroadcastMessage:
+                    return PacketObjects.GetBroadcastMessage(attributes);
+                case Flags.Message:
+                    return PacketObjects.GetMessage(attributes);
+                case Flags.ClientDisconnect:
+                    return PacketObjects.GetDisconnect();
+                default:
+                    throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
             }
         }
 
         public string GetTextData()
         {
-            string result = string.Empty;
-            result += Flags.GetFlag(Type);
+            string result = Flag;
 
             string[] attributes = GetAttributes();
 
             if (attributes != null) // Is not only a flag like Disconnect Packet
             {
-                result += Flags.StartOfText;
+                CreatePacket();
+            }
+
+            return result;
+
+            void CreatePacket()
+            {
+                result += ControlChars.StartOfText;
 
                 for (int i = 0; true; i++)
                 {
@@ -56,21 +60,18 @@ namespace PCS
                     if (i == attributes.Length - 1)
                         break;
 
-                    result += Flags.EndOfTransBlock;
+                    result += ControlChars.EndOfTransBlock;
                 }
 
-                result += Flags.EndOfText;
+                result += ControlChars.EndOfText;
             }
-
-            return result;
         }
 
         protected abstract string[] GetAttributes();
-        protected abstract void SetAttributes(string[] attributes);
 
-        private static string[] Split(string textData)
+        private static string[] Split(string textData) // TODO REDO
         {
-            return textData.Split(new char[] { Flags.StartOfText, Flags.EndOfText, Flags.EndOfTransBlock, Flags.EndOfTransmission },
+            return textData.Split(new char[] { ControlChars.StartOfText, ControlChars.EndOfText, ControlChars.EndOfTransBlock, ControlChars.EndOfTransmission },
                 StringSplitOptions.RemoveEmptyEntries);
         }
     }

@@ -16,9 +16,9 @@ namespace PCS.ConsoleApp
 
         static void Main()
         {
-            var msg = new Message[] { new Message("Salut", "Test", DateTime.Now, Member.Unknown),
-                new Message("Salut", "Test", DateTime.Now, Member.Unknown),
-                new Message("Salut", "Test", DateTime.Now, Member.Unknown),
+            var msg = new BroadcastMessage[] { new BroadcastMessage("Salut", "Test", DateTime.Now, Member.Unknown),
+                new BroadcastMessage("Salut", "Test", DateTime.Now, Member.Unknown),
+                new BroadcastMessage("Salut", "Test", DateTime.Now, Member.Unknown),
             };
 
             IFormatter formatter = new BinaryFormatter();

@@ -27,24 +27,24 @@ namespace PCS
             ftpClient.Connect();
         }
 
-        public void SaveMessage(Message message)
+        public void SaveMessage(BroadcastMessage broadcastMsg)
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+            if (broadcastMsg == null)
+                throw new ArgumentNullException(nameof(broadcastMsg));
 
-            string remotePath = GetMessagePath(message.ChannelName, message.DateTime);
+            string remotePath = GetMessagePath(broadcastMsg.Message.ChannelName, broadcastMsg.DateTime);
 
             CreateMissingDirectories(remotePath, true);
 
             using (var appendStream = ftpClient.OpenAppend(remotePath))
             using (var writer = new StreamWriter(appendStream, PcsServer.Encoding))
             {
-                string fileMessage = (char)2 + message.ToFileMessage() + (char)3; // TODO Do something for these variables
+                string fileMessage = (char)2 + broadcastMsg.ToFileMessage() + (char)3; // TODO Do something for these variables
                 writer.WriteLine(fileMessage);
             }
         }
 
-        public IEnumerable<Message> GetDailyMessages(string channelName, DateTime day)
+        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
         {
             string remotePath = GetMessagePath(channelName, day);
 
@@ -61,7 +61,7 @@ namespace PCS
 
             foreach (string fileMessage in fileMessages)
             {
-                yield return Message.FromFileMessage(fileMessage);
+                yield return BroadcastMessage.FromFileMessage(fileMessage);
             }
 
             IEnumerable<string> GetTextMessages(string fullText)

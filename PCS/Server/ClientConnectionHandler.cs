@@ -7,11 +7,12 @@ namespace PCS
 {
     internal class ClientConnectionHandler
     {
-        private readonly Member m_signedInMember = Member.Unknown;
+        private Member m_signedInMember = Member.Unknown;
+        private bool signedIn = false;
 
         public ClientConnectionHandler(PcsClient client, 
             Action<Member> signIn, 
-            Action<Message> addMessage, 
+            Action<BroadcastMessage> addMessage, 
             Action<PcsClient, Member> disconnect)
         {
             bool connected = true;
@@ -19,24 +20,24 @@ namespace PCS
             {
                 try
                 {
-                    var dataPacket = client.ReceivePacket();
+                    Packet packet = client.ReceivePacket();
 
-                    switch (dataPacket.Type)
+                    switch (packet)
                     {
-                        case PacketType.MemberSignIn:
+                        case SignInPacket signInPacket:
                             {
-                                m_signedInMember = (Member)dataPacket.Object;
+                                m_signedInMember = signInPacket.Member;
                                 signIn(m_signedInMember);
+                                signedIn = true;
                             }
                             break;
-                        case PacketType.Message:
+                        case MessagePacket messagePacket when signedIn:
                             {
-                                var clientMessage = (Message)dataPacket.Object;
-                                var serverMessage = new Message(clientMessage.Text, clientMessage.ChannelName, DateTime.Now, clientMessage.Author);
-                                addMessage(serverMessage);
+                                var message = new BroadcastMessage(messagePacket.Message, DateTime.Now, m_signedInMember);
+                                addMessage(message);
                             }
                             break;
-                        case PacketType.ClientDisconnect:
+                        case DisconnectPacket _ when signedIn:
                             {
                                 connected = false;
                             }
@@ -51,6 +52,11 @@ namespace PCS
 
             client.Disconnect();
             disconnect(client, m_signedInMember);
+        }
+
+        public void HandleConnection()
+        {
+
         }
     }
 }

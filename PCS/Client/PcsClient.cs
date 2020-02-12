@@ -19,11 +19,11 @@ namespace PCS
             AdapteeSocket = socket;
         }
 
-        internal DataPacket ReceivePacket()
+        internal Packet ReceivePacket()
         {
             string receivedData = Receive();
 
-            var dataPacket = DataPacket.FromTextData(receivedData);
+            var dataPacket = Packet.FromTextData(receivedData);
 
             return dataPacket;
 
@@ -41,7 +41,7 @@ namespace PCS
 
                     data += appendData;
 
-                    if (data.EndsWith(Flags.EndOfTransmission.ToString(CultureInfo.CurrentCulture), StringComparison.CurrentCulture))
+                    if (data.EndsWith(ControlChars.EndOfTransmission.ToString(CultureInfo.CurrentCulture), StringComparison.CurrentCulture))
                     {
                         break;
                     }
@@ -51,19 +51,15 @@ namespace PCS
             }
         }
 
-        internal void SendPacket(DataPacket packet)
+        internal void SendPacket(Packet packet)
         {
             if (packet == null)
                 throw new ArgumentNullException(nameof(packet));
 
-            string textData = "";
-
-            textData += packet.GetTextData();
-
-            textData += Flags.EndOfTransmission;
+            string textData = packet.GetTextData();
+            textData += ControlChars.EndOfTransmission;
 
             byte[] encodedMessage = PcsServer.Encoding.GetBytes(textData);
-
             AdapteeSocket.Send(encodedMessage);
         }
 

@@ -11,7 +11,7 @@ namespace PCS.WPFClientInterface
 {
     static class PcsNotifier
     {
-        public static void Notify(Window window, Message message)
+        public static void Notify(Window window, BroadcastMessage message)
         {
             WindowFlasher.Flash(window);
         }

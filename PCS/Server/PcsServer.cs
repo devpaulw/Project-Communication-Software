@@ -50,7 +50,7 @@ namespace PCS
 
                     var connectionThread = new Thread(()
                         => new ClientConnectionHandler(client,
-                            OnClientSignIn, OnMessageReceived, OnClientDisconnect));
+                            OnMemberSignIn, OnMessageReceived, OnClientDisconnect));
 
                     connectionThread.Start();
                 }
@@ -61,7 +61,7 @@ namespace PCS
             }
         }
 
-        private void OnMessageReceived(Message message)
+        private void OnMessageReceived(BroadcastMessage message)
         {
             lock (@lock) // Prevent that two thread don't call this function at the same time
             {
@@ -82,7 +82,7 @@ namespace PCS
                     if (message == null)
                         throw new ArgumentNullException(nameof(message));
 
-                    client.SendPacket(new DataPacket(PacketType.Message, message));
+                    client.SendPacket(new BroadcastMessagePacket(message));
                 }
             }
 
@@ -92,7 +92,7 @@ namespace PCS
             }
         }
 
-        private void OnClientSignIn(Member member)
+        private void OnMemberSignIn(Member member)
         {
             lock (@lock)
             {

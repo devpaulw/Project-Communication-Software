@@ -39,13 +39,13 @@ namespace PCS
                 if (member == null)
                     throw new ArgumentNullException(nameof(member));
 
-                SendPacket(new DataPacket(PacketType.MemberSignIn, member));
+                SendPacket(new SignInPacket(member));
 
                 IsConnected = true;
             }
         }
 
-        public void StartListenAsync(Action<Message> messageReceived)
+        public void StartListenAsync(Action<BroadcastMessage> messageReceived)
         {
             if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
@@ -59,14 +59,12 @@ namespace PCS
                 {
                     try
                     {
-                        var receivedPacket = ReceivePacket();
+                        Packet receivedPacket = ReceivePacket();
 
-                        if (receivedPacket.Type != PacketType.Message)
+                        if (receivedPacket is BroadcastMessagePacket == false)
                             throw new DataPacketException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 
-                        var gotMessage = (Message)receivedPacket.Object;
-
-                        messageReceived(gotMessage);
+                        messageReceived((receivedPacket as BroadcastMessagePacket).BroadcastMessage);
                     }
                     catch (SocketException)
                     {
@@ -82,14 +80,15 @@ namespace PCS
             if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
 
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
 
-            SendPacket(new DataPacket(PacketType.Message, message));
+            SendPacket(new MessagePacket(message));
         }
 
-        public IEnumerable<Message> GetDailyMessages(string channelName, DateTime day)
+        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
         {
-            var dailyMessages = new List<Message>(ftp.GetDailyMessages(channelName, day));
+            var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));
 
             return dailyMessages;
         }
@@ -98,7 +97,7 @@ namespace PCS
         {
             if (IsConnected)
             {
-                SendPacket(new DataPacket(PacketType.ClientDisconnect));
+                SendPacket(new DisconnectPacket());
 
                 IsConnected = false;
 

@@ -9,7 +9,7 @@ namespace PCS
     {
         public Member Member { get; set; }
 
-        public SignInPacket(Member member)
+        public SignInPacket(Member member) : base(Flags.MemberSignIn)
         {
             Member = member ?? throw new ArgumentNullException(nameof(member));
         }
@@ -21,12 +21,6 @@ namespace PCS
                 Member.Username,
                 Member.ID.ToString(CultureInfo.InvariantCulture)
             };
-        }
-
-        protected override void SetAttributes(string[] attributes)
-        {
-            Member.Username = attributes[0];
-            Member.ID = Convert.ToInt32(attributes[1], CultureInfo.InvariantCulture);
         }
     }
 }

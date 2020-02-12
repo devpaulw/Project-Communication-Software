@@ -47,7 +47,7 @@ namespace PCS.WPFClientInterface
             {
                 ActiveMember = signInWindow.SignedInMember;
 
-                clientAccessor.StartListenAsync((Message message) => // Start get messages dynamically
+                clientAccessor.StartListenAsync((BroadcastMessage message) => // Start get messages dynamically
                 {
                     Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
                         messageField.AddMessage(message, () => Notify(message)));
@@ -62,7 +62,7 @@ namespace PCS.WPFClientInterface
                 ToggleAll();
             }
 
-            void Notify(Message message)
+            void Notify(BroadcastMessage message)
             {
                 if (message.Author != ActiveMember)
                     PcsNotifier.Notify(this, message); // Notify when it's not us
@@ -87,7 +87,7 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel, DateTime.Now, ActiveMember);
+            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel);
             clientAccessor.SendMessage(message);
 
             messageTextBox.Text = string.Empty;

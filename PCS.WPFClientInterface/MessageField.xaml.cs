@@ -30,12 +30,12 @@ namespace PCS.WPFClientInterface
             Clear();
         }
 
-        public void AddMessage(Message message, Action notify)
+        public void AddMessage(BroadcastMessage broadcastMsg, Action notify)
         {
             notify();
 
             var appendParagraph = new Paragraph();
-            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
+            appendParagraph.Inlines.Add($"@{broadcastMsg.Author.Username} <{broadcastMsg.Message.ChannelName}> [{broadcastMsg.DateTime.ToLongTimeString()}]: {broadcastMsg.Message.Text}");
             appendParagraph.LineHeight = 3;
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
