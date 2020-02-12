@@ -149,5 +149,10 @@ namespace PCS.WPFClientInterface
         {
             testButton.IsEnabled = false;
         }
+
+        private void sendTaskButton_Click(object sender, RoutedEventArgs e)
+        {
+            clientAccessor.SendTask();
+        }
     }
 }

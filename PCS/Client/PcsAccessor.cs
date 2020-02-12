@@ -87,6 +87,11 @@ namespace PCS
             SendPacket(new MessagePacket(message));
         }
 
+        public void SendTask()
+        {
+            SendPacket(new TaskPacket());
+        }
+
         public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
         {
             var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));

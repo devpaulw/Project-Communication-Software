@@ -42,6 +42,9 @@ namespace PCS
                                 connected = false;
                             }
                             break;
+                        case TaskPacket taskPacket:
+                            Console.WriteLine("HELLO TASK");
+                            break;
                     }
                 }
                 catch (SocketException) // When An existing connection was forcibly closed by the remote host
