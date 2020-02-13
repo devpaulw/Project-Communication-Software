@@ -60,6 +60,7 @@ namespace PCS
             textData += ControlChars.EndOfTransmission;
 
             byte[] encodedMessage = PcsServer.Encoding.GetBytes(textData);
+
             AdapteeClient.Send(encodedMessage);
         }
 

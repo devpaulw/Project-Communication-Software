@@ -1,6 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -35,6 +39,16 @@ namespace PCS.WPFClientInterface
             InitializeComponent();
         }
 
+        private void Disconnect()
+        {
+            clientAccessor.Disconnect();
+            messageField.Clear();
+
+            channelSelector.Disable();
+
+            ToggleAll();
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ToggleAll();
@@ -49,8 +63,8 @@ namespace PCS.WPFClientInterface
             {
                 ActiveMember = signInWindow.SignedInMember;
 
-                clientAccessor.StartListenAsync((BroadcastMessage broadcastMsg) => MessageReceived(broadcastMsg));
-
+                clientAccessor.StartListenAsync((BroadcastMessage broadcastMsg) => MessageReceived(broadcastMsg)); // TODO Handle exceptions here.
+                
                 channelSelector.Enable();
 
                 // Get FTP Messages
@@ -83,28 +97,29 @@ namespace PCS.WPFClientInterface
         }
 
         private void DisconnectMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            clientAccessor.Disconnect();
-            messageField.Clear();
-
-            channelSelector.Disable();
-
-            ToggleAll();
-        }
+            => Disconnect(); // TODO: Do similar everywhere
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
             var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel);
-            clientAccessor.SendMessage(message);
 
-            messageTextBox.Text = string.Empty;
+            try
+            {
+                clientAccessor.SendMessage(message);
+                messageTextBox.Text = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Disconnect();
+            }
         }
 
         private void DisplayPreviousDayButton_Click(object sender, RoutedEventArgs e)
         {
             messageField.SetPreviousDay();
 
-            foreach (var message in Enumerable.Reverse(clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded)))
+            foreach (var message in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded).Reverse())
                 messageField.AddMessageOnTop(message);
         }
 
@@ -116,7 +131,7 @@ namespace PCS.WPFClientInterface
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
-                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\n[...]",
+                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\nVersion 0.3",
                 "About Project Communication Software",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
@@ -137,6 +152,7 @@ namespace PCS.WPFClientInterface
             ToggleDisconnectMenuItem();
             ToggleConnectMenuItem();
             ToggleSendMessageButton();
+            ToggleDisplayPreviousDayButton();
         }
 
         private void ToggleSendMessageButton()
@@ -145,13 +161,124 @@ namespace PCS.WPFClientInterface
 
         private void ToggleConnectMenuItem()
             => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
-        
+
         private void ToggleDisconnectMenuItem()
             => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
 
+        private void ToggleDisplayPreviousDayButton()
+            => displayPreviousDayButton.IsEnabled = clientAccessor.IsConnected;
+
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            testButton.IsEnabled = false;
+            Console.WriteLine("Hello World");
+
+            string provider = "System.Data.SqlClient";
+            string connStr = @"Data Source=DESKTOP-IQ5GUFM\;Initial Catalog=TESTDV;Integrated Security=True;Pooling=False";
+            DbProviderFactory factory = DbProviderFactories.GetFactory(provider);
+
+            using (DbConnection connection = factory.CreateConnection())
+            {
+                if (connection == null)
+                {
+                    Console.WriteLine("connect error");
+                    Console.ReadLine();
+                    return;
+                }
+
+                connection.ConnectionString = connStr;
+                connection.Open();
+                DbCommand command = factory.CreateCommand();
+
+                if (command == null)
+                {
+                    Console.WriteLine("Command error");
+                    Console.ReadLine();
+                    return;
+                }
+
+                command.Connection = connection;
+                command.CommandText = "Select * From Products";
+
+                using (DbDataReader dataReader = command.ExecuteReader())
+                {
+                    while (dataReader.Read())
+                    {
+                        Console.WriteLine($"Then {dataReader["ProdId"]} {dataReader["Product"]}");
+                        Console.ReadLine();
+                    }
+                }
+
+                //using (DbData)
+            }
+
+            //String str;
+            //SqlConnection myConn = new SqlConnection("Server=localhost;Integrated security=SSPI;database=master");
+
+            //str = "CREATE DATABASE MyDatabase ON PRIMARY " +
+            //    "(NAME = MyDatabase_Data, " +
+            //    "FILENAME = 'C:\\MyDatabaseData.mdf', " +
+            //    "SIZE = 2MB, MAXSIZE = 10MB, FILEGROWTH = 10%) " +
+            //    "LOG ON (NAME = MyDatabase_Log, " +
+            //    "FILENAME = 'C:\\MyDatabaseLog.ldf', " +
+            //    "SIZE = 1MB, " +
+            //    "MAXSIZE = 5MB, " +
+            //    "FILEGROWTH = 10%)";
+
+            //SqlCommand myCommand = new SqlCommand(str, myConn);
+            //try
+            //{
+            //    myConn.Open();
+            //    myCommand.ExecuteNonQuery();
+            //    MessageBox.Show("DataBase is Created Successfully", "MyProgram", MessageBoxButton.OK, MessageBoxImage.Information);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.ToString(), "MyProgram", MessageBoxButton.OK, MessageBoxImage.Information);
+            //}
+            //finally
+            //{
+            //    if (myConn.State == ConnectionState.Open)
+            //        myConn.Close();
+            //}
+
+            // your connection string
+            //string connectionString = ;
+
+            // your query:
+            //var query = GetDbCreationQuery();
+
+            //var conn = new SqlConnection(connectionString);
+            //var command = new SqlCommand(query, conn);
+
+            //try
+            //{
+            //    conn.Open();
+            //    command.ExecuteNonQuery();
+            //    MessageBox.Show("Database is created successfully", "MyProgram",
+            //                    MessageBoxButton.OK, MessageBoxImage.Information);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.ToString());
+            //}
+            //finally
+            //{
+            //    if ((conn.State == ConnectionState.Open))
+            //    {
+            //        conn.Close();
+            //    }
+            //}
+
+            //string GetDbCreationQuery()
+            //{
+            //    // your db name
+            //    string dbName = "MyDatabase";
+
+            //    // db creation query
+            //    string query = "CREATE DATABASE " + dbName + ";";
+
+            //    return query;
+            //}
         }
     }
 }
