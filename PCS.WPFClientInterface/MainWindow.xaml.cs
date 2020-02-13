@@ -100,6 +100,14 @@ namespace PCS.WPFClientInterface
             messageTextBox.Text = string.Empty;
         }
 
+        private void DisplayPreviousDayButton_Click(object sender, RoutedEventArgs e)
+        {
+            messageField.SetPreviousDay();
+
+            foreach (var message in Enumerable.Reverse(clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded)))
+                messageField.AddMessageOnTop(message);
+        }
+
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             ToggleSendMessageButton();
@@ -108,7 +116,7 @@ namespace PCS.WPFClientInterface
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
-                "Project Communication Software (P.C.S.), developed by SpydotNet and Binary Bluff.\n[...]",
+                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\n[...]",
                 "About Project Communication Software",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
@@ -129,19 +137,15 @@ namespace PCS.WPFClientInterface
             ToggleDisconnectMenuItem();
             ToggleConnectMenuItem();
             ToggleSendMessageButton();
-            //ToggleAddResourceButton();
         }
 
         private void ToggleSendMessageButton()
             => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
             && clientAccessor.IsConnected;
 
-        //private void ToggleAddResourceButton()
-        //    => new Action(() {}).Invoke(); addResourceButton.IsEnabled = clientAccessor.IsConnected;
-
         private void ToggleConnectMenuItem()
             => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
-
+        
         private void ToggleDisconnectMenuItem()
             => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
 

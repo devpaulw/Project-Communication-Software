@@ -23,24 +23,41 @@ namespace PCS.WPFClientInterface
     {
         const int ImageHeight = 260;
 
-        public MessageField()
+        public DateTime LastDayLoaded { get; set; } = DateTime.Now;
+
+        public MessageField() // TODO Implement ClientAccessor reference for this class it will be simpler for GetDailyMessages
         {
             InitializeComponent();
 
             Clear();
         }
 
-        public void AddMessage(BroadcastMessage broadcastMsg, Action notify)
+        public void SetPreviousDay()
+        {
+            const long oneDayTicks = 864000000000;
+            LastDayLoaded = new DateTime(LastDayLoaded.Ticks - oneDayTicks);
+        }
+
+        public void AddMessage(BroadcastMessage message, Action notify)
         {
             notify();
 
             var appendParagraph = new Paragraph();
-            appendParagraph.Inlines.Add($"@{broadcastMsg.Author.Username} <{broadcastMsg.BaseMessage.ChannelName}> [{broadcastMsg.DateTime.ToLongTimeString()}]: {broadcastMsg.BaseMessage.Text}");
+            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.BaseMessage.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.BaseMessage.Text}");
             appendParagraph.LineHeight = 3;
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
 
             ScrollToEnd();
+        }
+
+        public void AddMessageOnTop(BroadcastMessage message)
+        {
+            var appendParagraph = new Paragraph();
+            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.BaseMessage.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.BaseMessage.Text}");
+            appendParagraph.LineHeight = 3;
+
+            fieldRtb.Document.Blocks.InsertBefore(fieldRtb.Document.Blocks.FirstBlock, appendParagraph);
         }
 
         public void AddImage(BitmapImage bitmap) 
@@ -60,7 +77,11 @@ namespace PCS.WPFClientInterface
             fieldRtb.Document.Blocks.Add(paragraph);
         }
 
-        public void Clear() => fieldRtb.Document.Blocks.Clear();
+        public void Clear()
+        {
+            fieldRtb.Document.Blocks.Clear();
+            LastDayLoaded = DateTime.Now;
+        }
 
         public void ScrollToEnd() => fieldRtb.ScrollToEnd();
     }

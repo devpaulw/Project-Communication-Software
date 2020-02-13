@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace PCS
 {
-    public sealed class Message
+    public class Message
     {
         public string Text { get; set; }
         public string ChannelName { get; set; }
