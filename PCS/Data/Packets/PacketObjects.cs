@@ -39,5 +39,19 @@ namespace PCS
 
         public static DisconnectPacket GetDisconnect() => 
             new DisconnectPacket();
+
+        public static TaskPacket GetTask(string[] attributes)
+        {
+            string name = attributes[0];
+
+            return new TaskPacket(new Task(name));
+        }
+
+        public static TaskListPacket GetTaskList(string[] attributes)
+        {
+            string name = attributes[0];
+
+            return new TaskListPacket(new TaskList(name));
+        }
     }
 }

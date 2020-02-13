@@ -6,14 +6,16 @@ namespace PCS
 {
     class TaskPacket : Packet
     {
-        public TaskPacket() : base(Flags.Task)
-        {
+        public Task Task { get; set; }
 
+        public TaskPacket(Task task) : base(Flags.Task)
+        {
+            Task = task ?? throw new ArgumentNullException(nameof(task));
         }
 
         protected override string[] GetAttributes()
         {
-            return new string[] {"voiture"};
+            return new string[] { Task.Name };
         }
     }
 }

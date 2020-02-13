@@ -43,7 +43,10 @@ namespace PCS
                             }
                             break;
                         case TaskPacket taskPacket:
-                            Console.WriteLine("HELLO TASK");
+                            Console.WriteLine(taskPacket.Task.Name);
+                            break;
+                        case TaskListPacket taskListPacket:
+                            Console.WriteLine(taskListPacket.TaskList.Name);
                             break;
                     }
                 }

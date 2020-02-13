@@ -87,9 +87,20 @@ namespace PCS
             SendPacket(new MessagePacket(message));
         }
 
-        public void SendTask()
+        public void SendTask(Task task)
         {
-            SendPacket(new TaskPacket());
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
+            SendPacket(new TaskPacket(task));
+        }
+
+        public void SendList(TaskList taskList)
+        {
+            if (taskList == null)
+                throw new ArgumentNullException(nameof(taskList));
+
+            SendPacket(new TaskListPacket(taskList));
         }
 
         public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)

@@ -29,7 +29,9 @@ namespace PCS
                 case Flags.ClientDisconnect:
                     return PacketObjects.GetDisconnect();
                 case Flags.Task:
-                    return new TaskPacket();
+                    return PacketObjects.GetTask(attributes);
+                case Flags.TaskList:
+                    return PacketObjects.GetTaskList(attributes);
                 default:
                     throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
             }

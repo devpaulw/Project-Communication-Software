@@ -152,7 +152,16 @@ namespace PCS.WPFClientInterface
 
         private void sendTaskButton_Click(object sender, RoutedEventArgs e)
         {
-            clientAccessor.SendTask();
+            Task task = new Task("Ranger ma chambre");
+
+            clientAccessor.SendTask(task);
+        }
+
+        private void sendListButton_Click(object sender, RoutedEventArgs e)
+        {
+            TaskList taskList = new TaskList("To do");
+
+            clientAccessor.SendList(taskList);
         }
     }
 }

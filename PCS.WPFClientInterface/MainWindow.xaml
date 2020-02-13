@@ -45,6 +45,7 @@
 		<Button x:Name="sendMessageButton" IsDefault="True" Content="Send message" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142"  Height="40" Grid.Column="5" Margin="295,530,-32,0" Click="SendMessageButton_Click" IsEnabled="False"/>
 		<Button x:Name="testButton" Content="Test Button (experimental)" Grid.Column="5" HorizontalAlignment="Left" Height="25" Margin="295,615,-32,0" VerticalAlignment="Top" Width="142" Click="TestButton_Click"/>
         <Button x:Name="sendTaskButton" Content="SendTask" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="29,551,0,0" Click="sendTaskButton_Click"/>
+        <Button x:Name="sendListButton" Content="SendList" HorizontalAlignment="Left" Margin="29,589,0,0" VerticalAlignment="Top" Width="75" Click="sendListButton_Click"/>
 
     </Grid>
 
