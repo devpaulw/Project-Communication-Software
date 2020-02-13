@@ -53,5 +53,10 @@ namespace PCS
 
             return new TaskListPacket(new TaskList(name));
         }
+
+        public static ToDoListPacket GetToDoList()
+        {
+            return new ToDoListPacket(new ToDoList());
+        }
     }
 }

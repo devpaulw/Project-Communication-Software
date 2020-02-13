@@ -48,6 +48,9 @@ namespace PCS
                         case TaskListPacket taskListPacket:
                             Console.WriteLine(taskListPacket.TaskList.Name);
                             break;
+                        case ToDoListPacket toDoListPacket:
+                            Console.WriteLine(toDoListPacket.ToDoList.Name);
+                            break;
                     }
                 }
                 catch (SocketException) // When An existing connection was forcibly closed by the remote host

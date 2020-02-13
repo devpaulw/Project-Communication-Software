@@ -103,6 +103,14 @@ namespace PCS
             SendPacket(new TaskListPacket(taskList));
         }
 
+        public void SendToDoList(ToDoList toDoList)
+        {
+            if (toDoList == null)
+                throw new ArgumentNullException(nameof(toDoList));
+
+            SendPacket(new ToDoListPacket(toDoList));
+        }
+
         public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
         {
             var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));

@@ -11,6 +11,7 @@ namespace PCS
         public const string MemberSignIn = "SI";
         public const string Task = "TK";
         public const string TaskList = "TL";
+        public const string ToDoList = "TD";
         public const string ClientDisconnect = "DC";
     }
 }

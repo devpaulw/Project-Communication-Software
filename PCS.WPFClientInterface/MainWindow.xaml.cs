@@ -129,6 +129,7 @@ namespace PCS.WPFClientInterface
             ToggleDisconnectMenuItem();
             ToggleConnectMenuItem();
             ToggleSendMessageButton();
+            ToggleNewToDoListMenuItem();
             //ToggleAddResourceButton();
         }
 
@@ -144,6 +145,8 @@ namespace PCS.WPFClientInterface
 
         private void ToggleDisconnectMenuItem()
             => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
+        private void ToggleNewToDoListMenuItem()
+            => newMenuItem.IsEnabled = clientAccessor.IsConnected;
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
@@ -162,6 +165,13 @@ namespace PCS.WPFClientInterface
             TaskList taskList = new TaskList("To do");
 
             clientAccessor.SendList(taskList);
+        }
+
+        private void NewMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ToDoList toDoList = new ToDoList();
+
+            clientAccessor.SendToDoList(toDoList);
         }
     }
 }

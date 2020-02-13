@@ -32,6 +32,8 @@ namespace PCS
                     return PacketObjects.GetTask(attributes);
                 case Flags.TaskList:
                     return PacketObjects.GetTaskList(attributes);
+                case Flags.ToDoList:
+                    return PacketObjects.GetToDoList();
                 default:
                     throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
             }

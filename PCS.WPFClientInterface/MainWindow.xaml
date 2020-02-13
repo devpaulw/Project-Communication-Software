@@ -23,21 +23,25 @@
 			<ColumnDefinition Width="77*"/>
 			<ColumnDefinition Width="362*"/>
 		</Grid.ColumnDefinitions>
-		<Menu VerticalAlignment="Top" Height="25" Grid.ColumnSpan="6">
-			<MenuItem Header="_File" Height="25" FontSize="13">
-				<!--<Separator />-->
-				<MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
-			</MenuItem>
-			<MenuItem Header="_Server" Height="25" FontSize="13">
-				<MenuItem x:Name="connectMenuItem" Header="_Connect" Click="ConnectMenuItem_Click" />
-				<MenuItem x:Name="disconnectMenuItem" Header="_Disconnect" Click="DisconnectMenuItem_Click" />
-				<!--<Separator />-->
-			</MenuItem>
-			<MenuItem Header="_Help" Height="25" FontSize="13">
-				<MenuItem x:Name="aboutMenuItem" Header="_About P.C.S." Click="AboutMenuItem_Click" />
-				<!--<Separator />-->
-			</MenuItem>
-		</Menu>
+        <Menu VerticalAlignment="Top" Height="25" Grid.ColumnSpan="6">
+            <MenuItem Header="_File" Height="25" FontSize="13">
+                <!--<Separator />-->
+                <MenuItem Header="_Exit" Click="ExitMenuItem_Click" />
+            </MenuItem>
+            <MenuItem Header="_Server" Height="25" FontSize="13">
+                <MenuItem x:Name="connectMenuItem" Header="_Connect" Click="ConnectMenuItem_Click" />
+                <MenuItem x:Name="disconnectMenuItem" Header="_Disconnect" Click="DisconnectMenuItem_Click" />
+                <!--<Separator />-->
+            </MenuItem>
+            <MenuItem Header="To do list" Height="25">
+                <MenuItem x:Name="newMenuItem" Header="_New" Click="NewMenuItem_Click" />
+                <!--<Separator />-->
+            </MenuItem>
+            <MenuItem Header="_Help" Height="25" FontSize="13">
+                <MenuItem x:Name="aboutMenuItem" Header="_About P.C.S." Click="AboutMenuItem_Click" />
+                <!--<Separator />-->
+            </MenuItem>
+        </Menu>
 
 		<local:ChannelSelector x:Name="channelSelector" Margin="10,30,97,116"  />
 		<local:MessageField x:Name="messageField" Margin="182,30,-32,0" RenderTransformOrigin="0.479,0.299" Grid.ColumnSpan="6" Height="495" VerticalAlignment="Top" />
