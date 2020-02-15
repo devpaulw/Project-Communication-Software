@@ -9,114 +9,121 @@ using System.Threading;
 
 namespace PCS
 {
-    public class PcsAccessor : PcsClient
-    {
-        private Thread serverListenThread;
-        private PcsFtpClient ftp;
+	public class PcsAccessor : PcsClient
+	{
+		private Thread serverListenThread;
+		private PcsFtpClient ftp;
 
-        public bool IsConnected { get; private set; }
+		public bool IsConnected { get; private set; }
 
-        public PcsAccessor()
-        {
-        }
+		public PcsAccessor()
+		{
+		}
 
-        public void Connect(IPAddress ip, Member member)
-        {
-            if (ip == null)
-                throw new ArgumentNullException(nameof(ip));
+		public void Connect(IPAddress ip, Member member)
+		{
+			if (ip == null)
+				throw new ArgumentNullException(nameof(ip));
 
-            AdapteeClient = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            var endPoint = new IPEndPoint(ip, PcsServer.Port);
+			AdapteeClient = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			var endPoint = new IPEndPoint(ip, PcsServer.Port);
 
-            AdapteeClient.Connect(endPoint);
-            Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
+			AdapteeClient.Connect(endPoint);
+			Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
 
-            ftp = new PcsFtpClient(ip);
+			ftp = new PcsFtpClient(ip);
 
-            SignIn();
+			SignIn();
 
-            void SignIn()
-            {
-                if (member == null)
-                    throw new ArgumentNullException(nameof(member));
+			void SignIn()
+			{
+				if (member == null)
+					throw new ArgumentNullException(nameof(member));
 
-                SendPacket(new SignInPacket(member));
+				SendPacket(new SignInPacket(member));
 
-                IsConnected = true;
-            }
-        }
+				IsConnected = true;
+			}
+		}
 
-        public void StartListenAsync(Action<BroadcastMessage> messageReceived)
-        {
-            if (!IsConnected)
-                throw new Exception(Messages.Exceptions.NotConnected);
+		public void StartListenAsync(Action<BroadcastMessage> messageReceived, Action<Channel> onChannelReceived)
+		{
+			if (!IsConnected)
+				throw new Exception(Messages.Exceptions.NotConnected);
 
-            serverListenThread = new Thread(() => Listen());
-            serverListenThread.Start();
+			serverListenThread = new Thread(() => Listen());
+			serverListenThread.Start();
 
-            void Listen()
-            {
-                while (IsConnected)
-                {
-                    try
-                    {
-                        Packet receivedPacket = ReceivePacket();
+			void Listen()
+			{
+				while (IsConnected)
+				{
+					try
+					{
+						Packet receivedPacket = ReceivePacket();
 
-                        if (receivedPacket is BroadcastMessagePacket == false)
-                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+						if (receivedPacket is BroadcastMessagePacket)
+							messageReceived((receivedPacket as BroadcastMessagePacket).BroadcastMessage);
+						else if (receivedPacket is ChannelPacket)
+							onChannelReceived((receivedPacket as ChannelPacket).Channel);
+						else
+							throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+					}
+					catch (SocketException)
+					{
+						if (IsConnected)
+							throw;
+					}
+				}
+			}
+		}
 
-                        messageReceived((receivedPacket as BroadcastMessagePacket).BroadcastMessage);
-                    }
-                    catch (SocketException)
-                    {
-                        if (IsConnected)
-                            throw;
-                    }
-                }
-            }
-        }
+		public void SendMessage(Message message)
+		{
+			if (!IsConnected)
+				throw new Exception(Messages.Exceptions.NotConnected);
 
-        public void SendMessage(Message message)
-        {
-            if (!IsConnected)
-                throw new Exception(Messages.Exceptions.NotConnected);
+			if (message == null)
+				throw new ArgumentNullException(nameof(message));
 
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+			SendPacket(new MessagePacket(message));
+		}
 
-            SendPacket(new MessagePacket(message));
-        }
+		public IEnumerable<Channel> GetChannels()
+		{
+			return ftp.GetChannels();
+		}
 
-        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
-        {
-            var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));
+		public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
+		{
+			var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));
 
-            return dailyMessages;
-        }
+			return dailyMessages;
+		}
 
-        public override void Disconnect()
-        {
-            if (IsConnected)
-            {
-                SendPacket(new DisconnectPacket());
+		public override void Disconnect()
+		{
+			if (IsConnected)
+			{
+				SendPacket(new DisconnectPacket());
 
-                IsConnected = false;
+				IsConnected = false;
 
-                base.Disconnect();
-            }
-        }
+				base.Disconnect();
+			}
+		}
 
-        protected override void Dispose(bool disposing)
-        {
-            if (!IsConnected)
-                return;
+		protected override void Dispose(bool disposing)
+		{
+			if (!IsConnected)
+				return;
 
-            if (!disposedValue && disposing)
-            {
-                ftp.Dispose();
+			if (!disposedValue && disposing)
+			{
+				ftp.Dispose();
 
-                base.Dispose(disposing);
-            }
-        }
-    }
+				base.Dispose(disposing);
+			}
+		}
+	}
 }

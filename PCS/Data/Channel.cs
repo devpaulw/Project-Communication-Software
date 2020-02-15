@@ -1,4 +1,6 @@
-﻿namespace PCS
+﻿using System;
+
+namespace PCS
 {
 	public class Channel
 	{

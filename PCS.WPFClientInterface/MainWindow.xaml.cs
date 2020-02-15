@@ -23,153 +23,160 @@ using System.Windows.Threading;
 
 namespace PCS.WPFClientInterface
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
-    {
-        private readonly object @lock = new object();
+	/// <summary>
+	/// Interaction logic for MainWindow.xaml
+	/// </summary>
+	public partial class MainWindow : Window
+	{
+		private readonly object @lock = new object();
 
-        private PcsAccessor clientAccessor = new PcsAccessor();
+		private PcsAccessor clientAccessor = new PcsAccessor();
 
-        public Member ActiveMember { get; private set; }
+		public Member ActiveMember { get; private set; }
 
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+		public MainWindow()
+		{
+			InitializeComponent();
+		}
 
-        private void Disconnect()
-        {
-            clientAccessor.Disconnect();
-            messageField.Clear();
+		private void Disconnect()
+		{
+			clientAccessor.Disconnect();
+			messageField.Clear();
 
-            channelSelector.Disable();
+			channelSelector.Disable();
 
-            ToggleAll();
-        }
+			ToggleAll();
+		}
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            ToggleAll();
-        }
+		private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			ToggleAll();
+		}
 
-        private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var signInWindow = new ConnectionWindow(ref clientAccessor);
-            signInWindow.ShowDialog();
+		private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			var signInWindow = new ConnectionWindow(ref clientAccessor);
+			signInWindow.ShowDialog();
 
-            if (signInWindow.Connected)
-            {
-                ActiveMember = signInWindow.SignedInMember;
+			if (signInWindow.Connected)
+			{
+				ActiveMember = signInWindow.SignedInMember;
 
-                clientAccessor.StartListenAsync((BroadcastMessage broadcastMsg) => MessageReceived(broadcastMsg)); // TODO Handle exceptions here.
-                
-                channelSelector.Enable();
+				clientAccessor.StartListenAsync(MessageReceived, OnChannelReceived); // TODO Handle exceptions here.
 
-                // Get FTP Messages
-                foreach (var dailyMessage in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, DateTime.Now))
-                    messageField.AddMessage(dailyMessage, () => { });
+				//channelSelector.Enable();
+				channelSelector.Initialize(clientAccessor.GetChannels());
 
-                ToggleAll();
-            }
+				// Get FTP Messages
+				foreach (var dailyMessage in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, DateTime.Now))
+					messageField.AddMessage(dailyMessage, () => { });
 
-            void MessageReceived(BroadcastMessage broadcastMsg)
-            {
-                lock (@lock)
-                {
-                    Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                            messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
-                }
+				ToggleAll();
+			}
 
-                void Notify(BroadcastMessage message)
-                {
-                    if (message.Author != ActiveMember)
-                        PcsNotifier.Notify(this, message); // Notify when it's not us
-                }
-            }
-        }
+			void MessageReceived(BroadcastMessage broadcastMsg)
+			{
+				lock (@lock)
+				{
+					Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+							messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
+				}
 
-        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            clientAccessor.Disconnect();
-            Application.Current.Shutdown();
-        }
+				void Notify(BroadcastMessage message)
+				{
+					if (message.Author != ActiveMember)
+						PcsNotifier.Notify(this, message); // Notify when it's not us
+				}
+			}
 
-        private void DisconnectMenuItem_Click(object sender, RoutedEventArgs e)
-            => Disconnect(); // TODO: Do similar everywhere
+			void OnChannelReceived(Channel channel)
+			{
+				// TODO edit a channel
+			}
+		}
 
-        private void SendMessageButton_Click(object sender, RoutedEventArgs e)
-        {
-            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel);
 
-            try
-            {
-                clientAccessor.SendMessage(message);
-                messageTextBox.Text = string.Empty;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Disconnect();
-            }
-        }
+		private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			clientAccessor.Disconnect();
+			Application.Current.Shutdown();
+		}
 
-        private void DisplayPreviousDayButton_Click(object sender, RoutedEventArgs e)
-        {
-            messageField.SetPreviousDay();
+		private void DisconnectMenuItem_Click(object sender, RoutedEventArgs e)
+			=> Disconnect(); // TODO: Do similar everywhere
 
-            foreach (var message in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded).Reverse())
-                messageField.AddMessageOnTop(message);
-        }
+		private void SendMessageButton_Click(object sender, RoutedEventArgs e)
+		{
+			var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel);
 
-        private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ToggleSendMessageButton();
-        }
+			try
+			{
+				clientAccessor.SendMessage(message);
+				messageTextBox.Text = string.Empty;
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				Disconnect();
+			}
+		}
 
-        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show(
-                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\nVersion 0.3",
-                "About Project Communication Software",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-        }
+		private void DisplayPreviousDayButton_Click(object sender, RoutedEventArgs e)
+		{
+			messageField.SetPreviousDay();
 
-        private void ScrollToEndButton_Click(object sender, RoutedEventArgs e)
-        {
-            messageField.ScrollToEnd();
-        }
+			foreach (var message in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded).Reverse())
+				messageField.AddMessageOnTop(message);
+		}
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            clientAccessor.Dispose();
-        }
+		private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			ToggleSendMessageButton();
+		}
 
-        private void ToggleAll()
-        {
-            ToggleDisconnectMenuItem();
-            ToggleConnectMenuItem();
-            ToggleSendMessageButton();
-            ToggleDisplayPreviousDayButton();
-        }
+		private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			MessageBox.Show(
+				"Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\nVersion 0.3",
+				"About Project Communication Software",
+				MessageBoxButton.OK,
+				MessageBoxImage.Information);
+		}
 
-        private void ToggleSendMessageButton()
-            => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
-            && clientAccessor.IsConnected;
+		private void ScrollToEndButton_Click(object sender, RoutedEventArgs e)
+		{
+			messageField.ScrollToEnd();
+		}
 
-        private void ToggleConnectMenuItem()
-            => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			clientAccessor.Dispose();
+		}
 
-        private void ToggleDisconnectMenuItem()
-            => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
+		private void ToggleAll()
+		{
+			ToggleDisconnectMenuItem();
+			ToggleConnectMenuItem();
+			ToggleSendMessageButton();
+			ToggleDisplayPreviousDayButton();
+		}
 
-        private void ToggleDisplayPreviousDayButton()
-            => displayPreviousDayButton.IsEnabled = clientAccessor.IsConnected;
+		private void ToggleSendMessageButton()
+			=> sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
+			&& clientAccessor.IsConnected;
 
-        private void TestButton_Click(object sender, RoutedEventArgs e)
-        {
-        }
-    }
+		private void ToggleConnectMenuItem()
+			=> connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
+
+		private void ToggleDisconnectMenuItem()
+			=> disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
+
+		private void ToggleDisplayPreviousDayButton()
+			=> displayPreviousDayButton.IsEnabled = clientAccessor.IsConnected;
+
+		private void TestButton_Click(object sender, RoutedEventArgs e)
+		{
+		}
+	}
 }

@@ -27,12 +27,22 @@ namespace PCS.WPFClientInterface
 			InitializeComponent();
 		}
 
+		public void Add(Channel channel)
+		{
+			ChannelList.Items.Add(channel.Name);
+			if (ChannelList.Items.Count == 1)
+			{
+
+			}
+		}
+
 		public void Enable()
 		{
 			// TODO retrieve the channels from the server
-			ChannelList.Items.Add("channel1");
-			ChannelList.Items.Add("channel2");
-			ChannelList.SelectedItem = ChannelList.Items[0];
+			if (ChannelList.Items.Count == 0)
+			{
+				throw new Exception("Channels not received");
+			}
 		}
 
 		public void Disable()
@@ -40,6 +50,15 @@ namespace PCS.WPFClientInterface
 			ChannelList.Items.Clear();
 		}
 
+		internal void Initialize(IEnumerable<Channel> channels)
+		{
+			if (channels.DefaultIfEmpty() == default)
+				throw new ArgumentNullException(nameof(channels));
 
+			foreach (var channel in channels)
+				Add(channel);
+
+			ChannelList.SelectedItem = ChannelList.Items[0];
+		}
 	}
 }

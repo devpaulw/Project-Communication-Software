@@ -39,5 +39,12 @@ namespace PCS
 
         public static DisconnectPacket GetDisconnect() => 
             new DisconnectPacket();
+
+        public static ChannelPacket GetChannel(string[] attributes)
+        {
+            string name = attributes[0];
+
+            return new ChannelPacket(new Channel(name));
+        }
     }
 }

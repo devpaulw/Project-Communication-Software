@@ -44,6 +44,17 @@ namespace PCS
             }
         }
 
+        public IEnumerable<Channel> GetChannels()
+        {
+            // TODO retrieve from files
+            return new List<Channel>()
+            {
+                new Channel("channel1"),
+                new Channel("channel2"),
+                new Channel("channel3")
+            };
+        }
+
         public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
         {
             string remotePath = GetMessagePath(channelName, day);
