@@ -14,6 +14,7 @@ namespace PCS
 		private Thread serverListenThread;
 		private PcsFtpClient ftp;
 
+		public Channel FocusedChannel { get; set; }
 		public bool IsConnected { get; private set; }
 
 		public PcsAccessor()
@@ -24,6 +25,8 @@ namespace PCS
 		{
 			if (ip == null)
 				throw new ArgumentNullException(nameof(ip));
+			if (member == null)
+				throw new ArgumentNullException(nameof(member));
 
 			AdapteeClient = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 			var endPoint = new IPEndPoint(ip, PcsServer.Port);
@@ -37,9 +40,6 @@ namespace PCS
 
 			void SignIn()
 			{
-				if (member == null)
-					throw new ArgumentNullException(nameof(member));
-
 				SendPacket(new SignInPacket(member));
 
 				IsConnected = true;
@@ -80,11 +80,10 @@ namespace PCS
 
 		public void SendMessage(Message message)
 		{
-			if (!IsConnected)
-				throw new Exception(Messages.Exceptions.NotConnected);
-
 			if (message == null)
 				throw new ArgumentNullException(nameof(message));
+			if (!IsConnected)
+				throw new Exception(Messages.Exceptions.NotConnected);
 
 			SendPacket(new MessagePacket(message));
 		}
@@ -94,11 +93,9 @@ namespace PCS
 			return ftp.GetChannels();
 		}
 
-		public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
+		public IEnumerable<BroadcastMessage> GetDailyMessages(DateTime day)
 		{
-			var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));
-
-			return dailyMessages;
+			return new List<BroadcastMessage>(ftp.GetDailyMessages(FocusedChannel, day));
 		}
 
 		public override void Disconnect()

@@ -30,7 +30,8 @@ namespace PCS.WPFClientInterface
 	{
 		private readonly object @lock = new object();
 
-		private PcsAccessor clientAccessor = new PcsAccessor();
+		private PcsAccessor accessor = new PcsAccessor();
+
 
 		public Member ActiveMember { get; private set; }
 
@@ -41,10 +42,9 @@ namespace PCS.WPFClientInterface
 
 		private void Disconnect()
 		{
-			clientAccessor.Disconnect();
+			accessor.Disconnect();
 			messageField.Clear();
-
-			channelSelector.Disable();
+			channelSelector.Stop();
 
 			ToggleAll();
 		}
@@ -56,20 +56,20 @@ namespace PCS.WPFClientInterface
 
 		private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
 		{
-			var signInWindow = new ConnectionWindow(ref clientAccessor);
+			var signInWindow = new ConnectionWindow(ref accessor);
 			signInWindow.ShowDialog();
 
 			if (signInWindow.Connected)
 			{
 				ActiveMember = signInWindow.SignedInMember;
 
-				clientAccessor.StartListenAsync(MessageReceived, OnChannelReceived); // TODO Handle exceptions here.
+				accessor.StartListenAsync(MessageReceived, OnChannelReceived); // TODO Handle exceptions here.
 
 				//channelSelector.Enable();
-				channelSelector.Initialize(clientAccessor.GetChannels());
+				channelSelector.Initialize(accessor, ResetMessageField);
 
 				// Get FTP Messages
-				foreach (var dailyMessage in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, DateTime.Now))
+				foreach (var dailyMessage in accessor.GetDailyMessages(DateTime.Now))
 					messageField.AddMessage(dailyMessage, () => { });
 
 				ToggleAll();
@@ -96,10 +96,9 @@ namespace PCS.WPFClientInterface
 			}
 		}
 
-
 		private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
 		{
-			clientAccessor.Disconnect();
+			accessor.Disconnect();
 			Application.Current.Shutdown();
 		}
 
@@ -108,11 +107,11 @@ namespace PCS.WPFClientInterface
 
 		private void SendMessageButton_Click(object sender, RoutedEventArgs e)
 		{
-			var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel);
+			var message = new Message(messageTextBox.Text, channelSelector.FocusedChannel.Name);
 
 			try
 			{
-				clientAccessor.SendMessage(message);
+				accessor.SendMessage(message);
 				messageTextBox.Text = string.Empty;
 			}
 			catch (Exception ex)
@@ -126,7 +125,7 @@ namespace PCS.WPFClientInterface
 		{
 			messageField.SetPreviousDay();
 
-			foreach (var message in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded).Reverse())
+			foreach (var message in accessor.GetDailyMessages(messageField.LastDayLoaded).Reverse())
 				messageField.AddMessageOnTop(message);
 		}
 
@@ -151,7 +150,7 @@ namespace PCS.WPFClientInterface
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			clientAccessor.Dispose();
+			accessor.Dispose();
 		}
 
 		private void ToggleAll()
@@ -164,19 +163,32 @@ namespace PCS.WPFClientInterface
 
 		private void ToggleSendMessageButton()
 			=> sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
-			&& clientAccessor.IsConnected;
+			&& accessor.IsConnected;
 
 		private void ToggleConnectMenuItem()
-			=> connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
+			=> connectMenuItem.IsEnabled = !accessor.IsConnected;
 
 		private void ToggleDisconnectMenuItem()
-			=> disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
+			=> disconnectMenuItem.IsEnabled = accessor.IsConnected;
 
 		private void ToggleDisplayPreviousDayButton()
-			=> displayPreviousDayButton.IsEnabled = clientAccessor.IsConnected;
+			=> displayPreviousDayButton.IsEnabled = accessor.IsConnected;
 
 		private void TestButton_Click(object sender, RoutedEventArgs e)
 		{
+		}
+
+		public void ResetMessageField()
+		{
+			messageField.Clear();
+
+			foreach (var message in accessor.GetDailyMessages(DateTime.Now))
+				messageField.AddMessage(message, () => { });
+		}
+
+		private void channelSelector_Loaded(object sender, RoutedEventArgs e)
+		{
+
 		}
 	}
 }

@@ -21,7 +21,6 @@ namespace PCS
 		private readonly PcsFtpClient ftpClient;
 		private readonly List<PcsClient> connectedClients;
 		private readonly object @lock = new object();
-		private readonly List<Channel> channels;
 
 		public const ushort Port = 6783;
 		public static readonly Encoding Encoding = Encoding.UTF8;
@@ -35,12 +34,6 @@ namespace PCS
 			listener = new PcsListener(serverAddress);
 			ftpClient = new PcsFtpClient(serverAddress);
 			connectedClients = new List<PcsClient>();
-			channels = new List<Channel>();
-
-			// TEMP
-			channels.Add(new Channel("channel1"));
-			channels.Add(new Channel("channel2"));
-			channels.Add(new Channel("channel3"));
 		}
 
 		public void StartHosting()
@@ -54,16 +47,14 @@ namespace PCS
 				while (true)
 				{
 					PcsClient client = listener.Accept();
-
-					//foreach (var channel in channels)
-						//client.SendPacket(new ChannelPacket(channel));
-
 					connectedClients.Add(client);
 
 					var connectionThread = new Thread(()
-						=> new ClientConnectionHandler(client,
-							OnMemberSignIn, OnMessageReceived, OnClientDisconnect));
-
+						=> new ClientConnectionHandler(
+							client,
+							OnMemberSignIn,
+							OnMessageReceived,
+							OnClientDisconnect));
 					connectionThread.Start();
 				}
 			}

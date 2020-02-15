@@ -46,7 +46,7 @@ namespace PCS
 
         public IEnumerable<Channel> GetChannels()
         {
-            // TODO retrieve from files
+            // TODO retrieve from folders or from DB ?
             return new List<Channel>()
             {
                 new Channel("channel1"),
@@ -55,9 +55,12 @@ namespace PCS
             };
         }
 
-        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
+        public IEnumerable<BroadcastMessage> GetDailyMessages(Channel channel, DateTime day)
         {
-            string remotePath = GetMessagePath(channelName, day);
+            if (channel is null)
+                throw new ArgumentNullException(nameof(channel));
+
+            string remotePath = GetMessagePath(channel.Name, day);
 
             CreateMissingDirectories(remotePath, true);
 

@@ -20,45 +20,51 @@ namespace PCS.WPFClientInterface
 	/// </summary>
 	public partial class ChannelSelector : UserControl
 	{
-		public string SelectedChannel { get => ChannelList.SelectedItem.ToString(); }
+		public Channel FocusedChannel { get => new Channel(ChannelList.SelectedItem.ToString()); }
+		private PcsAccessor m_accessor;
+		private Action m_onChannelChanged = () => { };
 
 		public ChannelSelector()
 		{
 			InitializeComponent();
 		}
 
-		public void Add(Channel channel)
+		internal void Initialize(PcsAccessor accessor, Action onChannelChanged)
 		{
-			ChannelList.Items.Add(channel.Name);
-			if (ChannelList.Items.Count == 1)
-			{
+			if (accessor is null)
+				throw new ArgumentNullException(nameof(accessor));
+			if (onChannelChanged is null)
+				throw new ArgumentNullException(nameof(onChannelChanged));
 
-			}
-		}
-
-		public void Enable()
-		{
-			// TODO retrieve the channels from the server
-			if (ChannelList.Items.Count == 0)
-			{
-				throw new Exception("Channels not received");
-			}
-		}
-
-		public void Disable()
-		{
-			ChannelList.Items.Clear();
-		}
-
-		internal void Initialize(IEnumerable<Channel> channels)
-		{
-			if (channels.DefaultIfEmpty() == default)
+			IEnumerable<Channel> channels = accessor.GetChannels();
+			if (channels is null)
 				throw new ArgumentNullException(nameof(channels));
+			if (channels.DefaultIfEmpty() == default)
+				throw new ArgumentException(nameof(channels));
 
+			m_accessor = accessor;
 			foreach (var channel in channels)
 				Add(channel);
 
 			ChannelList.SelectedItem = ChannelList.Items[0];
+
+			m_onChannelChanged = onChannelChanged;
+		}
+
+		internal void Stop()
+		{
+			ChannelList.Items.Clear();
+		}
+
+		internal void Add(Channel channel)
+		{
+			ChannelList.Items.Add(channel.Name);
+		}
+
+		private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			m_accessor.FocusedChannel = FocusedChannel;
+			m_onChannelChanged();
 		}
 	}
 }

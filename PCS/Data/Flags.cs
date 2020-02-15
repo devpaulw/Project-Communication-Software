@@ -11,5 +11,6 @@ namespace PCS
         public const string MemberSignIn = "SI";
         public const string ClientDisconnect = "DC";
         public const string Channel = "CN";
+        public const string AskFocusedChannel = "FC";
     }
 }

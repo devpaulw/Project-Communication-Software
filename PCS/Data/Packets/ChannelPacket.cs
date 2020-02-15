@@ -19,10 +19,5 @@ namespace PCS
 				Channel.Name
 			};
 		}
-
-		protected Channel Unpack(string[] attributes)
-		{
-			return new Channel(attributes[0]);
-		}
 	}
 }
