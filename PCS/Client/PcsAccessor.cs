@@ -65,7 +65,8 @@ namespace PCS
                         if (receivedPacket is BroadcastMessagePacket == false)
                             throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 
-                        messageReceived((receivedPacket as BroadcastMessagePacket).BroadcastMessage);
+                        var broadcastMessagePacket = receivedPacket as BroadcastMessagePacket;
+                        messageReceived(broadcastMessagePacket.BroadcastMessage);
                     }
                     catch (SocketException)
                     {

@@ -170,13 +170,56 @@ namespace PCS.WPFClientInterface
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Hello World");
+            //Console.WriteLine("Hello World");
 
-            string provider = "System.Data.SqlClient";
+            //string provider = "System.Data.SqlClient";
+            //string connStr = @"Data Source=DESKTOP-IQ5GUFM\;Initial Catalog=TESTDV;Integrated Security=True;Pooling=False";
+            //DbProviderFactory factory = DbProviderFactories.GetFactory(provider);
+
+            //using (DbConnection connection = factory.CreateConnection())
+            //{
+            //    if (connection == null)
+            //    {
+            //        Console.WriteLine("connect error");
+            //        Console.ReadLine();
+            //        return;
+            //    }
+            //    connection.ConnectionString = connStr;
+            //    connection.Open();
+            //    DbCommand command = factory.CreateCommand();
+
+            //    if (command == null)
+            //    {
+            //        Console.WriteLine("Command error");
+            //        Console.ReadLine();
+            //        return;
+            //    }
+
+            //    command.Connection = connection;
+            //    command.CommandText = "Select * From Products";
+
+            //    using (DbDataReader dataReader = command.ExecuteReader())
+            //    {
+            //        while (dataReader.Read())
+            //        {
+            //            Console.WriteLine($"Then {dataReader["ProdId"]} {dataReader["Product"]}");
+            //            Console.ReadLine();
+            //        }
+            //    }
+
+            //    DbCommand ct = factory.CreateCommand();
+            //    ct.Connection = connection;
+            //    ct.CommandText = "INSERT INTO Products (ProdId, Product)" +
+            //        "Values (365, 'FromC#')";
+            //    ct.ExecuteNonQuery();
+
+            //    //using (DbData)
+            //}
+
             string connStr = @"Data Source=DESKTOP-IQ5GUFM\;Initial Catalog=TESTDV;Integrated Security=True;Pooling=False";
-            DbProviderFactory factory = DbProviderFactories.GetFactory(provider);
-
-            using (DbConnection connection = factory.CreateConnection())
+            //string test = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"D:\\Fichiers personnels\\Documents\\[] Projects\\Project Communication Software\\PCS.WPFClientInterface\\Database1.mdf\";Integrated Security=True";
+            
+            using (var connection = new SqlConnection())
             {
                 if (connection == null)
                 {
@@ -186,8 +229,10 @@ namespace PCS.WPFClientInterface
                 }
 
                 connection.ConnectionString = connStr;
+
                 connection.Open();
-                DbCommand command = factory.CreateCommand();
+
+                SqlCommand command = new SqlCommand();
 
                 if (command == null)
                 {
@@ -208,8 +253,13 @@ namespace PCS.WPFClientInterface
                     }
                 }
 
-                //using (DbData)
+                command.CommandText = "INSERT INTO Products (ProdId, Product)" +
+                    "Values (366, 'FromC#')";
+
+                command.ExecuteNonQuery();
             }
+
+            //using (SqlConnection connection = new SqlConn)
 
             //String str;
             //SqlConnection myConn = new SqlConnection("Server=localhost;Integrated security=SSPI;database=master");
