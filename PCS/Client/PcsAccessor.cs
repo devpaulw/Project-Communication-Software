@@ -64,8 +64,9 @@ namespace PCS
 
 						if (receivedPacket is BroadcastMessagePacket)
 							messageReceived((receivedPacket as BroadcastMessagePacket).BroadcastMessage);
-						else if (receivedPacket is ChannelPacket)
-							onChannelReceived((receivedPacket as ChannelPacket).Channel);
+						// BBTODO: receive channel modifications
+						//else if (receivedPacket is ChannelPacket)
+						//	onChannelReceived((receivedPacket as ChannelPacket).Channel);
 						else
 							throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 					}

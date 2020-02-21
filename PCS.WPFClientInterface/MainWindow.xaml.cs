@@ -65,7 +65,8 @@ namespace PCS.WPFClientInterface
 
 				accessor.StartListenAsync(MessageReceived, OnChannelReceived); // TODO Handle exceptions here.
 
-				//channelSelector.Enable();
+				// BBTEMP:
+				//channelSelector.Enable(); 
 				channelSelector.Initialize(accessor, ResetMessageField);
 
 				// Get FTP Messages
@@ -79,8 +80,17 @@ namespace PCS.WPFClientInterface
 			{
 				lock (@lock)
 				{
-					Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-							messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
+					// BBTODO: remove condition when the server will directly manage the messages
+					if (broadcastMsg.BaseMessage.ChannelName == accessor.FocusedChannel.Name)
+					{
+						Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+								messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
+					}
+					else
+					{
+						Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+							Notify(broadcastMsg));
+					}
 				}
 
 				void Notify(BroadcastMessage message)
