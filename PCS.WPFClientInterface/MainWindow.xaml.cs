@@ -153,14 +153,14 @@ namespace PCS.WPFClientInterface
             testButton.IsEnabled = false;
         }
 
-        private void sendTaskButton_Click(object sender, RoutedEventArgs e)
+        private void SendTaskButton_Click(object sender, RoutedEventArgs e)
         {
             Task task = new Task("Ranger ma chambre");
 
             clientAccessor.SendTask(task);
         }
 
-        private void sendListButton_Click(object sender, RoutedEventArgs e)
+        private void SendListButton_Click(object sender, RoutedEventArgs e)
         {
             TaskList taskList = new TaskList("To do");
 
@@ -169,9 +169,8 @@ namespace PCS.WPFClientInterface
 
         private void NewMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            ToDoList toDoList = new ToDoList();
-
-            clientAccessor.SendToDoList(toDoList);
+            NewToDoListWindow newToDoListWindow = new NewToDoListWindow(ref clientAccessor);
+            newToDoListWindow.Show();
         }
     }
 }

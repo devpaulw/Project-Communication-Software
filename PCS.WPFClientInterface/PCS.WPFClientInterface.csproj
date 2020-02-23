@@ -151,6 +151,9 @@
     <Compile Include="MessageField.xaml.cs">
       <DependentUpon>MessageField.xaml</DependentUpon>
     </Compile>
+    <Compile Include="NewToDoListWindow.xaml.cs">
+      <DependentUpon>NewToDoListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PcsNotifier.cs" />
     <Compile Include="ConnectionWindow.xaml.cs">
       <DependentUpon>ConnectionWindow.xaml</DependentUpon>
@@ -176,6 +179,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ConnectionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="NewToDoListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
