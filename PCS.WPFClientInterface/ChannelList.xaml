@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="PCS.WPFClientInterface.ChannelSelector"
+﻿<UserControl x:Class="PCS.WPFClientInterface.ChannelList"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,6 +8,6 @@
 		<Grid.RowDefinitions>
 			<RowDefinition/>
 		</Grid.RowDefinitions>
-		<ListBox x:Name="ChannelList" Margin="-2,1,-172,0" SelectionChanged="ChannelList_SelectionChanged"/>
+		<ListBox x:Name="channelList" Margin="-2,1,-172,0" SelectionChanged="channelList_SelectionChanged"/>
 	</Grid>
 </UserControl>

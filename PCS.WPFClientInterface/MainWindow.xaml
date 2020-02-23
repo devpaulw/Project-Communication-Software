@@ -39,7 +39,7 @@
             </MenuItem>
         </Menu>
 
-        <local:ChannelSelector x:Name="channelSelector" Margin="10,30,102,-44" Loaded="channelSelector_Loaded"  />
+        <local:ChannelList x:Name="channelList" Margin="10,30,102,-44" Loaded="channelList_Loaded"  />
         <local:MessageField x:Name="messageField" Margin="182,55,-32,0" RenderTransformOrigin="0.479,0.299" Grid.ColumnSpan="6" Height="470" VerticalAlignment="Top" />
         <TextBox x:Name="messageTextBox" TextWrapping="Wrap"  Grid.ColumnSpan="6" RenderTransformOrigin="0.041,0.63" Margin="182,530,115,0" TextChanged="MessageTextBox_TextChanged" Height="110" VerticalAlignment="Top"/>
         <Button x:Name="sendMessageButton" IsDefault="True" Content="Send message" HorizontalAlignment="Left" VerticalAlignment="Top" Width="142"  Height="40" Grid.Column="5" Margin="295,530,-32,0" Click="SendMessageButton_Click" IsEnabled="False"/>

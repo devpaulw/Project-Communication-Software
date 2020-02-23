@@ -44,7 +44,7 @@ namespace PCS.WPFClientInterface
 		{
 			accessor.Disconnect();
 			messageField.Clear();
-			channelSelector.Stop();
+			channelList.Stop();
 
 			ToggleAll();
 		}
@@ -66,8 +66,8 @@ namespace PCS.WPFClientInterface
 				accessor.StartListenAsync(MessageReceived, OnChannelReceived); // TODO Handle exceptions here.
 
 				// BBTEMP:
-				//channelSelector.Enable(); 
-				channelSelector.Initialize(accessor, ResetMessageField);
+				//channelList.Enable(); 
+				channelList.Initialize(accessor, ResetMessageField);
 
 				// Get FTP Messages
 				foreach (var dailyMessage in accessor.GetDailyMessages(DateTime.Now))
@@ -80,7 +80,6 @@ namespace PCS.WPFClientInterface
 			{
 				lock (@lock)
 				{
-					// BBTODO: remove condition when the server will directly manage the messages
 					if (broadcastMsg.BaseMessage.ChannelName == accessor.FocusedChannel.Name)
 					{
 						Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
@@ -117,7 +116,7 @@ namespace PCS.WPFClientInterface
 
 		private void SendMessageButton_Click(object sender, RoutedEventArgs e)
 		{
-			var message = new Message(messageTextBox.Text, channelSelector.FocusedChannel.Name);
+			var message = new Message(messageTextBox.Text, channelList.FocusedChannel.Name);
 
 			try
 			{
@@ -196,7 +195,7 @@ namespace PCS.WPFClientInterface
 				messageField.AddMessage(message, () => { });
 		}
 
-		private void channelSelector_Loaded(object sender, RoutedEventArgs e)
+		private void channelList_Loaded(object sender, RoutedEventArgs e)
 		{
 
 		}

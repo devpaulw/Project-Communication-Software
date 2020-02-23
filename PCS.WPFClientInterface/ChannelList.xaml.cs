@@ -18,13 +18,13 @@ namespace PCS.WPFClientInterface
 	/// <summary>
 	/// Interaction logic for ChannelList.xaml
 	/// </summary>
-	public partial class ChannelSelector : UserControl
+	public partial class ChannelList : UserControl
 	{
-		public Channel FocusedChannel { get => new Channel(ChannelList.SelectedItem.ToString()); }
+		public Channel FocusedChannel { get => new Channel(channelList.SelectedItem.ToString()); }
 		private PcsAccessor m_accessor;
 		private Action m_onChannelChanged = () => { };
 
-		public ChannelSelector()
+		public ChannelList()
 		{
 			InitializeComponent();
 		}
@@ -46,22 +46,22 @@ namespace PCS.WPFClientInterface
 			foreach (var channel in channels)
 				Add(channel);
 
-			ChannelList.SelectedItem = ChannelList.Items[0];
+			channelList.SelectedItem = channelList.Items[0];
 
 			m_onChannelChanged = onChannelChanged;
 		}
 
 		internal void Stop()
 		{
-			ChannelList.Items.Clear();
+			channelList.Items.Clear();
 		}
 
 		internal void Add(Channel channel)
 		{
-			ChannelList.Items.Add(channel.Name);
+			channelList.Items.Add(channel.Name);
 		}
 
-		private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		private void channelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			m_accessor.FocusedChannel = FocusedChannel;
 			m_onChannelChanged();
