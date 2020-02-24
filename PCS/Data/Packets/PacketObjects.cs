@@ -26,7 +26,7 @@ namespace PCS
 
             var author = new Member(username, id);
 
-            return new BroadcastMessagePacket(new BroadcastMessage(new Message(text, channelTitle), dateTime, author));
+            return new BroadcastMessagePacket(new BroadcastMessage(0, new Message(text, channelTitle), dateTime, author)); // TODO Supply
         }
 
         public static MessagePacket GetMessage(string[] attributes)

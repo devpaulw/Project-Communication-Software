@@ -8,12 +8,14 @@ namespace PCS
 {
     public class BroadcastMessage
     {
-        public Message BaseMessage { get; set; }
+        public int ID { get; set; }
+        public Message BaseMessage { get; set; } // TODO Discontinue this idea
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
 
-        public BroadcastMessage(Message baseMessage, DateTime dateTime, Member author)
+        public BroadcastMessage(int id, Message baseMessage, DateTime dateTime, Member author)
         {
+            ID = id; // TODO: Thrive ID
             BaseMessage = baseMessage;
             Author = author;
             DateTime = dateTime;
@@ -39,6 +41,7 @@ namespace PCS
             string[] infos = fileMessage.Split(endOfTB);
 
             return new BroadcastMessage(
+                0, // TODO Supply
                 new Message(infos[4],
                 infos[0]),
                 DateTime.FromFileTime(Convert.ToInt64(infos[3], CultureInfo.InvariantCulture)),
