@@ -1,6 +1,7 @@
 ﻿using FubarDev.FtpServer;
 using FubarDev.FtpServer.FileSystem.DotNet;
 using Microsoft.Extensions.DependencyInjection;
+using PCS.Sql;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +20,8 @@ namespace PCS
 
         private readonly PcsListener listener;
         private readonly PcsFtpClient ftpClient;
-        private readonly List<PcsClient> connectedClients;
+        private readonly MessageTable messageTable = new MessageTable();
+        private readonly List<PcsClient> connectedClients = new List<PcsClient>();
         private readonly object @lock = new object();
 
         public const ushort Port = 6783;
@@ -32,7 +34,6 @@ namespace PCS
 
             listener = new PcsListener(serverAddress);
             ftpClient = new PcsFtpClient(serverAddress);
-            connectedClients = new List<PcsClient>();
         }
 
         public void StartHosting()
@@ -46,14 +47,9 @@ namespace PCS
                 while (true)
                 {
                     var client = listener.Accept();
-                    OnClientConnect(client);
-                    
-                    var connectionThread = new Thread(() =>
-                    {
-                        lock (@lock) // Prevent that two thread don't call this function at the same time
-                            new ClientConnectionManager(client, CanSignIn, OnMessageReceived, OnClientDisconnect);
-                    });
+                    connectedClients.Add(client);
 
+                    var connectionThread = new Thread(() => ManageClientConnection(client));
                     connectionThread.Start();
                 }
             }
@@ -63,20 +59,84 @@ namespace PCS
             }
         }
 
-        private bool CanSignIn(Member member)
+        private void ManageClientConnection(PcsClient client)
         {
-            return member.Username != "Herobrine";
+            Member signedInMember = Member.Unknown;
+            bool signedIn = false;
+            bool connected = true;
+
+            while (connected)
+            {
+                try
+                {
+                    Packet packet = client.ReceivePacket();
+
+                    switch (packet)
+                    {
+                        case SignInPacket signInPacket when !signedIn:
+                            lock (@lock)
+                                OnSignIn(signInPacket.Member);
+                            break;
+                        case MessagePacket messagePacket when signedIn:
+                            lock (@lock)
+                                OnMessageReceived(messagePacket.Message);
+                            break;
+                        case DisconnectPacket _ when signedIn:
+                            connected = false;
+                            break;
+                    }
+                }
+                catch (SocketException) // When An existing connection was forcibly closed by the remote host
+                {
+                    connected = false;
+                }
+            }
+
+            lock (@lock)
+                OnDisconnect();
+
+            void OnSignIn(Member member)
+            {
+                signedInMember = member;
+
+                if (CanSignIn())
+                {
+                    signedIn = true;
+
+                    client.SendPacket(new ResponsePacket(ResponseCode.SignInSucceeded));
+                    Console.WriteLine(Messages.Server.ClientConnect, member, client.RemoteIP.Address.ToString());
+                }
+                else
+                {
+                    client.SendPacket(new ResponsePacket(ResponseCode.UnauthorizedLogin));
+                    connected = false;
+                }
+
+                bool CanSignIn()
+                {
+                    return member.Username != "Herobrine";
+                }
+            }
+
+            void OnMessageReceived(Message message)
+            {
+                Console.WriteLine("Received: " + message);
+
+                var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message, DateTime.Now, signedInMember);
+                AddBroadcast(broadcastMsg);
+            }
+
+            void OnDisconnect()
+            {
+                client.Disconnect();
+                Console.WriteLine(Messages.Server.ClientDisconnect, signedInMember);
+
+                connectedClients.Remove(client);
+            }
         }
 
-        private void OnClientConnect(PcsClient client)
+        private void AddBroadcast(BroadcastMessage message)
         {
-            connectedClients.Add(client);
-        }
-
-        private void OnMessageReceived(BroadcastMessage message)
-        {
-            Console.WriteLine("Received: " + message);
-
             SendToEveryone();
             SaveMessage();
 
@@ -98,12 +158,8 @@ namespace PCS
             void SaveMessage()
             {
                 ftpClient.SaveMessage(message);
+                messageTable.AddRow(message);
             }
-        }
-
-        private void OnClientDisconnect(PcsClient client, Member member)
-        {
-            connectedClients.Remove(client);
         }
 
         public void Dispose()

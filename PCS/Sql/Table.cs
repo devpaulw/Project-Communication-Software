@@ -6,18 +6,19 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Globalization;
+using System.Data.Common;
 
 namespace PCS.Sql
 {
-    public abstract class Table<T>
+    internal abstract class Table<T>
     {
+        protected abstract string Name { get; }
+
         public Table()
         {
             Database.TryCreate();
             TryCreate(); // The table
         }
-
-        protected abstract string Name { get; }
 
         public void AddRow(T rowObj)
         {
@@ -35,7 +36,7 @@ namespace PCS.Sql
                 cmd.Connection = conn;
 
                 foreach (var value in values)
-                    cmd.Parameters.AddWithValue('@' + value.Key, value.Value ?? throw new NullReferenceException()); // TODO Specify NRException
+                    cmd.Parameters.AddWithValue('@' + value.Key, value.Value ?? throw new NullReferenceException());
 
                 cmd.CommandText = cmdText;
 
@@ -45,10 +46,38 @@ namespace PCS.Sql
             }
         }
 
+        public IEnumerable<T> GetLastRowsInRange(int start, int end)
+        {
+            string cmdTxt = $"SELECT TOP {start + end} * FROM {Name} ORDER BY {KeyParameter.ParameterName} DESC";
 
+            using (SqlConnection conn = new SqlConnection($"server=;Initial Catalog = {Database.Name};Integrated security=SSPI"))
+            using (var cmd = new SqlCommand(cmdTxt, conn))
+            {
+                conn.Open();
+                using (DbDataReader dataReader = cmd.ExecuteReader())
+                {
+                    for (int i = 0; i < start; i++)
+                        dataReader.Read(); // DOLATER Optimize because it can be slow when we try to go far
+
+                    for (int i = start; dataReader.Read() && i < end; i++)
+                    {
+                        var parameters = GetParameters();
+                        var values = new Dictionary<string, object>();
+
+                        foreach (var parameter in parameters)
+                            values.Add(parameter.ParameterName, dataReader[parameter.ParameterName]);
+
+                        yield return GetObject(values);
+                    }
+                }
+            }
+        }
 
         protected abstract Dictionary<string, object> GetValues(T item);
+        protected abstract T GetObject(Dictionary<string, object> values);
         protected abstract SqlParameter[] GetParameters();
+        protected SqlParameter KeyParameter
+            => GetParameters()[0];
 
         private void TryCreate()
         {
@@ -64,7 +93,7 @@ namespace PCS.Sql
                     parameter.ParameterName,
                     parameter.SqlDbType.ToString().ToUpper(CultureInfo.InvariantCulture) + (parameter.Size != 0 ? "(" + parameter.Size + ")" : ""),
                     parameter.IsNullable ? "NULL" : "NOT NULL",
-                    i == 0 ? "PRIMARY KEY" : "");
+                    i == 0 ? "PRIMARY KEY" : ""); // TODO Change Key should be separated
 
                 i++;
                 if (i != parameters.Length)

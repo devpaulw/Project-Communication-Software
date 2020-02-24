@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+//using PCS.Sql;
 
 namespace PCS
 {
@@ -13,6 +14,7 @@ namespace PCS
     {
         private Thread serverListenThread;
         private PcsFtpClient ftp; // TODO: Should be general data class and not specific (not-known so)
+        //private MessageTable messageTable;
 
         public event EventHandler<BroadcastMessage> MessageReceive;
         public event EventHandler<ResponseCode> ResponseReceive; // TODO Think about, define the problem and find a solution lol
@@ -36,6 +38,7 @@ namespace PCS
             Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
 
             ftp = new PcsFtpClient(ip);
+            //messageTable = new MessageTable();
 
             SignIn();
 
@@ -63,37 +66,6 @@ namespace PCS
                 }
                 else
                     throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
-            }
-        }
-
-        public void StartListenBroadcasts() // TODO Listen better handle with Error Handle espacially
-        {
-            if (!IsConnected)
-                throw new Exception(Messages.Exceptions.NotConnected);
-
-            serverListenThread = new Thread(() => Listen());
-            serverListenThread.Start();
-
-            void Listen()
-            {
-                while (IsConnected) // UNDONE
-                {
-                    try
-                    {
-                        Packet receivedPacket = ReceivePacket();
-
-                        if (receivedPacket is BroadcastMessagePacket broadcastMessagePacket)
-                            MessageReceive(this, broadcastMessagePacket.BroadcastMessage);
-                        else
-                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
-
-                    }
-                    catch (SocketException)
-                    {
-                        if (IsConnected)
-                            throw;
-                    }
-                }
             }
         }
 
@@ -144,6 +116,37 @@ namespace PCS
         private void OnResponseReceive(object sender, ResponseCode responseCode)
         {
 
+        }
+
+        private void StartListenBroadcasts() // TODO Listen better handle with Error Handle espacially
+        {
+            if (!IsConnected)
+                throw new Exception(Messages.Exceptions.NotConnected);
+
+            serverListenThread = new Thread(() => Listen());
+            serverListenThread.Start();
+
+            void Listen()
+            {
+                while (IsConnected) // UNDONE
+                {
+                    try
+                    {
+                        Packet receivedPacket = ReceivePacket();
+
+                        if (receivedPacket is BroadcastMessagePacket broadcastMessagePacket)
+                            MessageReceive(this, broadcastMessagePacket.BroadcastMessage);
+                        else
+                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+
+                    }
+                    catch (SocketException)
+                    {
+                        if (IsConnected)
+                            throw;
+                    }
+                }
+            }
         }
     }
 }

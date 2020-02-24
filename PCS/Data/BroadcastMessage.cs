@@ -31,7 +31,7 @@ namespace PCS
                 + BaseMessage.Text;
         }
 
-        // DOLATER: When It will be C# 8.0, implement interface with static functions: IDataObject and discontinue DataPacket(Attributes)/(Objects)
+        // DOLATER: When there will be C# 8.0, implement interface with static functions: IDataObject and discontinue DataPacket(Attributes)/(Objects)
         public static BroadcastMessage FromFileMessage(string fileMessage)
         {
             if (fileMessage == null)
