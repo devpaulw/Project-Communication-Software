@@ -39,5 +39,11 @@ namespace PCS
 
         public static DisconnectPacket GetDisconnect() => 
             new DisconnectPacket();
+
+        public static ResponsePacket GetResponse(string[] attributes)
+        {
+            ResponseCode responseCode = (ResponseCode)Convert.ToInt32(attributes[0], CultureInfo.CurrentCulture);
+            return new ResponsePacket(responseCode);
+        }
     }
 }

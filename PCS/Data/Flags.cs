@@ -10,5 +10,6 @@ namespace PCS
         public const string BroadcastMessage = "BM";
         public const string MemberSignIn = "SI";
         public const string ClientDisconnect = "DC";
+        public const string Response = "RS";
     }
 }

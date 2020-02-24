@@ -3,6 +3,7 @@ using System.Net;
 using System.Data.SqlClient;
 using System.Data.Common;
 using System.Data;
+using System.IO;
 
 namespace PCS.ServerAppCore
 {
@@ -30,45 +31,45 @@ namespace PCS.ServerAppCore
             do rl = Console.ReadLine();
             while (rl != "2+2");
 
-            string str;
-            SqlConnection myConn = new SqlConnection("server=;Integrated security=SSPI");
+            // Create a database
+            // Create a table
+            // Fill a Value Of Key 2+2 and result 4
+            // Read it and write 4
 
-            str = "CREATE DATABASE MyDatabase5 ON PRIMARY" +
-                "(NAME = MyDatabase5_Data, " +
-                "FILENAME = 'MyDatabase5.mdf', " +
-                "SIZE = 2MB, MAXSIZE = 10MB, FILEGROWTH = 10%) " +
-                "LOG ON (NAME = MyDatabase_Log," +
-                "FILENAME = 'MyDatabase5.ldf'," +
-                "SIZE = 1MB, " +
-                "MAXSIZE = 5MB, " +
-                "FILEGROWTH = 10%)";
+            SqlConnection myConn = new SqlConnection("Server=localhost;Integrated security=SSPI;database=master");
 
-            SqlCommand myCommand = new SqlCommand(str, myConn);
+            SqlCommand myCommand = new SqlCommand();
+            myCommand.Connection = myConn;
 
-            try
+
+            myConn.Open();
+            myCommand.ExecuteNonQuery();
+
+            myConn.Close();
+            myConn.ConnectionString = "server =; Initial Catalog=MyDatabase1; Integrated Security = SSPI";
+            myConn.Open();
+
+            myCommand.CommandText = @"CREATE TABLE [dbo].[TableTest]
+                    (
+	                    [Expression] NCHAR(10) NOT NULL PRIMARY KEY, 
+                        [Result] INT NULL
+                    )";
+            myCommand.ExecuteNonQuery();
+
+            myCommand.CommandText = "INSERT INTO TableTest (Expression, Result)" +
+                    "VALUES ('2+2', 4)";
+
+            myCommand.ExecuteNonQuery();
+
+            myCommand.CommandText = "SELECT * FROM TableTest";
+
+            using (DbDataReader dataReader = myCommand.ExecuteReader())
             {
-                myConn.Open();
-                myCommand.ExecuteNonQuery();
-                Console.WriteLine("DataBase is Created Successfully");
+                while (dataReader.Read())
+                {
+                    Console.WriteLine($"{dataReader["Result"]}");
+                }
             }
-            catch (System.Exception ex)
-            {
-                throw;
-            }
-            finally
-            {
-                if (myConn.State == ConnectionState.Open)
-                    myConn.Close();
-            }
-
-            myConn = new SqlConnection("server =.; Initial Catalog = MyDatabase5; Integrated Security = SSPI");
-
-            str = @"IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Student' AND xtype='U')
-                            CREATE TABLE [dbo].[Student](
-	                        [id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
-	                        [FirstName] [nchar](10) NULL,
-	                        [LastName] [nchar](10) NULL,
-                            )";
 
             return;
 

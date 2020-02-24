@@ -36,21 +36,23 @@ namespace PCS
         }
 
         public void StartHosting()
-        {
+        { // TODO Client could contain member
             try
             {
                 listener.Listen();
 
                 Console.WriteLine(Messages.Server.Started, DateTime.Now);
-                
+
                 while (true)
                 {
                     var client = listener.Accept();
-                    connectedClients.Add(client);
-
-                    var connectionThread = new Thread(()
-                        => new ClientConnectionHandler(client,
-                            OnMemberSignIn, OnMessageReceived, OnClientDisconnect));
+                    OnClientConnect(client);
+                    
+                    var connectionThread = new Thread(() =>
+                    {
+                        lock (@lock) // Prevent that two thread don't call this function at the same time
+                            new ClientConnectionManager(client, CanSignIn, OnMessageReceived, OnClientDisconnect);
+                    });
 
                     connectionThread.Start();
                 }
@@ -61,15 +63,22 @@ namespace PCS
             }
         }
 
+        private bool CanSignIn(Member member)
+        {
+            return member.Username != "Herobrine";
+        }
+
+        private void OnClientConnect(PcsClient client)
+        {
+            connectedClients.Add(client);
+        }
+
         private void OnMessageReceived(BroadcastMessage message)
         {
-            lock (@lock) // Prevent that two thread don't call this function at the same time
-            {
-                Console.WriteLine("Received: " + message);
+            Console.WriteLine("Received: " + message);
 
-                SendToEveryone();
-                SaveMessage();
-            }
+            SendToEveryone();
+            SaveMessage();
 
             void SendToEveryone()
             {
@@ -92,22 +101,9 @@ namespace PCS
             }
         }
 
-        private void OnMemberSignIn(Member member)
-        {
-            lock (@lock)
-            {
-                Console.WriteLine(Messages.Server.ClientConnect, member);
-            }
-        }
-
         private void OnClientDisconnect(PcsClient client, Member member)
         {
-            lock (@lock)
-            {
-                connectedClients.Remove(client);
-
-                Console.WriteLine(Messages.Server.ClientDisconnect, member);
-            }
+            connectedClients.Remove(client);
         }
 
         public void Dispose()

@@ -12,12 +12,16 @@ namespace PCS
     public class PcsAccessor : PcsClient
     {
         private Thread serverListenThread;
-        private PcsFtpClient ftp;
+        private PcsFtpClient ftp; // TODO: Should be general data class and not specific (not-known so)
+
+        public event EventHandler<BroadcastMessage> MessageReceive;
+        public event EventHandler<ResponseCode> ResponseReceive; // TODO Think about, define the problem and find a solution lol
 
         public bool IsConnected { get; private set; }
 
         public PcsAccessor()
         {
+            ResponseReceive += OnResponseReceive;
         }
 
         public void Connect(IPAddress ip, Member member)
@@ -35,6 +39,8 @@ namespace PCS
 
             SignIn();
 
+            StartListenBroadcasts();
+
             void SignIn()
             {
                 if (member == null)
@@ -42,11 +48,25 @@ namespace PCS
 
                 SendPacket(new SignInPacket(member));
 
-                IsConnected = true;
+                if (ReceivePacket() is ResponsePacket responsePacket)// DOLATER: Is that a good way?
+                { 
+                    switch (responsePacket.ResponseCode)
+                    {
+                        case ResponseCode.SignInSucceeded: // TODO Use OnReceive and just enable isConnected when receive this packet!
+                            IsConnected = true;
+                            break;
+                        case ResponseCode.UnauthorizedLogin: // TODO Maybe add event caller in the true client that get these...
+                            throw new Exception(Messages.Exceptions.UnauthorizedLogin);
+                        default:
+                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
+                    }
+                }
+                else
+                    throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
             }
         }
 
-        public void StartListenAsync(Action<BroadcastMessage> messageReceived)
+        public void StartListenBroadcasts() // TODO Listen better handle with Error Handle espacially
         {
             if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
@@ -56,17 +76,17 @@ namespace PCS
 
             void Listen()
             {
-                while (IsConnected)
+                while (IsConnected) // UNDONE
                 {
                     try
                     {
                         Packet receivedPacket = ReceivePacket();
 
-                        if (receivedPacket is BroadcastMessagePacket == false)
+                        if (receivedPacket is BroadcastMessagePacket broadcastMessagePacket)
+                            MessageReceive(this, broadcastMessagePacket.BroadcastMessage);
+                        else
                             throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 
-                        var broadcastMessagePacket = receivedPacket as BroadcastMessagePacket;
-                        messageReceived(broadcastMessagePacket.BroadcastMessage);
                     }
                     catch (SocketException)
                     {
@@ -88,7 +108,7 @@ namespace PCS
             SendPacket(new MessagePacket(message));
         }
 
-        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
+        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day) // TODO Change system
         {
             var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));
 
@@ -115,9 +135,15 @@ namespace PCS
             if (!disposedValue && disposing)
             {
                 ftp.Dispose();
+                MessageReceive = null;
 
                 base.Dispose(disposing);
             }
+        }
+
+        private void OnResponseReceive(object sender, ResponseCode responseCode)
+        {
+
         }
     }
 }

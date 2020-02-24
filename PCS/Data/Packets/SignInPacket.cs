@@ -8,6 +8,7 @@ namespace PCS
     class SignInPacket : Packet
     {
         public Member Member { get; set; }
+        // TODO Add Authentifications infos
 
         public SignInPacket(Member member) : base(Flags.MemberSignIn)
         {

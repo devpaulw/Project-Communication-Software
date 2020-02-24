@@ -95,5 +95,14 @@ namespace PCS.Messages {
                 return ResourceManager.GetString("NotRecognizedDataPacket", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server login unauthorized: check your username, password..
+        /// </summary>
+        internal static string UnauthorizedLogin {
+            get {
+                return ResourceManager.GetString("UnauthorizedLogin", resourceCulture);
+            }
+        }
     }
 }

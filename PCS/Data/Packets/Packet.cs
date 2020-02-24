@@ -28,6 +28,8 @@ namespace PCS
                     return PacketObjects.GetMessage(attributes);
                 case Flags.ClientDisconnect:
                     return PacketObjects.GetDisconnect();
+                case Flags.Response:
+                    return PacketObjects.GetResponse(attributes);
                 default:
                     throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
             }

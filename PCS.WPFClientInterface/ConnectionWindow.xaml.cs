@@ -81,12 +81,7 @@ namespace PCS.WPFClientInterface
 
                 return true;
             }
-            catch (SocketException ex) // Connection failed
-            {
-                MessageBox.Show(ex.Message, $"Connection to {serverAddressTextBox.Text} failed", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            catch (FormatException ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, $"Connection to {serverAddressTextBox.Text} failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;

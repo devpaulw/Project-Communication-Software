@@ -129,4 +129,7 @@
   <data name="NotRecognizedDataPacket" xml:space="preserve">
     <value>This data packet is not recognized.</value>
   </data>
+  <data name="UnauthorizedLogin" xml:space="preserve">
+    <value>Server login unauthorized: check your username, password.</value>
+  </data>
 </root>

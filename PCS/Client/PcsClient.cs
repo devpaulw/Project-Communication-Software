@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -11,6 +12,13 @@ namespace PCS
         private protected bool disposedValue;
 
         protected Socket AdapteeClient { get; set; }
+
+        // TODO public Member Member { get; set; }
+
+        public IPEndPoint RemoteIP
+            => AdapteeClient.RemoteEndPoint == null ? null : AdapteeClient.RemoteEndPoint as IPEndPoint;
+        public IPEndPoint LocalIP
+            => AdapteeClient.LocalEndPoint == null ? null : AdapteeClient.LocalEndPoint as IPEndPoint;
 
         public PcsClient() { }
 
@@ -78,7 +86,6 @@ namespace PCS
 
         protected virtual void Dispose(bool disposing)
         {
-
             if (!disposedValue)
             {
                 if (disposing)

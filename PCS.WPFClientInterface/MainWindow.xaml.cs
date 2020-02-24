@@ -42,6 +42,8 @@ namespace PCS.WPFClientInterface
         private void Disconnect()
         {
             clientAccessor.Disconnect();
+            clientAccessor.MessageReceive -= OnMessageReceive;
+
             messageField.Clear();
 
             channelSelector.Disable();
@@ -56,15 +58,15 @@ namespace PCS.WPFClientInterface
 
         private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var signInWindow = new ConnectionWindow(ref clientAccessor);
-            signInWindow.ShowDialog();
+            var connWindow = new ConnectionWindow(ref clientAccessor);
+            connWindow.ShowDialog();
 
-            if (signInWindow.Connected)
+            if (connWindow.Connected)
             {
-                ActiveMember = signInWindow.SignedInMember;
+                ActiveMember = connWindow.SignedInMember;
 
-                clientAccessor.StartListenAsync((BroadcastMessage broadcastMsg) => MessageReceived(broadcastMsg)); // TODO Handle exceptions here.
-                
+                clientAccessor.MessageReceive += OnMessageReceive;
+
                 channelSelector.Enable();
 
                 // Get FTP Messages
@@ -73,21 +75,21 @@ namespace PCS.WPFClientInterface
 
                 ToggleAll();
             }
+        }
 
-            void MessageReceived(BroadcastMessage broadcastMsg)
+        void OnMessageReceive(object sender, BroadcastMessage broadcastMsg)
+        {
+            lock (@lock)
             {
-                lock (@lock)
-                {
-                    Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                            messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
-                }
-
-                void Notify(BroadcastMessage message)
-                {
-                    if (message.Author != ActiveMember)
-                        PcsNotifier.Notify(this, message); // Notify when it's not us
-                }
+                Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+                        messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
             }
+        }
+
+        void Notify(BroadcastMessage broadcastMsg)
+        {
+            if (broadcastMsg.Author != ActiveMember)
+                PcsNotifier.Notify(this, broadcastMsg); // Notify when it's not us
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
