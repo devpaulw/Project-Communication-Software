@@ -8,3 +8,6 @@
 - Channels folders (BB)
 - WPF resize ability
 - Settings page (e.g. with enable automatic connecion)
+
+BUGS:
+Sometimes the client can't send a message !

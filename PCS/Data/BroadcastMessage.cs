@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace PCS
+namespace PCS.Data
 {
     public class BroadcastMessage
     {
@@ -15,9 +15,9 @@ namespace PCS
 
         public BroadcastMessage(int id, Message baseMessage, DateTime dateTime, Member author)
         {
-            ID = id; // TODO: Thrive ID
+            ID = id;
             BaseMessage = baseMessage;
-            Author = author;
+            Author = author ?? Member.Unknown;
             DateTime = dateTime;
         }
 

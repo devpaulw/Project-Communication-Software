@@ -18,9 +18,6 @@ namespace PCS.ServerAppCore
             Console.Write("SERVER ADDRESS: ");
             var serverAddress = IPAddress.Parse(Console.ReadLine());
 
-            using var ftpServer = new PcsFtpServer(serverAddress);
-            ftpServer.StartAsync();
-
             var server = new PcsServer(serverAddress);
             server.StartHosting();
         }

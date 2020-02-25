@@ -18,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml;
 using System.Xml.Linq;
+using PCS.Data;
 
 namespace PCS.WPFClientInterface
 {
@@ -31,7 +32,6 @@ namespace PCS.WPFClientInterface
         private readonly PcsAccessor m_clientAccessor;
 
         public bool Connected { get; private set; }
-        public Member SignedInMember { get; private set; }
 
         public ConnectionWindow(ref PcsAccessor clientAccessor)
         {
@@ -43,15 +43,10 @@ namespace PCS.WPFClientInterface
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             // Assuming it was clicked only if we Can Sign In and the Sign In Button is enabled
-
-            var member = new Member(usernameTextBox.Text,
-                Convert.ToInt32(idTextBox.Text, CultureInfo.CurrentCulture));
-
-            Connected = TryMakeConnection(member);
+            Connected = TryMakeConnection();
 
             if (Connected)
             {
-                SignedInMember = member;
                 SaveFields();
                 Close();
             }
@@ -73,11 +68,19 @@ namespace PCS.WPFClientInterface
             ToggleConnectButton();
         }
 
-        private bool TryMakeConnection(Member member)
+        private void PasswordTb_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            ToggleConnectButton();
+        }
+
+        private bool TryMakeConnection()
         {
             try
             {
-                m_clientAccessor.Connect(IPAddress.Parse(serverAddressTextBox.Text), member);
+                m_clientAccessor.Connect(IPAddress.Parse(serverAddressTextBox.Text), 
+                    new AuthenticationInfos(
+                        Convert.ToInt32(idTextBox.Text, CultureInfo.CurrentCulture),
+                        passwordTb.Password));
 
                 return true;
             }
@@ -93,7 +96,7 @@ namespace PCS.WPFClientInterface
 
         private bool CanConnect()
             => serverAddressTextBox.Text != string.Empty &&
-            usernameTextBox.Text != string.Empty &&
+            passwordTb.Password != string.Empty &&
             idTextBox.Text != string.Empty && int.TryParse(idTextBox.Text, out _) == true;
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -115,8 +118,7 @@ namespace PCS.WPFClientInterface
             var document = new XDocument(
                 new XElement("ConnectionInfos",
                     new XElement("ServerAddress", serverAddressTextBox.Text),
-                    new XElement("Username", usernameTextBox.Text),
-                    new XElement("ID", idTextBox.Text)
+                    new XElement("UserID", idTextBox.Text)
                 )
             );
 
@@ -128,8 +130,7 @@ namespace PCS.WPFClientInterface
             var document = new XmlDocument();
             document.Load(fieldSavePath);
             serverAddressTextBox.Text = document.SelectSingleNode("/ConnectionInfos/ServerAddress").InnerXml;
-            usernameTextBox.Text = document.SelectSingleNode("/ConnectionInfos/Username").InnerXml;
-            idTextBox.Text = document.SelectSingleNode("/ConnectionInfos/ID").InnerXml;
+            idTextBox.Text = document.SelectSingleNode("/ConnectionInfos/UserID").InnerXml;
         }
     }
 }

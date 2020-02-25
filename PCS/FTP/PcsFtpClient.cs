@@ -5,8 +5,9 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
+using PCS.Data;
 
-namespace PCS
+namespace PCS.Ftp
 {
     // TODO: This same class but with System.IO copied to the local machine, there will be an interface, and the Client Accessor will save data to same directories of FTP server by copied constants ; The FtpClient of Accessor will be private now
     public class PcsFtpClient : IDisposable

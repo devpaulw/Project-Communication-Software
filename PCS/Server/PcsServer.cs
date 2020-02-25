@@ -11,6 +11,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using PCS.Data;
+using PCS.Data.Packets;
 
 namespace PCS
 {
@@ -19,8 +21,9 @@ namespace PCS
         private bool disposed;
 
         private readonly PcsListener listener;
-        private readonly PcsFtpClient ftpClient;
         private readonly MessageTable messageTable = new MessageTable();
+        private readonly MemberTable group = new MemberTable();
+        private readonly PasswordTable memberPasswords = new PasswordTable();
         private readonly List<PcsClient> connectedClients = new List<PcsClient>();
         private readonly object @lock = new object();
 
@@ -29,11 +32,20 @@ namespace PCS
 
         public PcsServer(IPAddress serverAddress)
         {
+            #region Temp Members assign
+            try
+            {
+                group.AddRow(new Member("Paul", 1));
+                group.AddRow(new Member("Thomas", 2));
+                group.AddRow(new Member("Ilian", 3));
+            }
+            catch { }
+            #endregion
+
             if (serverAddress == null)
                 throw new ArgumentNullException(nameof(serverAddress));
 
             listener = new PcsListener(serverAddress);
-            ftpClient = new PcsFtpClient(serverAddress);
         }
 
         public void StartHosting()
@@ -58,10 +70,10 @@ namespace PCS
                 throw;
             }
         }
-
+        
         private void ManageClientConnection(PcsClient client)
         {
-            Member signedInMember = Member.Unknown;
+            Member signInMember = null; // TODO Maybe put this variable in PcsClient so that it can be used both here and by The accessor
             bool signedIn = false;
             bool connected = true;
 
@@ -75,7 +87,7 @@ namespace PCS
                     {
                         case SignInPacket signInPacket when !signedIn:
                             lock (@lock)
-                                OnSignIn(signInPacket.Member);
+                                OnSignIn(signInPacket.AuthenticationInfos);
                             break;
                         case MessagePacket messagePacket when signedIn:
                             lock (@lock)
@@ -95,41 +107,45 @@ namespace PCS
             lock (@lock)
                 OnDisconnect();
 
-            void OnSignIn(Member member)
+            void OnSignIn(AuthenticationInfos infos)
             {
-                signedInMember = member;
+                signInMember = group.GetMemberFromId(infos.MemberId);
 
                 if (CanSignIn())
                 {
                     signedIn = true;
 
                     client.SendPacket(new ResponsePacket(ResponseCode.SignInSucceeded));
-                    Console.WriteLine(Messages.Server.ClientConnect, member, client.RemoteIP.Address.ToString());
+                    Console.WriteLine(Messages.Server.ClientConnect, signInMember, client.RemoteIP.Address.ToString());
                 }
                 else
                 {
                     client.SendPacket(new ResponsePacket(ResponseCode.UnauthorizedLogin));
                     connected = false;
+                    signInMember = null; // Because sign in failed
                 }
 
                 bool CanSignIn()
                 {
-                    return member.Username != "Herobrine";
+                    lock (@lock)
+                        return memberPasswords.PasswordCorrect(infos) && 
+                            group.MemberExists(infos.MemberId);
                 }
             }
 
             void OnMessageReceived(Message message)
             {
-                Console.WriteLine("Received: " + message);
+                var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message, DateTime.Now, signInMember);
+                Console.WriteLine("Received: " + broadcastMsg);
 
-                var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message, DateTime.Now, signedInMember);
                 AddBroadcast(broadcastMsg);
             }
 
             void OnDisconnect()
             {
                 client.Disconnect();
-                Console.WriteLine(Messages.Server.ClientDisconnect, signedInMember);
+                if (signInMember != null) 
+                    Console.WriteLine(Messages.Server.ClientDisconnect, signInMember);
 
                 connectedClients.Remove(client);
             }
@@ -157,7 +173,6 @@ namespace PCS
 
             void SaveMessage()
             {
-                ftpClient.SaveMessage(message);
                 messageTable.AddRow(message);
             }
         }
@@ -175,7 +190,6 @@ namespace PCS
                 if (disposing)
                 {
                     listener.Dispose();
-                    ftpClient.Dispose();
                 }
 
                 disposed = true;

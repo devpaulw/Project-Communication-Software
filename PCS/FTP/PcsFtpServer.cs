@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
-namespace PCS
+namespace PCS.Ftp
 {
     public class PcsFtpServer : IDisposable
     {

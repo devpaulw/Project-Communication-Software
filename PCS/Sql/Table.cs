@@ -46,33 +46,6 @@ namespace PCS.Sql
             }
         }
 
-        public IEnumerable<T> GetLastRowsInRange(int start, int end)
-        {
-            string cmdTxt = $"SELECT TOP {start + end} * FROM {Name} ORDER BY {KeyParameter.ParameterName} DESC";
-
-            using (SqlConnection conn = new SqlConnection($"server=;Initial Catalog = {Database.Name};Integrated security=SSPI"))
-            using (var cmd = new SqlCommand(cmdTxt, conn))
-            {
-                conn.Open();
-                using (DbDataReader dataReader = cmd.ExecuteReader())
-                {
-                    for (int i = 0; i < start; i++)
-                        dataReader.Read(); // DOLATER Optimize because it can be slow when we try to go far
-
-                    for (int i = start; dataReader.Read() && i < end; i++)
-                    {
-                        var parameters = GetParameters();
-                        var values = new Dictionary<string, object>();
-
-                        foreach (var parameter in parameters)
-                            values.Add(parameter.ParameterName, dataReader[parameter.ParameterName]);
-
-                        yield return GetObject(values);
-                    }
-                }
-            }
-        }
-
         protected abstract Dictionary<string, object> GetValues(T item);
         protected abstract T GetObject(Dictionary<string, object> values);
         protected abstract SqlParameter[] GetParameters();
@@ -109,7 +82,7 @@ namespace PCS.Sql
             }
         }
 
-        private static class Database
+        protected static class Database
         {
             public const string Name = "PcsDatabase";
 

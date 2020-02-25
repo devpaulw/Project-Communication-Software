@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using PCS.Data;
 
 namespace PCS.WPFClientInterface
 {
@@ -23,19 +24,14 @@ namespace PCS.WPFClientInterface
     {
         const int ImageHeight = 260;
 
-        public DateTime LastDayLoaded { get; set; } = DateTime.Now;
+        public int LoadedMessagesCount { get; set; }
+        public int ShowBeforeCount => 5;
 
         public MessageField() // TODO Implement ClientAccessor reference for this class it will be simpler for GetDailyMessages
         {
             InitializeComponent();
 
             Clear();
-        }
-
-        public void SetPreviousDay()
-        {
-            const long oneDayTicks = 864000000000;
-            LastDayLoaded = new DateTime(LastDayLoaded.Ticks - oneDayTicks);
         }
 
         public void AddMessage(BroadcastMessage message, Action notify)
@@ -57,7 +53,10 @@ namespace PCS.WPFClientInterface
             appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.BaseMessage.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.BaseMessage.Text}");
             appendParagraph.LineHeight = 3;
 
-            fieldRtb.Document.Blocks.InsertBefore(fieldRtb.Document.Blocks.FirstBlock, appendParagraph);
+            if (fieldRtb.Document.Blocks.FirstBlock != null)
+                fieldRtb.Document.Blocks.InsertBefore(fieldRtb.Document.Blocks.FirstBlock, appendParagraph);
+            else // When no messages in the messageField
+                fieldRtb.Document.Blocks.Add(appendParagraph);
         }
 
         public void AddImage(BitmapImage bitmap) 
@@ -80,7 +79,7 @@ namespace PCS.WPFClientInterface
         public void Clear()
         {
             fieldRtb.Document.Blocks.Clear();
-            LastDayLoaded = DateTime.Now;
+            LoadedMessagesCount = 0;
         }
 
         public void ScrollToEnd() => fieldRtb.ScrollToEnd();

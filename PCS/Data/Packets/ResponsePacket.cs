@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace PCS
+namespace PCS.Data.Packets
 {
     class ResponsePacket : Packet
     {

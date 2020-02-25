@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using PCS.Data;
 
 namespace PCS.WPFClientInterface
 {
@@ -31,8 +32,6 @@ namespace PCS.WPFClientInterface
         private readonly object @lock = new object();
 
         private PcsAccessor clientAccessor = new PcsAccessor();
-
-        public Member ActiveMember { get; private set; }
 
         public MainWindow()
         {
@@ -51,6 +50,16 @@ namespace PCS.WPFClientInterface
             ToggleAll();
         }
 
+        private void ShowMessagesBefore()
+        {
+            // TODO Not clean
+            messageField.LoadedMessagesCount += messageField.ShowBeforeCount;
+
+            // Get SQL Messages
+            foreach (var message in clientAccessor.GetTopMessagesInRange(messageField.LoadedMessagesCount - messageField.ShowBeforeCount, messageField.LoadedMessagesCount, channelSelector.SelectedChannel))
+                messageField.AddMessageOnTop(message);
+        }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             ToggleAll();
@@ -63,15 +72,11 @@ namespace PCS.WPFClientInterface
 
             if (connWindow.Connected)
             {
-                ActiveMember = connWindow.SignedInMember;
-
                 clientAccessor.MessageReceive += OnMessageReceive;
 
                 channelSelector.Enable();
 
-                // Get FTP Messages
-                foreach (var dailyMessage in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, DateTime.Now))
-                    messageField.AddMessage(dailyMessage, () => { });
+                ShowMessagesBefore();
 
                 ToggleAll();
             }
@@ -88,7 +93,7 @@ namespace PCS.WPFClientInterface
 
         void Notify(BroadcastMessage broadcastMsg)
         {
-            if (broadcastMsg.Author != ActiveMember)
+            if (broadcastMsg.Author.ID != clientAccessor.ActiveUserId)
                 PcsNotifier.Notify(this, broadcastMsg); // Notify when it's not us
         }
 
@@ -117,13 +122,8 @@ namespace PCS.WPFClientInterface
             }
         }
 
-        private void DisplayPreviousDayButton_Click(object sender, RoutedEventArgs e)
-        {
-            messageField.SetPreviousDay();
-
-            foreach (var message in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded).Reverse())
-                messageField.AddMessageOnTop(message);
-        }
+        private void ShowBeforeButton_Click(object sender, RoutedEventArgs e)
+            => ShowMessagesBefore();
 
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {

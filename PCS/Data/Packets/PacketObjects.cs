@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace PCS
+namespace PCS.Data.Packets
 {
     static class PacketObjects
     {
         public static SignInPacket GetMemberSignIn(string[] attributes)
         {
-            string username = attributes[0];
-            int id = Convert.ToInt32(attributes[1], CultureInfo.CurrentCulture);
+            int userId = Convert.ToInt32(attributes[0], CultureInfo.CurrentCulture);
+            string password = attributes[1];
 
-            return new SignInPacket(new Member(username, id));
+            return new SignInPacket(new AuthenticationInfos(userId, password));
         }
 
         public static BroadcastMessagePacket GetBroadcastMessage(string[] attributes)

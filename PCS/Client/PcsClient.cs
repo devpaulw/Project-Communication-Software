@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using PCS.Data;
+using PCS.Data.Packets;
 
 namespace PCS
 {

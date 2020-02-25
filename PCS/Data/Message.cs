@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace PCS
+namespace PCS.Data
 {
     public class Message
     {

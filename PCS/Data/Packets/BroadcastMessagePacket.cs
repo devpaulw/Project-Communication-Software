@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace PCS
+namespace PCS.Data.Packets
 {
-    class BroadcastMessagePacket : Packet
+    class BroadcastMessagePacket : Packet // TODO MAYBE Do something so that we don't have to do same class both
     {
         public BroadcastMessage BroadcastMessage { get; set; }
 

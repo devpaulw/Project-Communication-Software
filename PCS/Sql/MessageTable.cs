@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using PCS.Data;
 
 namespace PCS.Sql
 {
@@ -13,7 +15,34 @@ namespace PCS.Sql
 
         public int GetNewID()
         {
-            return GetLastRowsInRange(0, 1).First().ID + 1;
+            return GetTopMessagesInRange(0, 1, null).First().ID + 1;
+        }
+
+        public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
+        {
+            string cmdTxt = $"SELECT TOP {start + end} * FROM {Name} {(channelName != null ? $"WHERE Channel = '{channelName}'" : "")} ORDER BY {KeyParameter.ParameterName} DESC";
+
+            using (SqlConnection conn = new SqlConnection($"server=;Initial Catalog = {Database.Name};Integrated security=SSPI"))
+            using (var cmd = new SqlCommand(cmdTxt, conn))
+            {
+                conn.Open();
+                using (DbDataReader dataReader = cmd.ExecuteReader())
+                {
+                    for (int i = 0; i < start; i++)
+                        dataReader.Read(); // DOLATER Optimize because it can be slow when we try to go far
+
+                    for (int i = start; dataReader.Read() && i < end; i++)
+                    {
+                        var parameters = GetParameters();
+                        var values = new Dictionary<string, object>();
+
+                        foreach (var parameter in parameters)
+                            values.Add(parameter.ParameterName, dataReader[parameter.ParameterName]);
+
+                        yield return GetObject(values);
+                    }
+                }
+            }
         }
 
         protected override Dictionary<string, object> GetValues(BroadcastMessage broadcast)
@@ -51,8 +80,8 @@ namespace PCS.Sql
                 new Message(values["Text"] as string ?? throw new NullReferenceException(), 
                 values["Channel"] as string ?? throw new NullReferenceException()),
                 values["DateTime"] as DateTime? ?? throw new NullReferenceException(),
-                new Member((values["AuthorId"] as int? ?? throw new NullReferenceException()).ToString(), 
-                values["AuthorId"] as int? ?? throw new NullReferenceException()));
+                new MemberTable().GetMemberFromId(values["AuthorId"] as int? ?? throw new NullReferenceException())
+                );
         }
     }
 }

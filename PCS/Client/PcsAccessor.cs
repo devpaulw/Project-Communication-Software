@@ -6,30 +6,36 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-//using PCS.Sql;
+using PCS.Sql;
+using PCS.Data;
+using PCS.Data.Packets;
 
 namespace PCS
 {
     public class PcsAccessor : PcsClient
     {
         private Thread serverListenThread;
-        private PcsFtpClient ftp; // TODO: Should be general data class and not specific (not-known so)
-        //private MessageTable messageTable;
+        private MessageTable messageTable; // TODO Do a ask to server instead of SQL direct download BUT I'm not sure it's the right approach
 
         public event EventHandler<BroadcastMessage> MessageReceive;
         public event EventHandler<ResponseCode> ResponseReceive; // TODO Think about, define the problem and find a solution lol
 
         public bool IsConnected { get; private set; }
+        public int ActiveUserId { get; private set; }
 
         public PcsAccessor()
         {
             ResponseReceive += OnResponseReceive;
         }
 
-        public void Connect(IPAddress ip, Member member)
+        public void Connect(IPAddress ip, AuthenticationInfos authenticationInfos) // TODO I don't know if this password is secured
         {
             if (ip == null)
                 throw new ArgumentNullException(nameof(ip));
+            if (authenticationInfos == null)
+                throw new ArgumentNullException(nameof(authenticationInfos));
+
+            ActiveUserId = authenticationInfos.MemberId;
 
             AdapteeClient = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
@@ -37,8 +43,7 @@ namespace PCS
             AdapteeClient.Connect(endPoint);
             Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
 
-            ftp = new PcsFtpClient(ip);
-            //messageTable = new MessageTable();
+            messageTable = new MessageTable();
 
             SignIn();
 
@@ -46,10 +51,7 @@ namespace PCS
 
             void SignIn()
             {
-                if (member == null)
-                    throw new ArgumentNullException(nameof(member));
-
-                SendPacket(new SignInPacket(member));
+                SendPacket(new SignInPacket(authenticationInfos));
 
                 if (ReceivePacket() is ResponsePacket responsePacket)// DOLATER: Is that a good way?
                 { 
@@ -80,12 +82,8 @@ namespace PCS
             SendPacket(new MessagePacket(message));
         }
 
-        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day) // TODO Change system
-        {
-            var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));
-
-            return dailyMessages;
-        }
+        public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
+            => messageTable.GetTopMessagesInRange(start, end, channelName);
 
         public override void Disconnect()
         {
@@ -106,7 +104,6 @@ namespace PCS
 
             if (!disposedValue && disposing)
             {
-                ftp.Dispose();
                 MessageReceive = null;
 
                 base.Dispose(disposing);

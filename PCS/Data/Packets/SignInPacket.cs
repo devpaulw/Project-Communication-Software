@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace PCS
+namespace PCS.Data.Packets
 {
     class SignInPacket : Packet
     {
-        public Member Member { get; set; }
-        // TODO Add Authentifications infos
+        public AuthenticationInfos AuthenticationInfos { get; set; }
 
-        public SignInPacket(Member member) : base(Flags.MemberSignIn)
+        public SignInPacket(AuthenticationInfos authenticationInfos) : base(Flags.MemberSignIn)
         {
-            Member = member ?? throw new ArgumentNullException(nameof(member));
+            AuthenticationInfos = authenticationInfos;
         }
 
         protected override string[] GetAttributes()
         {
             return new string[]
             {
-                Member.Username,
-                Member.ID.ToString(CultureInfo.InvariantCulture)
+                AuthenticationInfos.MemberId.ToString(CultureInfo.InvariantCulture),
+                AuthenticationInfos.Password
             };
         }
     }

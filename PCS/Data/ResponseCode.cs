@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PCS
+namespace PCS.Data
 {
     public enum ResponseCode
     {
