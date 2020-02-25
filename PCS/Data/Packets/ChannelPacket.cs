@@ -16,6 +16,7 @@ namespace PCS
 		protected override string[] GetAttributes()
 		{
 			return new string[] {
+				Channel.Id + "",
 				Channel.Name
 			};
 		}

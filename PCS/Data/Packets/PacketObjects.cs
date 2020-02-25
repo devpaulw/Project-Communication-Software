@@ -42,9 +42,10 @@ namespace PCS
 
         public static ChannelPacket GetChannel(string[] attributes)
         {
-            string name = attributes[0];
+            int id = Convert.ToInt32(attributes[0], CultureInfo.CurrentCulture);
+            string name = attributes[1];
 
-            return new ChannelPacket(new Channel(name));
+            return new ChannelPacket(new Channel(id, name));
         }
     }
 }

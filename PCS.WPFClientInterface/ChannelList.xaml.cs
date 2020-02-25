@@ -20,7 +20,8 @@ namespace PCS.WPFClientInterface
 	/// </summary>
 	public partial class ChannelList : UserControl
 	{
-		public Channel FocusedChannel { get => new Channel(channelList.SelectedItem.ToString()); }
+		public Channel FocusedChannel { get => channels[channelList.SelectedIndex]; }
+		public List<Channel> channels = new List<Channel>();
 		private PcsAccessor m_accessor;
 		private Action m_onChannelChanged = () => { };
 
@@ -36,7 +37,7 @@ namespace PCS.WPFClientInterface
 			if (onChannelChanged is null)
 				throw new ArgumentNullException(nameof(onChannelChanged));
 
-			IEnumerable<Channel> channels = accessor.GetChannels();
+			channels = (List<Channel>)accessor.GetChannels();
 			if (channels is null)
 				throw new ArgumentNullException(nameof(channels));
 			if (channels.DefaultIfEmpty() == default)
@@ -46,7 +47,7 @@ namespace PCS.WPFClientInterface
 			foreach (var channel in channels)
 				Add(channel);
 
-			channelList.SelectedItem = channelList.Items[0];
+			channelList.SelectedIndex = 0;
 
 			m_onChannelChanged = onChannelChanged;
 		}
@@ -63,6 +64,7 @@ namespace PCS.WPFClientInterface
 
 		private void channelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
+			
 			m_accessor.FocusedChannel = FocusedChannel;
 			m_onChannelChanged();
 		}

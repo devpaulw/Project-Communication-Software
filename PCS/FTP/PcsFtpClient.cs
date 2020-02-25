@@ -44,14 +44,16 @@ namespace PCS
             }
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public IEnumerable<Channel> GetChannels()
+#pragma warning restore CA1822 // Mark members as static
         {
             // TODO retrieve from folders or from DB ?
             return new List<Channel>()
             {
-                new Channel("channel1"),
-                new Channel("channel2"),
-                new Channel("channel3")
+                ChannelGenerator.Generate("channel1"),
+                ChannelGenerator.Generate("channel2"),
+                ChannelGenerator.Generate("channel3")
             };
         }
 
