@@ -18,7 +18,7 @@ namespace PCS
         private MessageTable messageTable; // TODO Do a ask to server instead of SQL direct download BUT I'm not sure it's the right approach
 
         public event EventHandler<BroadcastMessage> MessageReceive;
-        public event EventHandler<ResponseCode> ResponseReceive; // TODO Think about, define the problem and find a solution lol
+        public event EventHandler<Response> ResponseReceive; // TODO Think about, define the problem and find a solution lol
 
         public bool IsConnected { get; private set; }
         public int ActiveUserId { get; private set; }
@@ -53,33 +53,63 @@ namespace PCS
             {
                 SendPacket(new SignInPacket(authenticationInfos));
 
-                if (ReceivePacket() is ResponsePacket responsePacket)// DOLATER: Is that a good way?
-                { 
-                    switch (responsePacket.ResponseCode)
-                    {
-                        case ResponseCode.SignInSucceeded: // TODO Use OnReceive and just enable isConnected when receive this packet!
-                            IsConnected = true;
-                            break;
-                        case ResponseCode.UnauthorizedLogin: // TODO Maybe add event caller in the true client that get these...
-                            throw new Exception(Messages.Exceptions.UnauthorizedLogin);
-                        default:
-                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
-                    }
+                if (ReceivePacket() is ResponsePacket responsePacket
+                    && responsePacket.Item.Code == ResponseCode.SignIn) // DOLATER: Is that a good way?
+                {
+                    if (responsePacket.Item.Succeeded)
+                        IsConnected = true;
+                    else
+                        throw new Exception(Messages.Exceptions.UnauthorizedLogin);
+
+                    // TODO Maybe add event caller in the true client that get these...
+                    // TODO Use OnReceive and just enable isConnected when receive this packet!
                 }
                 else
                     throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
             }
         }
 
-        public void SendMessage(Message message)
+        public void SendMessage(SendableMessage message)
         {
             if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
 
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+            SendPacket(new MessagePacket(message ?? throw new ArgumentNullException(nameof(message))));
+        }
 
-            SendPacket(new MessagePacket(message));
+        public void DeleteMessage(int messageId)
+        {
+            SendPacket(new RequestPacket(new DeleteMessageRequest(messageId)));
+
+            if (ReceivePacket() is ResponsePacket responsePacket
+                    && responsePacket.Item.Code == ResponseCode.MessageHandle)
+            {
+                if (responsePacket.Item.Succeeded)
+                    System.Diagnostics.Debug.WriteLine("Message remove succeeded");// TODO Error handling here
+            }
+            else
+                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
+        }
+
+        public void ModifyMessage(int messageId, SendableMessage newMessage)
+        {
+            SendPacket(
+                new RequestPacket(
+                    new ModifyMessageRequest(
+                        messageId, 
+                        newMessage ?? throw new ArgumentNullException(nameof(newMessage))
+                        )
+                    )
+                );
+
+            if (ReceivePacket() is ResponsePacket responsePacket // BUG! Already handled by async listener, find another approach
+                    && responsePacket.Item.Code == ResponseCode.MessageHandle)
+            {
+                if (responsePacket.Item.Succeeded)
+                    System.Diagnostics.Debug.WriteLine("Message modification succeeded");// TODO Error handling here
+            }
+            else
+                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
         }
 
         public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
@@ -110,9 +140,10 @@ namespace PCS
             }
         }
 
-        private void OnResponseReceive(object sender, ResponseCode responseCode)
+        private void OnResponseReceive(object sender, Response response)
         {
-
+            // BUG Executed twice
+            //System.Diagnostics.Debug.WriteLine(response.Code.ToString() + " " + (response.Succeeded ? "succeeded" : "failed"));//TEMP
         }
 
         private void StartListenBroadcasts() // TODO Listen better handle with Error Handle espacially
@@ -132,7 +163,9 @@ namespace PCS
                         Packet receivedPacket = ReceivePacket();
 
                         if (receivedPacket is BroadcastMessagePacket broadcastMessagePacket)
-                            MessageReceive(this, broadcastMessagePacket.BroadcastMessage);
+                            MessageReceive(this, broadcastMessagePacket.Item);
+                        else if (receivedPacket is ResponsePacket responsePacket) // TODO Is that really useful ? Is this async function should be only broadcast receive ? maybe if we keep no async wait response
+                            ResponseReceive(this, responsePacket.Item);
                         else
                             throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
 

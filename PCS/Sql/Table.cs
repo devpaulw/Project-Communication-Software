@@ -46,6 +46,54 @@ namespace PCS.Sql
             }
         }
 
+        public void RemoveRow(object rowKey)
+        {
+            string cmdText = string.Format(CultureInfo.InvariantCulture, "DELETE FROM {0} WHERE {1}=@rowKey;",
+                Name,
+                KeyParameter.ParameterName);
+
+            using (SqlConnection conn = new SqlConnection($"server=;Initial Catalog = {Database.Name};Integrated security=SSPI"))
+            using (var cmd = new SqlCommand())
+            {
+                cmd.Connection = conn;
+                cmd.Parameters.AddWithValue("@rowKey", rowKey ?? throw new NullReferenceException());
+                cmd.CommandText = cmdText;
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public T GetItemAt(object rowKey)
+        {
+            string cmdText = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM {0} WHERE {1}=@rowKey ORDER BY {2} DESC",
+                Name,
+                KeyParameter.ParameterName,
+                KeyParameter.ParameterName);
+
+            using (SqlConnection conn = new SqlConnection($"server=;Initial Catalog = {Database.Name};Integrated security=SSPI"))
+            using (var cmd = new SqlCommand())
+            {
+                cmd.Connection = conn;
+                cmd.Parameters.AddWithValue("@rowKey", rowKey ?? throw new NullReferenceException());
+                cmd.CommandText = cmdText;
+
+                conn.Open();
+
+                using (DbDataReader dataReader = cmd.ExecuteReader())
+                {
+                    dataReader.Read();
+                    var parameters = GetParameters();
+                    var values = new Dictionary<string, object>();
+
+                    foreach (var parameter in parameters)
+                        values.Add(parameter.ParameterName, dataReader[parameter.ParameterName]);
+
+                    return GetObject(values);
+                }
+            }
+        }
+
         protected abstract Dictionary<string, object> GetValues(T item);
         protected abstract T GetObject(Dictionary<string, object> values);
         protected abstract SqlParameter[] GetParameters();
@@ -93,7 +141,7 @@ namespace PCS.Sql
                 const int dataMaxSize = 4000,
                     logMaxSize = 2000;
                 string todayStr = string.Concat(DateTime.Today.Day.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'), DateTime.Today.Month.ToString(CultureInfo.InvariantCulture).PadLeft(2, '0'), DateTime.Today.Year.ToString(CultureInfo.InvariantCulture)).PadLeft(4, '0');
-                
+
                 string cmdTxt = $"IF DB_ID('{Name}') IS NULL " +
                     $"CREATE DATABASE {Name} ON PRIMARY" +
                     $"(NAME = {Name}_Data, " +

@@ -5,23 +5,20 @@ using System.Text;
 
 namespace PCS.Data.Packets
 {
-    class BroadcastMessagePacket : Packet // TODO MAYBE Do something so that we don't have to do same class both
+    class BroadcastMessagePacket : Packet<BroadcastMessage>
     {
-        public BroadcastMessage BroadcastMessage { get; set; }
-
-        public BroadcastMessagePacket(BroadcastMessage message) : base(Flags.BroadcastMessage)
+        public BroadcastMessagePacket(BroadcastMessage message) : base(message, Flags.BroadcastMessage)
         {
-            BroadcastMessage = message;
         }
 
         protected override string[] GetAttributes()
         {
             return new string[] {
-                 BroadcastMessage.BaseMessage.ChannelName,
-                 BroadcastMessage.Author.Username,
-                 BroadcastMessage.Author.ID.ToString(CultureInfo.CurrentCulture),
-                 BroadcastMessage.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
-                 BroadcastMessage.BaseMessage.Text
+                 Item.BaseMessage.ChannelName,
+                 Item.Author.Username,
+                 Item.Author.ID.ToString(CultureInfo.CurrentCulture),
+                 Item.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
+                 Item.BaseMessage.Text
             };
         }
     }

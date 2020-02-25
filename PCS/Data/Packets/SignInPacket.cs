@@ -5,21 +5,16 @@ using System.Text;
 
 namespace PCS.Data.Packets
 {
-    class SignInPacket : Packet
+    class SignInPacket : Packet<AuthenticationInfos>
     {
-        public AuthenticationInfos AuthenticationInfos { get; set; }
-
-        public SignInPacket(AuthenticationInfos authenticationInfos) : base(Flags.MemberSignIn)
-        {
-            AuthenticationInfos = authenticationInfos;
-        }
+        public SignInPacket(AuthenticationInfos authenticationInfos) : base(authenticationInfos, Flags.MemberSignIn) { }
 
         protected override string[] GetAttributes()
         {
             return new string[]
             {
-                AuthenticationInfos.MemberId.ToString(CultureInfo.InvariantCulture),
-                AuthenticationInfos.Password
+                Item.MemberId.ToString(CultureInfo.InvariantCulture),
+                Item.Password
             };
         }
     }

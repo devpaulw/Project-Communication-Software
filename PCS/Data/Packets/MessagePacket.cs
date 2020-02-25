@@ -4,21 +4,18 @@ using System.Text;
 
 namespace PCS.Data.Packets
 {
-    class MessagePacket : Packet
+    class MessagePacket : Packet<SendableMessage>
     {
-        public Message Message { get; set; }
-
-        public MessagePacket(Message message) : base(Flags.Message)
-        {
-            Message = message ?? throw new ArgumentNullException(nameof(message));
-        }
+        public MessagePacket(SendableMessage message) : base(message, Flags.SendableMessage) { }
 
         protected override string[] GetAttributes()
         {
             return new string[] {
-                 Message.ChannelName,
-                 Message.Text
+                 Item.ChannelName,
+                 Item.Text
             };
         }
+
+        //DOLATER: find a way to put GetItem here
     }
 }

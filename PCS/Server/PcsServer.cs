@@ -70,8 +70,8 @@ namespace PCS
                 throw;
             }
         }
-        
-        private void ManageClientConnection(PcsClient client)
+
+        private void ManageClientConnection(PcsClient client) // TODO I think it would be better in a well managed class ServerClientManager
         {
             Member signInMember = null; // TODO Maybe put this variable in PcsClient so that it can be used both here and by The accessor
             bool signedIn = false;
@@ -87,14 +87,18 @@ namespace PCS
                     {
                         case SignInPacket signInPacket when !signedIn:
                             lock (@lock)
-                                OnSignIn(signInPacket.AuthenticationInfos);
+                                OnSignIn(signInPacket.Item);
                             break;
                         case MessagePacket messagePacket when signedIn:
                             lock (@lock)
-                                OnMessageReceived(messagePacket.Message);
+                                OnMessageReceived(messagePacket.Item);
                             break;
                         case DisconnectPacket _ when signedIn:
                             connected = false;
+                            break;
+                        case RequestPacket requestPacket when signedIn:
+                            lock (@lock)
+                                OnRequest(requestPacket.Item);
                             break;
                     }
                 }
@@ -115,12 +119,12 @@ namespace PCS
                 {
                     signedIn = true;
 
-                    client.SendPacket(new ResponsePacket(ResponseCode.SignInSucceeded));
+                    client.SendPacket(new ResponsePacket(new Response(ResponseCode.SignIn, true)));
                     Console.WriteLine(Messages.Server.ClientConnect, signInMember, client.RemoteIP.Address.ToString());
                 }
                 else
                 {
-                    client.SendPacket(new ResponsePacket(ResponseCode.UnauthorizedLogin));
+                    client.SendPacket(new ResponsePacket(new Response(ResponseCode.SignIn, false)));
                     connected = false;
                     signInMember = null; // Because sign in failed
                 }
@@ -128,12 +132,12 @@ namespace PCS
                 bool CanSignIn()
                 {
                     lock (@lock)
-                        return memberPasswords.PasswordCorrect(infos) && 
+                        return memberPasswords.PasswordCorrect(infos) &&
                             group.MemberExists(infos.MemberId);
                 }
             }
 
-            void OnMessageReceived(Message message)
+            void OnMessageReceived(SendableMessage message)
             {
                 var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message, DateTime.Now, signInMember);
                 Console.WriteLine("Received: " + broadcastMsg);
@@ -144,10 +148,39 @@ namespace PCS
             void OnDisconnect()
             {
                 client.Disconnect();
-                if (signInMember != null) 
+                if (signInMember != null)
                     Console.WriteLine(Messages.Server.ClientDisconnect, signInMember);
 
                 connectedClients.Remove(client);
+            }
+
+            void OnRequest(Request request)
+            {
+                switch (request)
+                {
+                    case DeleteMessageRequest deleteMessageRequest:
+                        { // Remove message
+                            messageTable.RemoveRow(deleteMessageRequest.MessageId); // TODO try catch
+                        }
+
+                        client.SendPacket(new ResponsePacket(
+                            new Response(ResponseCode.MessageHandle, true)));
+
+                        break;
+                    case ModifyMessageRequest modifyMessageRequest:
+                        { // Modify message
+                            var oldBroadcast = messageTable.GetItemAt(modifyMessageRequest.MessageId);
+                            var newBroadcast = new BroadcastMessage(modifyMessageRequest.MessageId, modifyMessageRequest.NewMessage, oldBroadcast.DateTime, oldBroadcast.Author);
+
+                            messageTable.RemoveRow(modifyMessageRequest.MessageId);
+                            messageTable.AddRow(newBroadcast);
+                        }
+
+                        client.SendPacket(new ResponsePacket(
+                            new Response(ResponseCode.MessageHandle, true)));
+
+                        break;
+                }
             }
         }
 

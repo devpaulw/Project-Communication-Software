@@ -6,7 +6,8 @@ namespace PCS.Data
 {
     public enum ResponseCode
     {
-        SignInSucceeded = 0,
-        UnauthorizedLogin = 1
+        SignIn = 0,
+        MessageDelivery = 1,
+        MessageHandle = 2
     }
 }

@@ -31,7 +31,7 @@ namespace PCS.WPFClientInterface
     {
         private readonly object @lock = new object();
 
-        private PcsAccessor clientAccessor = new PcsAccessor();
+        private PcsAccessor accessor = new PcsAccessor();
 
         public MainWindow()
         {
@@ -40,8 +40,8 @@ namespace PCS.WPFClientInterface
 
         private void Disconnect()
         {
-            clientAccessor.Disconnect();
-            clientAccessor.MessageReceive -= OnMessageReceive;
+            accessor.Disconnect();
+            accessor.MessageReceive -= OnMessageReceive;
 
             messageField.Clear();
 
@@ -56,7 +56,7 @@ namespace PCS.WPFClientInterface
             messageField.LoadedMessagesCount += messageField.ShowBeforeCount;
 
             // Get SQL Messages
-            foreach (var message in clientAccessor.GetTopMessagesInRange(messageField.LoadedMessagesCount - messageField.ShowBeforeCount, messageField.LoadedMessagesCount, channelSelector.SelectedChannel))
+            foreach (var message in accessor.GetTopMessagesInRange(messageField.LoadedMessagesCount - messageField.ShowBeforeCount, messageField.LoadedMessagesCount, channelSelector.SelectedChannel))
                 messageField.AddMessageOnTop(message);
         }
 
@@ -67,12 +67,12 @@ namespace PCS.WPFClientInterface
 
         private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var connWindow = new ConnectionWindow(ref clientAccessor);
+            var connWindow = new ConnectionWindow(ref accessor);
             connWindow.ShowDialog();
 
             if (connWindow.Connected)
             {
-                clientAccessor.MessageReceive += OnMessageReceive;
+                accessor.MessageReceive += OnMessageReceive;
 
                 channelSelector.Enable();
 
@@ -93,13 +93,13 @@ namespace PCS.WPFClientInterface
 
         void Notify(BroadcastMessage broadcastMsg)
         {
-            if (broadcastMsg.Author.ID != clientAccessor.ActiveUserId)
+            if (broadcastMsg.Author.ID != accessor.ActiveUserId)
                 PcsNotifier.Notify(this, broadcastMsg); // Notify when it's not us
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            clientAccessor.Disconnect();
+            accessor.Disconnect();
             Application.Current.Shutdown();
         }
 
@@ -108,11 +108,11 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel);
+            var message = new SendableMessage(messageTextBox.Text, channelSelector.SelectedChannel);
 
             try
             {
-                clientAccessor.SendMessage(message);
+                accessor.SendMessage(message);
                 messageTextBox.Text = string.Empty;
             }
             catch (Exception ex)
@@ -146,7 +146,7 @@ namespace PCS.WPFClientInterface
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            clientAccessor.Dispose();
+            accessor.Dispose();
         }
 
         private void ToggleAll()
@@ -159,178 +159,23 @@ namespace PCS.WPFClientInterface
 
         private void ToggleSendMessageButton()
             => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
-            && clientAccessor.IsConnected;
+            && accessor.IsConnected;
 
         private void ToggleConnectMenuItem()
-            => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
+            => connectMenuItem.IsEnabled = !accessor.IsConnected;
 
         private void ToggleDisconnectMenuItem()
-            => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
+            => disconnectMenuItem.IsEnabled = accessor.IsConnected;
 
         private void ToggleDisplayPreviousDayButton()
-            => displayPreviousDayButton.IsEnabled = clientAccessor.IsConnected;
+            => displayPreviousDayButton.IsEnabled = accessor.IsConnected;
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            //Console.WriteLine("Hello World");
-
-            //string provider = "System.Data.SqlClient";
-            //string connStr = @"Data Source=DESKTOP-IQ5GUFM\;Initial Catalog=TESTDV;Integrated Security=True;Pooling=False";
-            //DbProviderFactory factory = DbProviderFactories.GetFactory(provider);
-
-            //using (DbConnection connection = factory.CreateConnection())
-            //{
-            //    if (connection == null)
-            //    {
-            //        Console.WriteLine("connect error");
-            //        Console.ReadLine();
-            //        return;
-            //    }
-            //    connection.ConnectionString = connStr;
-            //    connection.Open();
-            //    DbCommand command = factory.CreateCommand();
-
-            //    if (command == null)
-            //    {
-            //        Console.WriteLine("Command error");
-            //        Console.ReadLine();
-            //        return;
-            //    }
-
-            //    command.Connection = connection;
-            //    command.CommandText = "Select * From Products";
-
-            //    using (DbDataReader dataReader = command.ExecuteReader())
-            //    {
-            //        while (dataReader.Read())
-            //        {
-            //            Console.WriteLine($"Then {dataReader["ProdId"]} {dataReader["Product"]}");
-            //            Console.ReadLine();
-            //        }
-            //    }
-
-            //    DbCommand ct = factory.CreateCommand();
-            //    ct.Connection = connection;
-            //    ct.CommandText = "INSERT INTO Products (ProdId, Product)" +
-            //        "Values (365, 'FromC#')";
-            //    ct.ExecuteNonQuery();
-
-            //    //using (DbData)
-            //}
-
-            string connStr = @"Data Source=DESKTOP-IQ5GUFM\;Initial Catalog=TESTDV;Integrated Security=True;Pooling=False";
-            //string test = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=\"D:\\Fichiers personnels\\Documents\\[] Projects\\Project Communication Software\\PCS.WPFClientInterface\\Database1.mdf\";Integrated Security=True";
-            
-            using (var connection = new SqlConnection())
-            {
-                if (connection == null)
-                {
-                    Console.WriteLine("connect error");
-                    Console.ReadLine();
-                    return;
-                }
-
-                connection.ConnectionString = connStr;
-
-                connection.Open();
-
-                SqlCommand command = new SqlCommand();
-
-                if (command == null)
-                {
-                    Console.WriteLine("Command error");
-                    Console.ReadLine();
-                    return;
-                }
-
-                command.Connection = connection;
-                command.CommandText = "Select * From Products";
-
-                using (DbDataReader dataReader = command.ExecuteReader())
-                {
-                    while (dataReader.Read())
-                    {
-                        Console.WriteLine($"Then {dataReader["ProdId"]} {dataReader["Product"]}");
-                        Console.ReadLine();
-                    }
-                }
-
-                command.CommandText = "INSERT INTO Products (ProdId, Product)" +
-                    "Values (366, 'FromC#')";
-
-                command.ExecuteNonQuery();
-            }
-
-            //using (SqlConnection connection = new SqlConn)
-
-            //String str;
-            //SqlConnection myConn = new SqlConnection("Server=localhost;Integrated security=SSPI;database=master");
-
-            //str = "CREATE DATABASE MyDatabase ON PRIMARY " +
-            //    "(NAME = MyDatabase_Data, " +
-            //    "FILENAME = 'C:\\MyDatabaseData.mdf', " +
-            //    "SIZE = 2MB, MAXSIZE = 10MB, FILEGROWTH = 10%) " +
-            //    "LOG ON (NAME = MyDatabase_Log, " +
-            //    "FILENAME = 'C:\\MyDatabaseLog.ldf', " +
-            //    "SIZE = 1MB, " +
-            //    "MAXSIZE = 5MB, " +
-            //    "FILEGROWTH = 10%)";
-
-            //SqlCommand myCommand = new SqlCommand(str, myConn);
-            //try
-            //{
-            //    myConn.Open();
-            //    myCommand.ExecuteNonQuery();
-            //    MessageBox.Show("DataBase is Created Successfully", "MyProgram", MessageBoxButton.OK, MessageBoxImage.Information);
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.ToString(), "MyProgram", MessageBoxButton.OK, MessageBoxImage.Information);
-            //}
-            //finally
-            //{
-            //    if (myConn.State == ConnectionState.Open)
-            //        myConn.Close();
-            //}
-
-            // your connection string
-            //string connectionString = ;
-
-            // your query:
-            //var query = GetDbCreationQuery();
-
-            //var conn = new SqlConnection(connectionString);
-            //var command = new SqlCommand(query, conn);
-
-            //try
-            //{
-            //    conn.Open();
-            //    command.ExecuteNonQuery();
-            //    MessageBox.Show("Database is created successfully", "MyProgram",
-            //                    MessageBoxButton.OK, MessageBoxImage.Information);
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.ToString());
-            //}
-            //finally
-            //{
-            //    if ((conn.State == ConnectionState.Open))
-            //    {
-            //        conn.Close();
-            //    }
-            //}
-
-            //string GetDbCreationQuery()
-            //{
-            //    // your db name
-            //    string dbName = "MyDatabase";
-
-            //    // db creation query
-            //    string query = "CREATE DATABASE " + dbName + ";";
-
-            //    return query;
-            //}
+            accessor.DeleteMessage(14);
+            accessor.ModifyMessage(38, new SendableMessage("Modifié", "channel1"));
+            messageField.Clear();// TODO Reset func, handle better MessageField //TODO MAKE MessageField adapted to Modify and Remove message // TODO In messageField use List<Broadcast> to handle them and with an update system
+            ShowMessagesBefore();
         }
     }
 }

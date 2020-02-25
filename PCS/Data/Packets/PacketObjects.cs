@@ -26,7 +26,7 @@ namespace PCS.Data.Packets
 
             var author = new Member(username, id);
 
-            return new BroadcastMessagePacket(new BroadcastMessage(0, new Message(text, channelTitle), dateTime, author)); // TODO Supply
+            return new BroadcastMessagePacket(new BroadcastMessage(0, new SendableMessage(text, channelTitle), dateTime, author)); // TODO Supply
         }
 
         public static MessagePacket GetMessage(string[] attributes)
@@ -34,7 +34,7 @@ namespace PCS.Data.Packets
             string channelTitle = attributes[0];
             string text = attributes[1];
 
-            return new MessagePacket(new Message(text, channelTitle));
+            return new MessagePacket(new SendableMessage(text, channelTitle));
         }
 
         public static DisconnectPacket GetDisconnect() => 
@@ -43,7 +43,31 @@ namespace PCS.Data.Packets
         public static ResponsePacket GetResponse(string[] attributes)
         {
             ResponseCode responseCode = (ResponseCode)Convert.ToInt32(attributes[0], CultureInfo.CurrentCulture);
-            return new ResponsePacket(responseCode);
+            bool succeeded = Convert.ToBoolean(Convert.ToInt32(attributes[1], CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+
+            return new ResponsePacket(new Response(responseCode, succeeded));
+        }
+
+        public static RequestPacket GetRequest(string[] attributes)
+        {
+            RequestCode requestCode = (RequestCode)Convert.ToInt32(attributes[0], CultureInfo.CurrentCulture);
+            Request request = null;
+
+            switch (requestCode)
+            {
+                case RequestCode.DeleteMessage:
+                    request = new DeleteMessageRequest(Convert.ToInt32(attributes[1], CultureInfo.InvariantCulture));
+                    break;
+                case RequestCode.ModifyMessage:
+                    request = new ModifyMessageRequest(Convert.ToInt32(attributes[1], CultureInfo.InvariantCulture),
+                        new SendableMessage(attributes[3], attributes[2]));
+                    break;
+                case RequestCode.GetMessages:
+                    request = null;
+                    break;
+            }
+
+            return new RequestPacket(request);
         }
     }
 }

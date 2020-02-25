@@ -9,11 +9,11 @@ namespace PCS.Data
     public class BroadcastMessage
     {
         public int ID { get; set; }
-        public Message BaseMessage { get; set; } // TODO Discontinue this idea
+        public SendableMessage BaseMessage { get; set; } // TODO Discontinue this idea
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
 
-        public BroadcastMessage(int id, Message baseMessage, DateTime dateTime, Member author)
+        public BroadcastMessage(int id, SendableMessage baseMessage, DateTime dateTime, Member author)
         {
             ID = id;
             BaseMessage = baseMessage;
@@ -42,7 +42,7 @@ namespace PCS.Data
 
             return new BroadcastMessage(
                 0, // TODO Supply
-                new Message(infos[4],
+                new SendableMessage(infos[4],
                 infos[0]),
                 DateTime.FromFileTime(Convert.ToInt64(infos[3], CultureInfo.InvariantCulture)),
                 new Member(infos[1], 

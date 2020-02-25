@@ -25,7 +25,7 @@ namespace PCS.WPFClientInterface
         const int ImageHeight = 260;
 
         public int LoadedMessagesCount { get; set; }
-        public int ShowBeforeCount => 5;
+        public int ShowBeforeCount => 20;
 
         public MessageField() // TODO Implement ClientAccessor reference for this class it will be simpler for GetDailyMessages
         {

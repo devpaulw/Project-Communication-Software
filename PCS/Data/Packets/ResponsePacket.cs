@@ -5,21 +5,17 @@ using System.Text;
 
 namespace PCS.Data.Packets
 {
-    class ResponsePacket : Packet
+    class ResponsePacket : Packet<Response>
     {
-        public ResponseCode ResponseCode { get; set; }
-
-        public ResponsePacket(ResponseCode responseCode) : base(Flags.Response)
-        {
-            ResponseCode = responseCode;
-        }
+        public ResponsePacket(Response response) : base(response, Flags.Response) { }
 
         protected override string[] GetAttributes()
         {
-            return new string[]
-            {
-                ((int)ResponseCode).ToString(CultureInfo.InvariantCulture)
-            };
+            return new[]
+                {
+                    ((int)Item.Code).ToString(CultureInfo.InvariantCulture),
+                    Convert.ToInt32(Item.Succeeded).ToString(CultureInfo.InvariantCulture)
+                };
         }
     }
 }

@@ -5,39 +5,20 @@ using System.Text;
 
 namespace PCS.Data.Packets
 {
-    internal abstract class Packet
+    abstract class Packet<T> : Packet where T : class
     {
-        public string Flag { get; }
+        public T Item { get; }
 
-        public Packet(string flag)
+        public Packet(T item, string flag) : base(flag)
         {
-            Flag = flag;
+            Item = item ?? throw new ArgumentNullException(nameof(item));
         }
 
-        public static Packet FromTextData(string textData)
-        {
-            var attributes = Split(textData, out string headerFlag);
-                                                       
-            switch (headerFlag)
-            {
-                case Flags.MemberSignIn:
-                    return PacketObjects.GetMemberSignIn(attributes);
-                case Flags.BroadcastMessage:
-                    return PacketObjects.GetBroadcastMessage(attributes);
-                case Flags.Message:
-                    return PacketObjects.GetMessage(attributes);
-                case Flags.ClientDisconnect:
-                    return PacketObjects.GetDisconnect();
-                case Flags.Response:
-                    return PacketObjects.GetResponse(attributes);
-                default:
-                    throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
-            }
-        }
+        protected abstract string[] GetAttributes();
 
-        public string GetTextData()
+        public override string GetTextData()
         {
-            string result = Flag;
+            string result = base.GetTextData();
 
             string[] attributes = GetAttributes();
 
@@ -65,8 +46,44 @@ namespace PCS.Data.Packets
                 result += ControlChars.EndOfText;
             }
         }
+    }
 
-        protected abstract string[] GetAttributes();
+    internal abstract class Packet
+    {
+        public string Flag { get; }
+
+        public Packet(string flag)
+        {
+            Flag = flag;
+        }
+
+        public virtual string GetTextData()
+        {
+            return Flag;
+        }
+
+        public static Packet FromTextData(string textData)
+        {
+            var attributes = Split(textData, out string headerFlag);
+
+            switch (headerFlag)
+            {
+                case Flags.MemberSignIn:
+                    return PacketObjects.GetMemberSignIn(attributes);
+                case Flags.BroadcastMessage:
+                    return PacketObjects.GetBroadcastMessage(attributes);
+                case Flags.SendableMessage:
+                    return PacketObjects.GetMessage(attributes);
+                case Flags.ClientDisconnect:
+                    return PacketObjects.GetDisconnect();
+                case Flags.Response:
+                    return PacketObjects.GetResponse(attributes);
+                case Flags.Request:
+                    return PacketObjects.GetRequest(attributes);
+                default:
+                    throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
+            }
+        }
 
         private static string[] Split(string textData, out string headerFlag)
         {

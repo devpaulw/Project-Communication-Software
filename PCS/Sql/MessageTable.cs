@@ -77,7 +77,7 @@ namespace PCS.Sql
 
             return new BroadcastMessage(
                 values["Id"] as int? ?? throw new NullReferenceException(),
-                new Message(values["Text"] as string ?? throw new NullReferenceException(), 
+                new SendableMessage(values["Text"] as string ?? throw new NullReferenceException(), 
                 values["Channel"] as string ?? throw new NullReferenceException()),
                 values["DateTime"] as DateTime? ?? throw new NullReferenceException(),
                 new MemberTable().GetMemberFromId(values["AuthorId"] as int? ?? throw new NullReferenceException())
