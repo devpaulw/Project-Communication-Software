@@ -65,8 +65,6 @@ namespace PCS.WPFClientInterface
 
 				accessor.StartListenAsync(MessageReceived, OnChannelReceived); // TODO Handle exceptions here.
 
-				// BBTEMP:
-				//channelList.Enable(); 
 				channelList.Initialize(accessor, ResetMessageField);
 
 				// Get FTP Messages
@@ -116,7 +114,7 @@ namespace PCS.WPFClientInterface
 
 		private void SendMessageButton_Click(object sender, RoutedEventArgs e)
 		{
-			var message = new Message(messageTextBox.Text, channelList.FocusedChannel.Name);
+			var message = new Message(messageTextBox.Text, accessor.FocusedChannel.Name);
 
 			try
 			{

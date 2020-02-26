@@ -20,7 +20,6 @@ namespace PCS.WPFClientInterface
 	/// </summary>
 	public partial class ChannelList : UserControl
 	{
-		public Channel FocusedChannel { get => channels[channelList.SelectedIndex]; }
 		public List<Channel> channels = new List<Channel>();
 		private PcsAccessor m_accessor;
 		private Action m_onChannelChanged = () => { };
@@ -62,11 +61,36 @@ namespace PCS.WPFClientInterface
 			channelList.Items.Add(channel.Name);
 		}
 
+		internal void Remove(Channel channel)
+		{
+			int channelIndex = channels.IndexOf(channel);
+
+			channels.RemoveAt(channelIndex);
+			channelList.Items.RemoveAt(channelIndex);
+
+			if (channel == m_accessor.FocusedChannel)
+			{
+				// BBASSUME: the channel count will always be greater than two
+				m_accessor.FocusedChannel = channels[0];
+				channelList.SelectedIndex = 0;
+			}
+		}
+
+		internal void Rename(Channel channel, string name)
+		{
+			int channelIndex = channels.IndexOf(channel);
+
+			channels[channelIndex].Name = name;
+			channelList.Items[channelIndex] = name;
+		}
+
 		private void channelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			
-			m_accessor.FocusedChannel = FocusedChannel;
-			m_onChannelChanged();
+			if (channelList.SelectedIndex != -1)
+			{
+				m_accessor.FocusedChannel = new Channel(channelList.SelectedIndex, channelList.SelectedItem.ToString());
+				m_onChannelChanged();
+			}
 		}
 	}
 }
