@@ -14,8 +14,9 @@ namespace PCS.Sql
         protected override string Name => "Messages";
 
         public int GetNewID()
-        {
-            return GetTopMessagesInRange(0, 1, null).First().ID + 1;
+        { // DOLATER: this is working but not fine
+            var topMessage = GetTopMessagesInRange(0, 1, null);
+            return topMessage.Any() ? topMessage.First().ID + 1 : 0;
         }
 
         public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)

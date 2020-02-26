@@ -14,12 +14,10 @@ namespace PCS
 {
     public class PcsAccessor : PcsClient
     {
-        private Thread serverListenThread;
         private ResponseResetEvent responseEvent;
         private MessageTable messageTable; // TODO Do a ask to server instead of SQL direct download BUT I'm not sure it's the right approach
 
         public event EventHandler<BroadcastMessage> MessageReceive;
-        public event EventHandler<Response> ResponseReceive; // TODO Think about, define the problem and find a solution lol
 
         public bool IsSignedIn { get; private set; }
         public int ActiveMemberId { get; private set; }
@@ -42,7 +40,6 @@ namespace PCS
             #region Init Listen
             IsConnected = true;
             responseEvent = new ResponseResetEvent();
-            ResponseReceive += (object sender, Response response) => responseEvent.SetResponse(response);
 
             StartListenServer();
             #endregion
@@ -128,7 +125,6 @@ namespace PCS
             if (IsConnected)
             {
                 MessageReceive = null;
-                ResponseReceive = null;
 
                 base.Disconnect();
             }
@@ -136,7 +132,7 @@ namespace PCS
 
         private void StartListenServer() // TODO Listen better handle with Error Handle espacially
         {
-            serverListenThread = new Thread(new ThreadStart(Listen));
+            Thread serverListenThread = new Thread(new ThreadStart(Listen));
             serverListenThread.Start();
 
             void Listen()
@@ -153,7 +149,7 @@ namespace PCS
                                 MessageReceive(this, broadcastMessagePacket.Item);
                                 break;
                             case ResponsePacket responsePacket:
-                                ResponseReceive(this, responsePacket.Item);
+                                responseEvent.SetResponse(responsePacket.Item);
                                 break;
                             default:
                                 throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
@@ -167,38 +163,5 @@ namespace PCS
                 }
             }
         }
-
-        //private void StartListenBroadcasts() // TODO Listen better handle with Error Handle espacially
-        //{
-        //    if (!IsSignedIn)
-        //        throw new Exception(Messages.Exceptions.NotConnected);
-            
-        //    serverListenThread = new Thread(new ThreadStart(Listen));
-        //    serverListenThread.Start();
-
-        //    void Listen()
-        //    {
-        //        while (IsSignedIn) // UNDONE Make it not IsConnected obligation
-        //        {
-        //            try
-        //            {
-        //                Packet receivedPacket = ReceivePacket();
-
-        //                if (receivedPacket is BroadcastMessagePacket broadcastMessagePacket)
-        //                    MessageReceive(this, broadcastMessagePacket.Item);
-        //                else if (receivedPacket is ResponsePacket responsePacket) // TODO Is that really useful ? Is this async function should be only broadcast receive ? maybe if we keep no async wait response
-        //                    ResponseReceive(this, responsePacket.Item);
-        //                else
-        //                    throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
-                        
-        //            }
-        //            catch (SocketException)
-        //            {
-        //                if (IsSignedIn)
-        //                    throw;
-        //            }
-        //        }
-        //    }
-        //}
     }
 }

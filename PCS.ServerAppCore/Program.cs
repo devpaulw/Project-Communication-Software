@@ -15,8 +15,14 @@ namespace PCS.ServerAppCore
 
             //SqlTest();
 
+            IPAddress serverAddress;
+
+#if DEBUG
+            serverAddress = IPAddress.Parse("127.0.0.1");
+#else
             Console.Write("SERVER ADDRESS: ");
-            var serverAddress = IPAddress.Parse(Console.ReadLine());
+            serverAddress = IPAddress.Parse(Console.ReadLine());
+#endif
 
             var server = new PcsServer(serverAddress);
             server.StartHosting();

@@ -22,8 +22,10 @@ namespace PCS.Sql
                 conn.Open();
                 using (DbDataReader dataReader = cmd.ExecuteReader())
                 {
-                    dataReader.Read();
-                    return (string)dataReader["Password"] == authenticationInfos.Password;
+                    if (dataReader.Read())
+                        return (string)dataReader["Password"] == authenticationInfos.Password;
+                    else 
+                        return false;
                 }
             }
         }

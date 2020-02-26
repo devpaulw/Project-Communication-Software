@@ -7,7 +7,7 @@ using System.Text;
 
 namespace PCS.Data
 {
-    public class Response
+    class Response
     {
         public ResponseCode Code { get; }
         public bool Succeeded { get; }
@@ -17,5 +17,8 @@ namespace PCS.Data
             Code = code;
             Succeeded = succeeded;
         }
+
+        internal virtual string[] GetAdditionalAttributes()
+            => null;
     }
 }

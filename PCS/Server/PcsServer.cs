@@ -38,6 +38,9 @@ namespace PCS
                 group.AddRow(new Member("Paul", 1));
                 group.AddRow(new Member("Thomas", 2));
                 group.AddRow(new Member("Ilian", 3));
+                memberPasswords.AddRow(new AuthenticationInfos(1, "gamestar"));
+                memberPasswords.AddRow(new AuthenticationInfos(2, "momocmapassion3"));
+                memberPasswords.AddRow(new AuthenticationInfos(1, "iliano"));
             }
             catch { }
             #endregion
@@ -132,8 +135,8 @@ namespace PCS
                 bool CanSignIn()
                 {
                     lock (@lock)
-                        return memberPasswords.PasswordCorrect(infos) &&
-                            group.MemberExists(infos.MemberId);
+                        return group.MemberExists(infos.MemberId)
+                            && memberPasswords.PasswordCorrect(infos);
                 }
             }
 
