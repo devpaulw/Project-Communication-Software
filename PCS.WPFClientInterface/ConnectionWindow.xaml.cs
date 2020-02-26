@@ -86,6 +86,7 @@ namespace PCS.WPFClientInterface
             }
             catch (Exception ex)
             {
+                m_clientAccessor.Disconnect();
                 MessageBox.Show(ex.Message, $"Connection to {serverAddressTextBox.Text} failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -109,6 +110,7 @@ namespace PCS.WPFClientInterface
                 LoadFields();
             }
             catch (FileNotFoundException) { }
+            // DOLATER Get used of other possible exceptions (+everywhere)
 
             ToggleConnectButton();
         }
@@ -118,7 +120,8 @@ namespace PCS.WPFClientInterface
             var document = new XDocument(
                 new XElement("ConnectionInfos",
                     new XElement("ServerAddress", serverAddressTextBox.Text),
-                    new XElement("UserID", idTextBox.Text)
+                    new XElement("UserID", idTextBox.Text),
+                    new XElement("Password", passwordTb.Password)
                 )
             );
 
@@ -131,6 +134,7 @@ namespace PCS.WPFClientInterface
             document.Load(fieldSavePath);
             serverAddressTextBox.Text = document.SelectSingleNode("/ConnectionInfos/ServerAddress").InnerXml;
             idTextBox.Text = document.SelectSingleNode("/ConnectionInfos/UserID").InnerXml;
+            passwordTb.Password = document.SelectSingleNode("/ConnectionInfos/Password").InnerXml; // TODO Make it secured
         }
     }
 }

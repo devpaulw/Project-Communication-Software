@@ -11,8 +11,9 @@ namespace PCS
 {
     public class PcsClient : IDisposable
     {
-        private protected bool disposedValue;
+        private bool disposedValue;
 
+        protected bool IsConnected { get; set; }
         protected Socket AdapteeClient { get; set; }
 
         // TODO public Member Member { get; set; }
@@ -27,6 +28,7 @@ namespace PCS
         public PcsClient(Socket client)
         {
             AdapteeClient = client;
+            IsConnected = true;
         }
 
         internal Packet ReceivePacket()
@@ -76,6 +78,8 @@ namespace PCS
 
         public virtual void Disconnect()
         {
+            IsConnected = false;
+
             AdapteeClient.Shutdown(SocketShutdown.Both);
             AdapteeClient.Close();
         }
@@ -88,6 +92,9 @@ namespace PCS
 
         protected virtual void Dispose(bool disposing)
         {
+            if (!IsConnected)
+                return;
+
             if (!disposedValue)
             {
                 if (disposing)

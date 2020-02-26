@@ -15,54 +15,55 @@ namespace PCS
     public class PcsAccessor : PcsClient
     {
         private Thread serverListenThread;
+        private ResponseResetEvent responseEvent;
         private MessageTable messageTable; // TODO Do a ask to server instead of SQL direct download BUT I'm not sure it's the right approach
 
         public event EventHandler<BroadcastMessage> MessageReceive;
         public event EventHandler<Response> ResponseReceive; // TODO Think about, define the problem and find a solution lol
 
-        public bool IsConnected { get; private set; }
-        public int ActiveUserId { get; private set; }
+        public bool IsSignedIn { get; private set; }
+        public int ActiveMemberId { get; private set; }
 
         public PcsAccessor()
         {
-            ResponseReceive += OnResponseReceive;
         }
 
         public void Connect(IPAddress ip, AuthenticationInfos authenticationInfos) // TODO I don't know if this password is secured
         {
-            if (ip == null)
-                throw new ArgumentNullException(nameof(ip));
-            if (authenticationInfos == null)
-                throw new ArgumentNullException(nameof(authenticationInfos));
+            ActiveMemberId = (authenticationInfos ?? throw new ArgumentNullException(nameof(authenticationInfos))).MemberId;
 
-            ActiveUserId = authenticationInfos.MemberId;
-
-            AdapteeClient = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            #region Connect to the network
+            AdapteeClient = new Socket((ip ?? throw new ArgumentNullException(nameof(ip))).AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
-
             AdapteeClient.Connect(endPoint);
             Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
+            #endregion
 
-            messageTable = new MessageTable();
+            #region Init Listen
+            IsConnected = true;
+            responseEvent = new ResponseResetEvent();
+            ResponseReceive += (object sender, Response response) => responseEvent.SetResponse(response);
+
+            StartListenServer();
+            #endregion
+
+            messageTable = new MessageTable(); // TODO SHould not be there
 
             SignIn();
-
-            StartListenBroadcasts();
 
             void SignIn()
             {
                 SendPacket(new SignInPacket(authenticationInfos));
 
-                if (ReceivePacket() is ResponsePacket responsePacket
-                    && responsePacket.Item.Code == ResponseCode.SignIn) // DOLATER: Is that a good way?
+                    // TODO Maybe add event caller in the true client that get these...
+
+                var response = responseEvent.WaitResponse();
+                if (response.Code == ResponseCode.SignIn)
                 {
-                    if (responsePacket.Item.Succeeded)
-                        IsConnected = true;
+                    if (response.Succeeded)
+                        IsSignedIn = true;
                     else
                         throw new Exception(Messages.Exceptions.UnauthorizedLogin);
-
-                    // TODO Maybe add event caller in the true client that get these...
-                    // TODO Use OnReceive and just enable isConnected when receive this packet!
                 }
                 else
                     throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
@@ -71,7 +72,7 @@ namespace PCS
 
         public void SendMessage(SendableMessage message)
         {
-            if (!IsConnected)
+            if (!IsSignedIn)
                 throw new Exception(Messages.Exceptions.NotConnected);
 
             SendPacket(new MessagePacket(message ?? throw new ArgumentNullException(nameof(message))));
@@ -81,11 +82,11 @@ namespace PCS
         {
             SendPacket(new RequestPacket(new DeleteMessageRequest(messageId)));
 
-            if (ReceivePacket() is ResponsePacket responsePacket
-                    && responsePacket.Item.Code == ResponseCode.MessageHandle)
+            var response = responseEvent.WaitResponse();
+            if (response.Code == ResponseCode.MessageHandle)
             {
-                if (responsePacket.Item.Succeeded)
-                    System.Diagnostics.Debug.WriteLine("Message remove succeeded");// TODO Error handling here
+                if (response.Succeeded)
+                    System.Diagnostics.Debug.WriteLine("Message delete succeeded");// TODO Error handling here
             }
             else
                 throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
@@ -102,10 +103,10 @@ namespace PCS
                     )
                 );
 
-            if (ReceivePacket() is ResponsePacket responsePacket // BUG! Already handled by async listener, find another approach
-                    && responsePacket.Item.Code == ResponseCode.MessageHandle)
+            var response = responseEvent.WaitResponse();
+            if (response.Code == ResponseCode.MessageHandle)
             {
-                if (responsePacket.Item.Succeeded)
+                if (response.Succeeded)
                     System.Diagnostics.Debug.WriteLine("Message modification succeeded");// TODO Error handling here
             }
             else
@@ -117,58 +118,46 @@ namespace PCS
 
         public override void Disconnect()
         {
-            if (IsConnected)
+            if (IsSignedIn)
             {
                 SendPacket(new DisconnectPacket());
 
-                IsConnected = false;
+                IsSignedIn = false; // TODO Put it in client directly so that it can be used by server too
+            }
+
+            if (IsConnected)
+            {
+                MessageReceive = null;
+                ResponseReceive = null;
 
                 base.Disconnect();
             }
         }
 
-        protected override void Dispose(bool disposing)
+        private void StartListenServer() // TODO Listen better handle with Error Handle espacially
         {
-            if (!IsConnected)
-                return;
-
-            if (!disposedValue && disposing)
-            {
-                MessageReceive = null;
-
-                base.Dispose(disposing);
-            }
-        }
-
-        private void OnResponseReceive(object sender, Response response)
-        {
-            // BUG Executed twice
-            //System.Diagnostics.Debug.WriteLine(response.Code.ToString() + " " + (response.Succeeded ? "succeeded" : "failed"));//TEMP
-        }
-
-        private void StartListenBroadcasts() // TODO Listen better handle with Error Handle espacially
-        {
-            if (!IsConnected)
-                throw new Exception(Messages.Exceptions.NotConnected);
-
-            serverListenThread = new Thread(() => Listen());
+            serverListenThread = new Thread(new ThreadStart(Listen));
             serverListenThread.Start();
 
             void Listen()
             {
-                while (IsConnected) // UNDONE
+                while (IsConnected)
                 {
                     try
                     {
                         Packet receivedPacket = ReceivePacket();
 
-                        if (receivedPacket is BroadcastMessagePacket broadcastMessagePacket)
-                            MessageReceive(this, broadcastMessagePacket.Item);
-                        else if (receivedPacket is ResponsePacket responsePacket) // TODO Is that really useful ? Is this async function should be only broadcast receive ? maybe if we keep no async wait response
-                            ResponseReceive(this, responsePacket.Item);
-                        else
-                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
-
+                        switch (receivedPacket)
+                        {
+                            case BroadcastMessagePacket broadcastMessagePacket when IsSignedIn:
+                                MessageReceive(this, broadcastMessagePacket.Item);
+                                break;
+                            case ResponsePacket responsePacket:
+                                ResponseReceive(this, responsePacket.Item);
+                                break;
+                            default:
+                                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+                        }
                     }
                     catch (SocketException)
                     {
@@ -178,5 +167,38 @@ namespace PCS
                 }
             }
         }
+
+        //private void StartListenBroadcasts() // TODO Listen better handle with Error Handle espacially
+        //{
+        //    if (!IsSignedIn)
+        //        throw new Exception(Messages.Exceptions.NotConnected);
+            
+        //    serverListenThread = new Thread(new ThreadStart(Listen));
+        //    serverListenThread.Start();
+
+        //    void Listen()
+        //    {
+        //        while (IsSignedIn) // UNDONE Make it not IsConnected obligation
+        //        {
+        //            try
+        //            {
+        //                Packet receivedPacket = ReceivePacket();
+
+        //                if (receivedPacket is BroadcastMessagePacket broadcastMessagePacket)
+        //                    MessageReceive(this, broadcastMessagePacket.Item);
+        //                else if (receivedPacket is ResponsePacket responsePacket) // TODO Is that really useful ? Is this async function should be only broadcast receive ? maybe if we keep no async wait response
+        //                    ResponseReceive(this, responsePacket.Item);
+        //                else
+        //                    throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+                        
+        //            }
+        //            catch (SocketException)
+        //            {
+        //                if (IsSignedIn)
+        //                    throw;
+        //            }
+        //        }
+        //    }
+        //}
     }
 }

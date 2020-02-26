@@ -93,7 +93,7 @@ namespace PCS.WPFClientInterface
 
         void Notify(BroadcastMessage broadcastMsg)
         {
-            if (broadcastMsg.Author.ID != accessor.ActiveUserId)
+            if (broadcastMsg.Author.ID != accessor.ActiveMemberId)
                 PcsNotifier.Notify(this, broadcastMsg); // Notify when it's not us
         }
 
@@ -159,21 +159,21 @@ namespace PCS.WPFClientInterface
 
         private void ToggleSendMessageButton()
             => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
-            && accessor.IsConnected;
+            && accessor.IsSignedIn;
 
         private void ToggleConnectMenuItem()
-            => connectMenuItem.IsEnabled = !accessor.IsConnected;
+            => connectMenuItem.IsEnabled = !accessor.IsSignedIn;
 
         private void ToggleDisconnectMenuItem()
-            => disconnectMenuItem.IsEnabled = accessor.IsConnected;
+            => disconnectMenuItem.IsEnabled = accessor.IsSignedIn;
 
         private void ToggleDisplayPreviousDayButton()
-            => displayPreviousDayButton.IsEnabled = accessor.IsConnected;
+            => displayPreviousDayButton.IsEnabled = accessor.IsSignedIn;
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            accessor.DeleteMessage(14);
-            accessor.ModifyMessage(38, new SendableMessage("Modifié", "channel1"));
+            accessor.DeleteMessage(65);
+            accessor.ModifyMessage(56, new SendableMessage("Modifié", "channel1"));
             messageField.Clear();// TODO Reset func, handle better MessageField //TODO MAKE MessageField adapted to Modify and Remove message // TODO In messageField use List<Broadcast> to handle them and with an update system
             ShowMessagesBefore();
         }

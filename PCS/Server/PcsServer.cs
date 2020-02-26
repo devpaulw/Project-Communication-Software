@@ -74,7 +74,7 @@ namespace PCS
         private void ManageClientConnection(PcsClient client) // TODO I think it would be better in a well managed class ServerClientManager
         {
             Member signInMember = null; // TODO Maybe put this variable in PcsClient so that it can be used both here and by The accessor
-            bool signedIn = false;
+            bool signedIn = false; // TODO Put these  variables in PcsClient
             bool connected = true;
 
             while (connected)
