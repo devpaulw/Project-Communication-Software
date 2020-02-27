@@ -16,7 +16,7 @@ namespace PCS.Data
             NewMessage = newMessage ?? throw new ArgumentNullException(nameof(newMessage));
         }
 
-        internal override string[] GetAdditionalAttributes()
+        internal override string[] GetAttributes()
         {
             return new[]
                 {
@@ -24,6 +24,12 @@ namespace PCS.Data
                     NewMessage.ChannelName,
                     NewMessage.Text
                 };
+        }
+
+        public static Request FromAttributes(string[] attributes)
+        {
+            return new ModifyMessageRequest(Convert.ToInt32(attributes[0], CultureInfo.InvariantCulture),
+                        new SendableMessage(attributes[2], attributes[1]));
         }
     }
 }

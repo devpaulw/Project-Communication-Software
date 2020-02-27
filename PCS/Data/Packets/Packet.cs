@@ -14,7 +14,7 @@ namespace PCS.Data.Packets
             Item = item ?? throw new ArgumentNullException(nameof(item));
         }
 
-        protected abstract string[] GetAttributes();
+        public abstract string[] GetAttributes();
 
         public override string GetTextData()
         {
@@ -68,18 +68,16 @@ namespace PCS.Data.Packets
 
             switch (headerFlag)
             {
-                case Flags.MemberSignIn:
-                    return PacketObjects.GetMemberSignIn(attributes);
                 case Flags.BroadcastMessage:
-                    return PacketObjects.GetBroadcastMessage(attributes);
+                    return BroadcastMessagePacket.FromAttributes(attributes);
                 case Flags.SendableMessage:
-                    return PacketObjects.GetMessage(attributes);
-                case Flags.ClientDisconnect:
-                    return PacketObjects.GetDisconnect();
+                    return SendableMessagePacket.FromAttributes(attributes);
                 case Flags.Response:
-                    return PacketObjects.GetResponse(attributes);
+                    return ResponsePacket.FromAttributes(attributes);
                 case Flags.Request:
-                    return PacketObjects.GetRequest(attributes);
+                    return RequestPacket.FromAttributes(attributes);
+                case Flags.ClientDisconnect:
+                    return new DisconnectPacket();
                 default:
                     throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
             }

@@ -53,6 +53,7 @@ namespace PCS
 
         public void StartHosting()
         { // TODO Client could contain member
+
             try
             {
                 listener.Listen();
@@ -88,20 +89,16 @@ namespace PCS
 
                     switch (packet)
                     {
-                        case SignInPacket signInPacket when !signedIn:
+                        case RequestPacket requestPacket:
                             lock (@lock)
-                                OnSignIn(signInPacket.Item);
+                                OnRequest(requestPacket.Item);
                             break;
-                        case MessagePacket messagePacket when signedIn:
+                        case SendableMessagePacket messagePacket when signedIn:
                             lock (@lock)
                                 OnMessageReceived(messagePacket.Item);
                             break;
                         case DisconnectPacket _ when signedIn:
                             connected = false;
-                            break;
-                        case RequestPacket requestPacket when signedIn:
-                            lock (@lock)
-                                OnRequest(requestPacket.Item);
                             break;
                     }
                 }
@@ -122,12 +119,12 @@ namespace PCS
                 {
                     signedIn = true;
 
-                    client.SendPacket(new ResponsePacket(new Response(ResponseCode.SignIn, true)));
+                    client.SendPacket(new ResponsePacket(new Response(RequestCode.SignIn, true)));
                     Console.WriteLine(Messages.Server.ClientConnect, signInMember, client.RemoteIP.Address.ToString());
                 }
                 else
                 {
-                    client.SendPacket(new ResponsePacket(new Response(ResponseCode.SignIn, false)));
+                    client.SendPacket(new ResponsePacket(new Response(RequestCode.SignIn, false)));
                     connected = false;
                     signInMember = null; // Because sign in failed
                 }
@@ -161,13 +158,18 @@ namespace PCS
             {
                 switch (request)
                 {
+                    case SignInRequest signInRequest:
+                        lock (@lock)
+                            OnSignIn(signInRequest.AuthenticationInfos);
+
+                        break;
                     case DeleteMessageRequest deleteMessageRequest:
                         { // Remove message
                             messageTable.RemoveRow(deleteMessageRequest.MessageId); // TODO try catch
                         }
 
                         client.SendPacket(new ResponsePacket(
-                            new Response(ResponseCode.MessageHandle, true)));
+                            new Response(deleteMessageRequest.Code, true)));
 
                         break;
                     case ModifyMessageRequest modifyMessageRequest:
@@ -180,7 +182,18 @@ namespace PCS
                         }
 
                         client.SendPacket(new ResponsePacket(
-                            new Response(ResponseCode.MessageHandle, true)));
+                            new Response(modifyMessageRequest.Code, true)));
+
+                        break;
+                    case BroadcastDeliveryRequest broadcastDeliveryRequest:
+                        { // Prepare
+                            BroadcastMessage[] delivery;
+
+                            lock (@lock)
+                                delivery = messageTable.GetTopMessagesInRange(broadcastDeliveryRequest.Start, broadcastDeliveryRequest.End, broadcastDeliveryRequest.ChannelName).ToArray();
+
+                            client.SendPacket(new ResponsePacket(new BroadcastDeliveryResponse(true, delivery)));
+                        }
 
                         break;
                 }

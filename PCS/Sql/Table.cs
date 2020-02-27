@@ -30,7 +30,7 @@ namespace PCS.Sql
                 string.Join(",", from value in values select '@' + value.Key ?? throw new NullReferenceException())
                 );
 
-            using (SqlConnection conn = new SqlConnection($"server=;Initial Catalog = {Database.Name};Integrated security=SSPI"))
+            using (SqlConnection conn = new SqlConnection($"server=localhost;Initial Catalog = {Database.Name};Integrated security=SSPI"))
             using (var cmd = new SqlCommand())
             {
                 cmd.Connection = conn;

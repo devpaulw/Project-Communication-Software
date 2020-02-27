@@ -9,10 +9,10 @@ namespace PCS.Data
 {
     class Response
     {
-        public ResponseCode Code { get; }
+        public RequestCode Code { get; }
         public bool Succeeded { get; }
 
-        public Response(ResponseCode code, bool succeeded)
+        public Response(RequestCode code, bool succeeded)
         {
             Code = code;
             Succeeded = succeeded;

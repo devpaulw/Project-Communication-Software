@@ -14,12 +14,18 @@ namespace PCS.Data
             MessageId = messageId;
         }
 
-        internal override string[] GetAdditionalAttributes()
+        internal override string[] GetAttributes()
         {
             return new[]
                 {
                     MessageId.ToString(CultureInfo.InvariantCulture)
                 };
         }
+
+        public static Request FromAttributes(string[] attributes)
+        {
+            return new DeleteMessageRequest(Convert.ToInt32(attributes[0], CultureInfo.InvariantCulture));
+        }
+        
     }
 }

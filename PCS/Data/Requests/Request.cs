@@ -16,6 +16,6 @@ namespace PCS.Data
             Code = code;
         }
 
-        internal abstract string[] GetAdditionalAttributes();
+        internal abstract string[] GetAttributes();
     }
 }

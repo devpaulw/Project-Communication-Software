@@ -6,8 +6,9 @@ namespace PCS.Data
 {
     public enum RequestCode
     {
-        GetMessages = 0,
-        DeleteMessage = 1,
-        ModifyMessage = 2,
+        SignIn = 0,
+        BroadcastDelivery = 1,
+        DeleteMessage = 2,
+        ModifyMessage = 3,
     }
 }

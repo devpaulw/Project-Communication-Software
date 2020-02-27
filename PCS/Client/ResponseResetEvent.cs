@@ -27,7 +27,7 @@ namespace PCS
 
         public Response WaitResponse()
         {
-            while (!isFilled) ;
+            while (!isFilled) ; // TODO IDEA Timeout system here
 
             Response response;
             lock (waitingResponses)

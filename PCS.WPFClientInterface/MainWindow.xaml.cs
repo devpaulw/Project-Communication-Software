@@ -172,8 +172,8 @@ namespace PCS.WPFClientInterface
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            accessor.DeleteMessage(2);
-            accessor.ModifyMessage(0, new SendableMessage("Modifié", "channel1"));
+            accessor.DeleteMessage(67);
+            accessor.ModifyMessage(66, new SendableMessage("Modifié", "channel1"));
             messageField.Clear();// TODO Reset func, handle better MessageField //TODO MAKE MessageField adapted to Modify and Remove message // TODO In messageField use List<Broadcast> to handle them and with an update system
             ShowMessagesBefore();
         }

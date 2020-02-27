@@ -12,11 +12,36 @@ namespace PCS.Data.Packets
         {
         }
 
-        protected override string[] GetAttributes() => new[]
+        public override string[] GetAttributes() => new[]
                 {
                     ((int)Item.Code).ToString(CultureInfo.CurrentCulture)
                 }
-                .Concat(Item.GetAdditionalAttributes())
+                .Concat(Item.GetAttributes() ?? Array.Empty<string>())
                 .ToArray();
+
+        public static Packet FromAttributes(string[] attributes)
+        {
+            RequestCode requestCode = (RequestCode)Convert.ToInt32(attributes[0], CultureInfo.CurrentCulture);
+            attributes = attributes.Skip(1).ToArray();
+            Request request = null;
+
+            switch (requestCode)
+            {
+                case RequestCode.SignIn:
+                    request = SignInRequest.FromAttributes(attributes);
+                    break;
+                case RequestCode.DeleteMessage:
+                    request = DeleteMessageRequest.FromAttributes(attributes);
+                    break;
+                case RequestCode.ModifyMessage:
+                    request = ModifyMessageRequest.FromAttributes(attributes);
+                    break;
+                case RequestCode.BroadcastDelivery:
+                    request = BroadcastDeliveryRequest.FromAttributes(attributes);
+                    break;
+            }
+
+            return new RequestPacket(request);
+        }
     }
 }

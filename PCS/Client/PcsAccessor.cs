@@ -50,20 +50,14 @@ namespace PCS
 
             void SignIn()
             {
-                SendPacket(new SignInPacket(authenticationInfos));
+                Response response = SendRequest(new SignInRequest(authenticationInfos));
 
-                    // TODO Maybe add event caller in the true client that get these...
-
-                var response = responseEvent.WaitResponse();
-                if (response.Code == ResponseCode.SignIn)
-                {
-                    if (response.Succeeded)
-                        IsSignedIn = true;
-                    else
-                        throw new Exception(Messages.Exceptions.UnauthorizedLogin);
-                }
+                if (response.Succeeded)
+                    IsSignedIn = true;
                 else
-                    throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
+                    throw new Exception(Messages.Exceptions.UnauthorizedLogin);
+
+                // TODO Maybe add event caller in the true client that get these...
             }
         }
 
@@ -72,46 +66,38 @@ namespace PCS
             if (!IsSignedIn)
                 throw new Exception(Messages.Exceptions.NotConnected);
 
-            SendPacket(new MessagePacket(message ?? throw new ArgumentNullException(nameof(message))));
+            SendPacket(new SendableMessagePacket(message ?? throw new ArgumentNullException(nameof(message))));
         }
 
         public void DeleteMessage(int messageId)
         {
-            SendPacket(new RequestPacket(new DeleteMessageRequest(messageId)));
-
-            var response = responseEvent.WaitResponse();
-            if (response.Code == ResponseCode.MessageHandle)
-            {
-                if (response.Succeeded)
-                    System.Diagnostics.Debug.WriteLine("Message delete succeeded");// TODO Error handling here
-            }
-            else
-                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
+            Response response = SendRequest(new DeleteMessageRequest(messageId));
+            if (response.Succeeded)
+                System.Diagnostics.Debug.WriteLine("Message delete succeeded");// TODO Error handling here
         }
 
         public void ModifyMessage(int messageId, SendableMessage newMessage)
         {
-            SendPacket(
-                new RequestPacket(
-                    new ModifyMessageRequest(
-                        messageId, 
+            Response response = SendRequest(new ModifyMessageRequest(
+                        messageId,
                         newMessage ?? throw new ArgumentNullException(nameof(newMessage))
-                        )
-                    )
-                );
+                        ));
 
-            var response = responseEvent.WaitResponse();
-            if (response.Code == ResponseCode.MessageHandle)
-            {
-                if (response.Succeeded)
-                    System.Diagnostics.Debug.WriteLine("Message modification succeeded");// TODO Error handling here
-            }
-            else
-                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
+            if (response.Succeeded)
+                System.Diagnostics.Debug.WriteLine("Message modification succeeded");// TODO Error handling here
         }
 
         public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
-            => messageTable.GetTopMessagesInRange(start, end, channelName);
+        {
+            var response = SendRequest(new BroadcastDeliveryRequest(start, end, channelName)) as BroadcastDeliveryResponse;
+
+            if (response.Succeeded)
+            {
+                foreach(var broadcast in response.BroadcastMessages)
+                    yield return broadcast;
+            }
+            else yield break;
+        }
 
         public override void Disconnect()
         {
@@ -162,6 +148,19 @@ namespace PCS
                     }
                 }
             }
+        }
+
+        private Response SendRequest(Request request)
+        {
+            SendPacket(new RequestPacket(request));
+
+            var response = responseEvent.WaitResponse(); // TODO Timeout system ?
+            if (response.Code == request.Code)
+            {
+                return response;
+            }
+            else
+                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
         }
     }
 }

@@ -7,6 +7,18 @@ using System.IO;
 
 namespace PCS.ServerAppCore
 {
+    interface Test
+    {
+        static void Lol() { Console.WriteLine(); }
+    }
+
+    class Test2 : Test
+    {
+        public Test2()
+        {
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
