@@ -15,7 +15,6 @@ namespace PCS
     public class PcsAccessor : PcsClient
     {
         private ResponseResetEvent responseEvent;
-        private MessageTable messageTable; // TODO Do a ask to server instead of SQL direct download BUT I'm not sure it's the right approach
 
         public event EventHandler<BroadcastMessage> MessageReceive;
 
@@ -26,7 +25,7 @@ namespace PCS
         {
         }
 
-        public void Connect(IPAddress ip, AuthenticationInfos authenticationInfos) // TODO I don't know if this password is secured
+        public void Connect(IPAddress ip, AuthenticationInfos authenticationInfos) // DOLATER I don't know if this password is secured
         {
             ActiveMemberId = (authenticationInfos ?? throw new ArgumentNullException(nameof(authenticationInfos))).MemberId;
 
@@ -44,8 +43,6 @@ namespace PCS
             StartListenServer();
             #endregion
 
-            messageTable = new MessageTable(); // TODO SHould not be there
-
             SignIn();
 
             void SignIn()
@@ -56,8 +53,6 @@ namespace PCS
                     IsSignedIn = true;
                 else
                     throw new Exception(Messages.Exceptions.UnauthorizedLogin);
-
-                // TODO Maybe add event caller in the true client that get these...
             }
         }
 
@@ -73,7 +68,9 @@ namespace PCS
         {
             Response response = SendRequest(new DeleteMessageRequest(messageId));
             if (response.Succeeded)
-                System.Diagnostics.Debug.WriteLine("Message delete succeeded");// TODO Error handling here
+                System.Diagnostics.Debug.WriteLine("Message delete succeeded");
+            else
+                throw new Exception(Messages.Exceptions.UnauthorizedHandleMessage);
         }
 
         public void ModifyMessage(int messageId, SendableMessage newMessage)
@@ -84,7 +81,9 @@ namespace PCS
                         ));
 
             if (response.Succeeded)
-                System.Diagnostics.Debug.WriteLine("Message modification succeeded");// TODO Error handling here
+                System.Diagnostics.Debug.WriteLine("Message modification succeeded");
+            else
+                throw new Exception(Messages.Exceptions.UnauthorizedHandleMessage);
         }
 
         public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
@@ -96,7 +95,6 @@ namespace PCS
                 foreach(var broadcast in response.BroadcastMessages)
                     yield return broadcast;
             }
-            else yield break;
         }
 
         public override void Disconnect()

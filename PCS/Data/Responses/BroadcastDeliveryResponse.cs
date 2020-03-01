@@ -30,7 +30,7 @@ namespace PCS.Data
         public static Response FromAttributes(bool succeeded, string[] attributes)
         {
             List<BroadcastMessage> broadcastMessages = new List<BroadcastMessage>();
-            for (int i = 0; i < attributes.Length; i += 5)
+            for (int i = 0; i < attributes.Length; i += 5) // DOLATER a better approach to know what the length (5 yet)
             {
                 broadcastMessages.Add(BroadcastMessagePacket.FromAttributes(attributes.Skip(i).ToArray()).Item);
             }

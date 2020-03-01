@@ -129,6 +129,9 @@
   <data name="NotRecognizedDataPacket" xml:space="preserve">
     <value>This data packet is not recognized.</value>
   </data>
+  <data name="UnauthorizedHandleMessage" xml:space="preserve">
+    <value>Impossible to delete of modify this message, it was not allowed by the server</value>
+  </data>
   <data name="UnauthorizedLogin" xml:space="preserve">
     <value>Server login unauthorized: check your username, password.</value>
   </data>

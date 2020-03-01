@@ -97,6 +97,15 @@ namespace PCS.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Impossible to delete of modify this message, it was not allowed by the server.
+        /// </summary>
+        internal static string UnauthorizedHandleMessage {
+            get {
+                return ResourceManager.GetString("UnauthorizedHandleMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server login unauthorized: check your username, password..
         /// </summary>
         internal static string UnauthorizedLogin {
