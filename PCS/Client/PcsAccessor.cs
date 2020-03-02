@@ -9,16 +9,18 @@ using System.Threading;
 using PCS.Sql;
 using PCS.Data;
 using PCS.Data.Packets;
+using System.Threading.Tasks;
 
 namespace PCS
 {
     public class PcsAccessor : PcsClient
     {
         private ResponseResetEvent responseEvent;
+        private bool listen;
 
         public event EventHandler<BroadcastMessage> MessageReceive;
+        public event EventHandler<Exception> ListenException;
 
-        public bool IsSignedIn { get; private set; }
         public int ActiveMemberId { get; private set; }
 
         public PcsAccessor()
@@ -37,7 +39,7 @@ namespace PCS
             #endregion
 
             #region Init Listen
-            IsConnected = true;
+            listen = true;
             responseEvent = new ResponseResetEvent();
 
             StartListenServer();
@@ -50,7 +52,7 @@ namespace PCS
                 Response response = SendRequest(new SignInRequest(authenticationInfos));
 
                 if (response.Succeeded)
-                    IsSignedIn = true;
+                    IsConnected = true;
                 else
                     throw new Exception(Messages.Exceptions.UnauthorizedLogin);
             }
@@ -58,7 +60,7 @@ namespace PCS
 
         public void SendMessage(SendableMessage message)
         {
-            if (!IsSignedIn)
+            if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
 
             SendPacket(new SendableMessagePacket(message ?? throw new ArgumentNullException(nameof(message))));
@@ -92,36 +94,47 @@ namespace PCS
 
             if (response.Succeeded)
             {
-                foreach(var broadcast in response.BroadcastMessages)
+                foreach (var broadcast in response.BroadcastMessages)
                     yield return broadcast;
             }
         }
 
         public override void Disconnect()
         {
-            if (IsSignedIn)
-            {
-                SendPacket(new DisconnectPacket());
-
-                IsSignedIn = false; // TODO Put it in client directly so that it can be used by server too
-            }
+            listen = false;
+            MessageReceive = null;
 
             if (IsConnected)
             {
-                MessageReceive = null;
-
+                SendPacket(new DisconnectPacket());
                 base.Disconnect();
             }
         }
 
         private void StartListenServer() // TODO Listen better handle with Error Handle espacially
         {
-            Thread serverListenThread = new Thread(new ThreadStart(Listen));
+            Thread serverListenThread =
+                new Thread(() =>
+                {
+                    try
+                    {
+                        Listen();
+                    }
+                    catch (PcsTransmissionException ex)
+                    {
+                        ListenException(this, ex);
+                    }
+                    catch (SocketException ex)
+                    {
+                        ListenException(this, ex);
+                    }
+                });
             serverListenThread.Start();
+
 
             void Listen()
             {
-                while (IsConnected)
+                while (listen)
                 {
                     try
                     {
@@ -129,17 +142,17 @@ namespace PCS
 
                         switch (receivedPacket)
                         {
-                            case BroadcastMessagePacket broadcastMessagePacket when IsSignedIn:
+                            case BroadcastMessagePacket broadcastMessagePacket when IsConnected:
                                 MessageReceive(this, broadcastMessagePacket.Item);
                                 break;
                             case ResponsePacket responsePacket:
                                 responseEvent.SetResponse(responsePacket.Item);
                                 break;
                             default:
-                                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+                                throw new PcsTransmissionException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
                         }
                     }
-                    catch (SocketException)
+                    catch (SocketException ex)
                     {
                         if (IsConnected)
                             throw;

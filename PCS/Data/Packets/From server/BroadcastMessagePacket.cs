@@ -33,7 +33,7 @@ namespace PCS.Data.Packets
 
             var author = new Member(username, id);
 
-            return new BroadcastMessagePacket(new BroadcastMessage(0, new SendableMessage(text, channelTitle), dateTime, author)); // TODO Supply
+            return new BroadcastMessagePacket(new BroadcastMessage(0, new SendableMessage(text, channelTitle), dateTime, author));
         }
     }
 }

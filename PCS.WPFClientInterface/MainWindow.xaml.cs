@@ -73,6 +73,7 @@ namespace PCS.WPFClientInterface
             if (connWindow.Connected)
             {
                 accessor.MessageReceive += OnMessageReceive;
+                accessor.ListenException += OnServerListenException;
 
                 channelSelector.Enable();
 
@@ -89,6 +90,12 @@ namespace PCS.WPFClientInterface
                 Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
                         messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
             }
+        }
+
+        void OnServerListenException(object sender, Exception exception)
+        {
+            MessageBox.Show(exception.Message, "Transmission exception", MessageBoxButton.OK, MessageBoxImage.Error);
+            Dispatcher.Invoke(() => Disconnect());
         }
 
         void Notify(BroadcastMessage broadcastMsg)
@@ -159,16 +166,16 @@ namespace PCS.WPFClientInterface
 
         private void ToggleSendMessageButton()
             => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
-            && accessor.IsSignedIn;
+            && accessor.IsConnected;
 
         private void ToggleConnectMenuItem()
-            => connectMenuItem.IsEnabled = !accessor.IsSignedIn;
+            => connectMenuItem.IsEnabled = !accessor.IsConnected;
 
         private void ToggleDisconnectMenuItem()
-            => disconnectMenuItem.IsEnabled = accessor.IsSignedIn;
+            => disconnectMenuItem.IsEnabled = accessor.IsConnected;
 
         private void ToggleDisplayPreviousDayButton()
-            => displayPreviousDayButton.IsEnabled = accessor.IsSignedIn;
+            => displayPreviousDayButton.IsEnabled = accessor.IsConnected;
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {

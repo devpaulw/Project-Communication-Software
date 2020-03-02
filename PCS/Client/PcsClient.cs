@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using PCS.Data;
 using PCS.Data.Packets;
 
@@ -13,8 +14,9 @@ namespace PCS
     {
         private bool disposedValue;
 
-        protected bool IsConnected { get; set; }
         protected Socket AdapteeClient { get; set; }
+
+        public bool IsConnected { get; set; }
 
         // TODO public Member Member { get; set; }
 
