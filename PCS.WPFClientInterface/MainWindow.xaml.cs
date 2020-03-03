@@ -94,7 +94,8 @@ namespace PCS.WPFClientInterface
             lock (@lock)
             {
                 Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                        messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
+                        messageField.AddMessage(broadcastMsg));
+                Notify(broadcastMsg);
             }
         }
 

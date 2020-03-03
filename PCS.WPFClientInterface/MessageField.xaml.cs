@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -34,13 +35,9 @@ namespace PCS.WPFClientInterface
             Clear();
         }
 
-        public void AddMessage(BroadcastMessage message, Action notify)
+        public void AddMessage(BroadcastMessage message)
         {
-            notify();
-
-            var appendParagraph = new Paragraph();
-            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
-            appendParagraph.LineHeight = 3;
+            var appendParagraph = GetBroadcastParagraph(message);
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
 
@@ -49,9 +46,7 @@ namespace PCS.WPFClientInterface
 
         public void AddMessageOnTop(BroadcastMessage message)
         {
-            var appendParagraph = new Paragraph();
-            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
-            appendParagraph.LineHeight = 3;
+            var appendParagraph = GetBroadcastParagraph(message);
 
             if (fieldRtb.Document.Blocks.FirstBlock != null)
                 fieldRtb.Document.Blocks.InsertBefore(fieldRtb.Document.Blocks.FirstBlock, appendParagraph);
@@ -96,5 +91,24 @@ namespace PCS.WPFClientInterface
         }
 
         public void ScrollToEnd() => fieldRtb.ScrollToEnd();
+
+        private Paragraph GetBroadcastParagraph(BroadcastMessage broadcast)
+        {
+            string dayFormat = "MMM dd";
+            string timeFormat = "t";
+            var paragraph = new Paragraph();
+
+            paragraph.Inlines.Add(new Run('@' + broadcast.Author.Username + ' ') { FontWeight = FontWeights.SemiBold, FontSize = 13.5d, Foreground = Brushes.CadetBlue });
+
+            paragraph.Inlines.Add(new Run(string.Format("{0}, {1} ",
+                broadcast.DateTime.ToString(dayFormat, CultureInfo.InvariantCulture),
+                broadcast.DateTime.ToString(timeFormat, CultureInfo.InvariantCulture))) 
+            { FontSize = 11d, Foreground = Brushes.Gray });
+
+            paragraph.Inlines.Add(broadcast.Text);
+
+            paragraph.LineHeight = 3;
+            return paragraph;
+        }
     }
 }
