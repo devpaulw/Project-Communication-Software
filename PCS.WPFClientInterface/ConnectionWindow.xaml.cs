@@ -86,7 +86,6 @@ namespace PCS.WPFClientInterface
             }
             catch (Exception ex)
             {
-                m_clientAccessor.IsConnected = false;
                 m_clientAccessor.Disconnect(); // Cancel connecting
                 MessageBox.Show(ex.Message, $"Connection to {serverAddressTextBox.Text} failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;

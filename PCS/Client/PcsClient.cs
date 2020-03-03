@@ -18,8 +18,6 @@ namespace PCS
 
         public bool IsConnected { get; set; }
 
-        // TODO public Member Member { get; set; }
-
         public IPEndPoint RemoteIP
             => AdapteeClient.RemoteEndPoint == null ? null : AdapteeClient.RemoteEndPoint as IPEndPoint;
         public IPEndPoint LocalIP
@@ -80,10 +78,13 @@ namespace PCS
 
         public virtual void Disconnect()
         {
-            IsConnected = false;
+            if (IsConnected)
+            {
+                AdapteeClient.Shutdown(SocketShutdown.Both);
+                AdapteeClient.Close();
 
-            AdapteeClient.Shutdown(SocketShutdown.Both);
-            AdapteeClient.Close();
+                IsConnected = false;
+            }
         }
 
         public void Dispose()

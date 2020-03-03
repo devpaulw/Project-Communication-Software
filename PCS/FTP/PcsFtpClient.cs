@@ -9,7 +9,7 @@ using PCS.Data;
 
 namespace PCS.Ftp
 {
-    // TODO: This same class but with System.IO copied to the local machine, there will be an interface, and the Client Accessor will save data to same directories of FTP server by copied constants ; The FtpClient of Accessor will be private now
+    [Obsolete("Not using FTP anymore")]
     public class PcsFtpClient : IDisposable
     {
         private readonly FtpClient ftpClient;
@@ -33,14 +33,14 @@ namespace PCS.Ftp
             if (broadcastMsg == null)
                 throw new ArgumentNullException(nameof(broadcastMsg));
 
-            string remotePath = GetMessagePath(broadcastMsg.BaseMessage.ChannelName, broadcastMsg.DateTime);
+            string remotePath = GetMessagePath(broadcastMsg.ChannelName, broadcastMsg.DateTime);
 
             CreateMissingDirectories(remotePath, true);
 
             using (var appendStream = ftpClient.OpenAppend(remotePath))
             using (var writer = new StreamWriter(appendStream, PcsServer.Encoding))
             {
-                string fileMessage = ControlChars.StartOfText + broadcastMsg.ToFileMessage() + ControlChars.EndOfText; // TODO Do something for these variables
+                string fileMessage = ControlChars.StartOfText + broadcastMsg.ToFileMessage() + ControlChars.EndOfText;
                 writer.WriteLine(fileMessage);
             }
         }

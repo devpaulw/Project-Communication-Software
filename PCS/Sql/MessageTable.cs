@@ -54,8 +54,8 @@ namespace PCS.Sql
             return new Dictionary<string, object>()
             {
                 { "Id", broadcast.ID },
-                { "Text", broadcast.BaseMessage.Text },
-                { "Channel", broadcast.BaseMessage.ChannelName },
+                { "Text", broadcast.Text },
+                { "Channel", broadcast.ChannelName },
                 { "AuthorId", broadcast.Author.ID },
                 { "DateTime", broadcast.DateTime }
             };
@@ -78,8 +78,8 @@ namespace PCS.Sql
 
             return new BroadcastMessage(
                 values["Id"] as int? ?? throw new NullReferenceException(),
-                new SendableMessage(values["Text"] as string ?? throw new NullReferenceException(), 
-                values["Channel"] as string ?? throw new NullReferenceException()),
+                values["Text"] as string ?? throw new NullReferenceException(), 
+                values["Channel"] as string ?? throw new NullReferenceException(),
                 values["DateTime"] as DateTime? ?? throw new NullReferenceException(),
                 new MemberTable().GetMemberFromId(values["AuthorId"] as int? ?? throw new NullReferenceException())
                 );

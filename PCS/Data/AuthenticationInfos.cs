@@ -7,7 +7,7 @@ namespace PCS.Data
     public class AuthenticationInfos
     {
         public int MemberId { get; set; }
-        public string Password { get; set; } // TODO Use secured string
+        public string Password { get; set; } // DOLATER Use secured string
 
         public AuthenticationInfos(int memberId, string password)
         {

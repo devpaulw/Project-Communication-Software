@@ -39,7 +39,7 @@ namespace PCS.WPFClientInterface
             notify();
 
             var appendParagraph = new Paragraph();
-            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.BaseMessage.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.BaseMessage.Text}");
+            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
             appendParagraph.LineHeight = 3;
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
@@ -50,7 +50,7 @@ namespace PCS.WPFClientInterface
         public void AddMessageOnTop(BroadcastMessage message)
         {
             var appendParagraph = new Paragraph();
-            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.BaseMessage.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.BaseMessage.Text}");
+            appendParagraph.Inlines.Add($"@{message.Author.Username} <{message.ChannelName}> [{message.DateTime.ToLongTimeString()}]: {message.Text}");
             appendParagraph.LineHeight = 3;
 
             if (fieldRtb.Document.Blocks.FirstBlock != null)

@@ -12,13 +12,15 @@ using System.Threading;
 
 namespace PCS.Ftp
 {
+    [Obsolete("Not using FTP anymore")]
+
     public class PcsFtpServer : IDisposable
     {
         private bool disposed;
         private readonly IFtpServerHost serverHost;
 
         public const string Directory = @"./ftp_server/";
-        public const string MessagePath = "messages"; // TODO: It's to the server to do that
+        public const string MessagePath = "messages";
         public const string ResourcePath = "resources";
         public const ushort Port = 6784;
 

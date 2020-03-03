@@ -52,7 +52,7 @@ namespace PCS
         }
 
         public void StartHosting()
-        { // TODO Client could contain member
+        {
 
             try
             {
@@ -75,10 +75,10 @@ namespace PCS
             }
         }
 
-        private void ManageClientConnection(PcsClient client) // TODO I think it would be better in a well managed class ServerClientManager
+        private void ManageClientConnection(PcsClient client)
         {
-            Member signInMember = null; // TODO Maybe put this variable in PcsClient so that it can be used both here and by The accessor
-            bool signedIn = false; // TODO Put these  variables in PcsClient
+            Member signInMember = null;
+            bool signedIn = false;
             bool connected = true;
 
             while (connected)
@@ -111,35 +111,9 @@ namespace PCS
             lock (@lock)
                 OnDisconnect();
 
-            void OnSignIn(AuthenticationInfos infos)
-            {
-                signInMember = group.GetMemberFromId(infos.MemberId);
-
-                if (CanSignIn())
-                {
-                    signedIn = true;
-
-                    client.SendPacket(new ResponsePacket(new Response(RequestCode.SignIn, true)));
-                    Console.WriteLine(Messages.Server.ClientConnect, signInMember, client.RemoteIP.Address.ToString());
-                }
-                else
-                {
-                    client.SendPacket(new ResponsePacket(new Response(RequestCode.SignIn, false)));
-                    connected = false;
-                    signInMember = null; // Because sign in failed
-                }
-
-                bool CanSignIn()
-                {
-                    lock (@lock)
-                        return group.MemberExists(infos.MemberId)
-                            && memberPasswords.PasswordCorrect(infos);
-                }
-            }
-
             void OnMessageReceived(SendableMessage message)
             {
-                var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message, DateTime.Now, signInMember);
+                var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message.Text, message.ChannelName, DateTime.Now, signInMember);
                 Console.WriteLine("Received: " + broadcastMsg);
 
                 AddBroadcast(broadcastMsg);
@@ -159,43 +133,82 @@ namespace PCS
                 switch (request)
                 {
                     case SignInRequest signInRequest:
-                        lock (@lock)
-                            OnSignIn(signInRequest.AuthenticationInfos);
-
+                        OnSignIn(signInRequest.AuthenticationInfos);
                         break;
                     case DeleteMessageRequest deleteMessageRequest:
-                        { // Remove message
-                            messageTable.RemoveRow(deleteMessageRequest.MessageId); // TODO try catch
-                        }
-
-                        client.SendPacket(new ResponsePacket(
-                            new Response(deleteMessageRequest.Code, true)));
-
+                        OnDeleteMessage(deleteMessageRequest);
                         break;
                     case ModifyMessageRequest modifyMessageRequest:
-                        { // Modify message
-                            var oldBroadcast = messageTable.GetItemAt(modifyMessageRequest.MessageId);
-                            var newBroadcast = new BroadcastMessage(modifyMessageRequest.MessageId, modifyMessageRequest.NewMessage, oldBroadcast.DateTime, oldBroadcast.Author);
-
-                            messageTable.RemoveRow(modifyMessageRequest.MessageId);
-                            messageTable.AddRow(newBroadcast);
-                        }
-
-                        client.SendPacket(new ResponsePacket(
-                            new Response(modifyMessageRequest.Code, true)));
-
+                        OnModifyMessage(modifyMessageRequest);
                         break;
                     case BroadcastDeliveryRequest broadcastDeliveryRequest:
-                        { // Prepare
-                            BroadcastMessage[] delivery;
-
-                            lock (@lock)
-                                delivery = messageTable.GetTopMessagesInRange(broadcastDeliveryRequest.Start, broadcastDeliveryRequest.End, broadcastDeliveryRequest.ChannelName).ToArray();
-
-                            client.SendPacket(new ResponsePacket(new BroadcastDeliveryResponse(true, delivery)));
-                        }
-
+                        OnBroadcastDelivery(broadcastDeliveryRequest);
                         break;
+                }
+
+                void OnSignIn(AuthenticationInfos infos)
+                {
+                    lock (@lock)
+                        signInMember = group.GetMemberFromId(infos.MemberId);
+
+                    if (CanSignIn())
+                    {
+                        signedIn = true;
+
+                        client.SendPacket(new ResponsePacket(new Response(RequestCode.SignIn, true)));
+
+                        lock (@lock)
+                            Console.WriteLine(Messages.Server.ClientConnect, signInMember, client.RemoteIP.Address.ToString());
+                    }
+                    else
+                    {
+                        client.SendPacket(new ResponsePacket(new Response(RequestCode.SignIn, false)));
+                        connected = false;
+                        signInMember = null; // Because sign in failed
+                    }
+
+                    bool CanSignIn()
+                    {
+                        lock (@lock)
+                            return group.MemberExists(infos.MemberId)
+                                && memberPasswords.PasswordCorrect(infos);
+                    }
+                }
+
+                void OnDeleteMessage(DeleteMessageRequest deleteMessageRequest)
+                {
+                    { // Remove message
+                        lock (@lock)
+                            messageTable.RemoveRow(deleteMessageRequest.MessageId);
+                    }
+
+                    client.SendPacket(new ResponsePacket(
+                        new Response(request.Code, true)));
+                }
+
+                void OnModifyMessage(ModifyMessageRequest modifyMessageRequest)
+                {
+                    lock (@lock)
+                    {
+                        var oldBroadcast = messageTable.GetItemAt(modifyMessageRequest.MessageId);
+                        var newBroadcast = new BroadcastMessage(modifyMessageRequest.MessageId, modifyMessageRequest.NewMessage.Text, modifyMessageRequest.NewMessage.ChannelName, oldBroadcast.DateTime, oldBroadcast.Author);
+
+                        messageTable.RemoveRow(modifyMessageRequest.MessageId);
+                        messageTable.AddRow(newBroadcast);
+                    }
+
+                    client.SendPacket(new ResponsePacket(
+                        new Response(request.Code, true)));
+                }
+
+                void OnBroadcastDelivery(BroadcastDeliveryRequest broadcastDeliveryRequest)
+                {
+                    BroadcastMessage[] delivery;
+
+                    lock (@lock)
+                        delivery = messageTable.GetTopMessagesInRange(broadcastDeliveryRequest.Start, broadcastDeliveryRequest.End, broadcastDeliveryRequest.ChannelName).ToArray();
+    
+                    client.SendPacket(new ResponsePacket(new BroadcastDeliveryResponse(true, delivery)));
                 }
             }
         }

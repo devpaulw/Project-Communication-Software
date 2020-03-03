@@ -41,7 +41,6 @@ namespace PCS.WPFClientInterface
         private void Disconnect()
         {
             accessor.Disconnect();
-            accessor.MessageReceive -= OnMessageReceive;
 
             messageField.Clear();
 
@@ -52,7 +51,7 @@ namespace PCS.WPFClientInterface
 
         private void ShowMessagesBefore()
         {
-            // TODO Not clean
+            // TODO Not clean, DO this function in MessageField control class
             messageField.LoadedMessagesCount += messageField.ShowBeforeCount;
 
             // Get SQL Messages

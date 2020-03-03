@@ -11,7 +11,6 @@ namespace PCS.Data
     {
         public string Username { get; set; }
         public int ID { get; set; }
-        public ConnectionState ConnectionState { get; set; } // TODO Find a solution to handle better this variable
 
         public Member(string username, int id)
         {

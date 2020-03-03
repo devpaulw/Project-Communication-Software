@@ -41,6 +41,7 @@ namespace PCS
             #region Init Listen
             listen = true;
             responseEvent = new ResponseResetEvent();
+            ListenException += OnListenException;
 
             StartListenServer();
             #endregion
@@ -103,15 +104,17 @@ namespace PCS
         {
             listen = false;
             MessageReceive = null;
+            ListenException = null;
 
             if (IsConnected)
             {
                 SendPacket(new DisconnectPacket());
-                base.Disconnect();
             }
+
+            base.Disconnect();
         }
 
-        private void StartListenServer() // TODO Listen better handle with Error Handle espacially
+        private void StartListenServer()
         {
             Thread serverListenThread =
                 new Thread(() =>
@@ -172,6 +175,12 @@ namespace PCS
             }
             else
                 throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
+        }
+
+        private void OnListenException(object sender, Exception exception)
+        {
+            IsConnected = false;
+            Disconnect();
         }
     }
 }
