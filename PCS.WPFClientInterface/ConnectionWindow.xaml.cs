@@ -29,13 +29,13 @@ namespace PCS.WPFClientInterface
     {
         const string fieldSavePath = "./connection_infos.xml";
 
-        private readonly PcsAccessor m_clientAccessor;
+        private PcsAccessor m_accessor;
 
         public bool Connected { get; private set; }
 
-        public ConnectionWindow(ref PcsAccessor clientAccessor)
+        public ConnectionWindow(ref PcsAccessor accessor)
         {
-            m_clientAccessor = clientAccessor;
+            m_accessor = accessor;
 
             InitializeComponent();
         }
@@ -77,7 +77,7 @@ namespace PCS.WPFClientInterface
         {
             try
             {
-                m_clientAccessor.Connect(IPAddress.Parse(serverAddressTextBox.Text), 
+                m_accessor.Connect(IPAddress.Parse(serverAddressTextBox.Text), 
                     new AuthenticationInfos(
                         Convert.ToInt32(idTextBox.Text, CultureInfo.CurrentCulture),
                         passwordTb.Password));
@@ -86,7 +86,7 @@ namespace PCS.WPFClientInterface
             }
             catch (Exception ex)
             {
-                m_clientAccessor.Disconnect(); // Cancel connecting
+                m_accessor.Disconnect(); // Cancel connecting
                 MessageBox.Show(ex.Message, $"Connection to {serverAddressTextBox.Text} failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }

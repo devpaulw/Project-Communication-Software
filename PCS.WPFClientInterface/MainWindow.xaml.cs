@@ -31,16 +31,23 @@ namespace PCS.WPFClientInterface
     {
         private readonly object @lock = new object();
 
-        private PcsAccessor accessor = new PcsAccessor();
+        public static PcsAccessor Accessor = new PcsAccessor();
 
         public MainWindow()
         {
             InitializeComponent();
+
+            messageField.OnDeleteBroadcast = delegate (int messageId)
+            {
+                Accessor.DeleteMessage(messageId);
+                messageField.Clear();
+                ShowBefore(); // TODO local delete easier
+            };
         }
 
         private void Disconnect()
         {
-            accessor.Disconnect();
+            Accessor.Disconnect();
             messageField.Clear();
             channelSelector.Disable();
             ToggleAll();
@@ -50,7 +57,7 @@ namespace PCS.WPFClientInterface
         {
             try
             {
-                accessor.SendMessage(message);
+                Accessor.SendMessage(message);
                 messageTextBox.Text = string.Empty;
             }
             catch (Exception ex)
@@ -63,7 +70,7 @@ namespace PCS.WPFClientInterface
         private void ShowBefore()
         {
             // Get SQL Messages
-            messageField.ShowBefore((start, end) => accessor.GetTopMessagesInRange(start, end, channelSelector.SelectedChannel));
+            messageField.ShowBefore((start, end) => Accessor.GetTopMessagesInRange(start, end, channelSelector.SelectedChannel));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -73,13 +80,13 @@ namespace PCS.WPFClientInterface
 
         private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var connWindow = new ConnectionWindow(ref accessor);
+            var connWindow = new ConnectionWindow(ref Accessor);
             connWindow.ShowDialog();
 
             if (connWindow.Connected)
             {
-                accessor.MessageReceive += OnMessageReceive;
-                accessor.ListenException += OnServerListenException;
+                Accessor.MessageReceive += OnMessageReceive;
+                Accessor.ListenException += OnServerListenException;
 
                 channelSelector.Enable();
 
@@ -107,13 +114,13 @@ namespace PCS.WPFClientInterface
 
         void Notify(BroadcastMessage broadcastMsg)
         {
-            if (broadcastMsg.Author.ID != accessor.ActiveMemberId)
+            if (broadcastMsg.Author.ID != Accessor.ActiveMemberId)
                 PcsNotifier.Notify(this, broadcastMsg); // Notify when it's not us
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            accessor.Disconnect();
+            Accessor.Disconnect();
             Application.Current.Shutdown();
         }
 
@@ -143,14 +150,9 @@ namespace PCS.WPFClientInterface
                 MessageBoxImage.Information);
         }
 
-        private void ScrollToEndButton_Click(object sender, RoutedEventArgs e)
-        {
-            messageField.ScrollToEnd();
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            accessor.Dispose();
+            Accessor.Dispose();
         }
 
         private void ToggleAll()
@@ -163,21 +165,21 @@ namespace PCS.WPFClientInterface
 
         private void ToggleSendMessageButton()
             => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
-            && accessor.IsConnected;
+            && Accessor.IsConnected;
 
         private void ToggleConnectMenuItem()
-            => connectMenuItem.IsEnabled = !accessor.IsConnected;
+            => connectMenuItem.IsEnabled = !Accessor.IsConnected;
 
         private void ToggleDisconnectMenuItem()
-            => disconnectMenuItem.IsEnabled = accessor.IsConnected;
+            => disconnectMenuItem.IsEnabled = Accessor.IsConnected;
 
         private void ToggleDisplayPreviousDayButton()
-            => displayPreviousDayButton.IsEnabled = accessor.IsConnected;
+            => displayPreviousDayButton.IsEnabled = Accessor.IsConnected;
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            accessor.DeleteMessage(67);
-            accessor.ModifyMessage(66, new SendableMessage("Modifié", "channel1"));
+            Accessor.DeleteMessage(67);
+            Accessor.ModifyMessage(66, new SendableMessage("Modifié", "channel1"));
             messageField.Clear();// TODO Reset func, handle better MessageField //TODO MAKE MessageField adapted to Modify and Remove message // TODO In messageField use List<Broadcast> to handle them and with an update system
             ShowBefore();
         }

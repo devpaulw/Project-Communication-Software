@@ -27,6 +27,9 @@ namespace PCS.WPFClientInterface
         const int ShowBeforeCount = 20;
 
         private int loadedMessagesCount;
+        private BroadcastMessage selectedBroadcast;
+
+        public Action<int> OnDeleteBroadcast { get; set; }
 
         public MessageField()
         {
@@ -37,7 +40,7 @@ namespace PCS.WPFClientInterface
 
         public void AddMessage(BroadcastMessage message)
         {
-            var appendParagraph = GetBroadcastParagraph(message);
+            var appendParagraph = new BroadcastMessageParagraph(message);
 
             fieldRtb.Document.Blocks.Add(appendParagraph);
 
@@ -46,7 +49,7 @@ namespace PCS.WPFClientInterface
 
         public void AddMessageOnTop(BroadcastMessage message)
         {
-            var appendParagraph = GetBroadcastParagraph(message);
+            var appendParagraph = new BroadcastMessageParagraph(message);
 
             if (fieldRtb.Document.Blocks.FirstBlock != null)
                 fieldRtb.Document.Blocks.InsertBefore(fieldRtb.Document.Blocks.FirstBlock, appendParagraph);
@@ -109,6 +112,56 @@ namespace PCS.WPFClientInterface
 
             paragraph.LineHeight = 3;
             return paragraph;
+        }
+
+
+
+        private void DeleteMessage_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show(string.Format("Are you sure you want to delete the {0} ?", selectedBroadcast.ToString()), "Delete message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                OnDeleteBroadcast(selectedBroadcast.ID);
+            }
+        }
+
+        private void fieldRtb_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (loadedMessagesCount == 0) // When no messages
+                e.Handled = true;
+            else
+            {
+                foreach (Block block in fieldRtb.Document.Blocks)
+                {
+                    if (block.IsMouseOver)
+                    {
+                        selectedBroadcast = (block as BroadcastMessageParagraph).BroadcastMessage;
+                    }
+                }
+            }
+        }
+
+        private class BroadcastMessageParagraph : Paragraph
+        {
+            public BroadcastMessage BroadcastMessage { get; set; }
+
+            public BroadcastMessageParagraph(BroadcastMessage broadcast)
+            {
+                BroadcastMessage = broadcast;
+
+                string dayFormat = "MMM dd";
+                string timeFormat = "t";
+
+                Inlines.Add(new Run('@' + broadcast.Author.Username + ' ') { FontWeight = FontWeights.SemiBold, FontSize = 13.5d, Foreground = Brushes.CadetBlue });
+
+                Inlines.Add(new Run(string.Format("{0}, {1} ",
+                    broadcast.DateTime.ToString(dayFormat, CultureInfo.InvariantCulture),
+                    broadcast.DateTime.ToString(timeFormat, CultureInfo.InvariantCulture)))
+                { FontSize = 11d, Foreground = Brushes.Gray });
+
+                Inlines.Add(broadcast.Text);
+
+                LineHeight = 3;
+            }
         }
     }
 }
