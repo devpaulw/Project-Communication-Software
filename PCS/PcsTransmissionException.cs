@@ -6,7 +6,7 @@ namespace PCS
 {
 
     [Serializable]
-    public class PcsTransmissionException : Exception
+    public class PcsTransmissionException : SystemException
     {
         public PcsTransmissionException() { }
         public PcsTransmissionException(string message) : base(message) { }

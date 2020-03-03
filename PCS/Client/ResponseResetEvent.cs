@@ -3,14 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Timers;
 
 namespace PCS
 {
     class ResponseResetEvent
     {
+        const int timeoutSeconds = 4;
         readonly List<Response> waitingResponses = new List<Response>();
         bool isFilled = false;
-
+        
         public ResponseResetEvent()
         {
 
@@ -27,7 +29,13 @@ namespace PCS
 
         public Response WaitResponse()
         {
-            while (!isFilled) ; // TODO IDEA Timeout system here
+            DateTime initialTime = DateTime.Now;
+
+            while (!isFilled)
+            {
+                if (DateTime.Now.Ticks - initialTime.Ticks > 10000000 * timeoutSeconds)
+                    throw new TimeoutException(Messages.Exceptions.NoResponseTimeout);
+            }
 
             Response response;
             lock (waitingResponses)

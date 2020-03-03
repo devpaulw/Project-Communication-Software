@@ -134,7 +134,7 @@ namespace PCS.WPFClientInterface
             document.Load(fieldSavePath);
             serverAddressTextBox.Text = document.SelectSingleNode("/ConnectionInfos/ServerAddress").InnerXml;
             idTextBox.Text = document.SelectSingleNode("/ConnectionInfos/UserID").InnerXml;
-            passwordTb.Password = document.SelectSingleNode("/ConnectionInfos/Password").InnerXml; // TODO Make it secured
+            passwordTb.Password = document.SelectSingleNode("/ConnectionInfos/Password").InnerXml; // DOLATER Make it secured
         }
     }
 }

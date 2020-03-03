@@ -26,7 +26,7 @@ namespace PCS.Data.Packets
             RequestCode responseCode = (RequestCode)Convert.ToInt32(attributes[0], CultureInfo.CurrentCulture);
             bool succeeded = Convert.ToBoolean(Convert.ToInt32(attributes[1], CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
 
-            if (responseCode == RequestCode.BroadcastDelivery) // TODO Better handle
+            if (responseCode == RequestCode.BroadcastDelivery)
             {
                 return new ResponsePacket(BroadcastDeliveryResponse.FromAttributes(succeeded, attributes.Skip(2).ToArray()));
             }

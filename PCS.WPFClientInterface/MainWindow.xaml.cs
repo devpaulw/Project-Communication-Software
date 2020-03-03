@@ -41,22 +41,29 @@ namespace PCS.WPFClientInterface
         private void Disconnect()
         {
             accessor.Disconnect();
-
             messageField.Clear();
-
             channelSelector.Disable();
-
             ToggleAll();
         }
 
-        private void ShowMessagesBefore()
+        public void SendMessage(SendableMessage message)
         {
-            // TODO Not clean, DO this function in MessageField control class
-            messageField.LoadedMessagesCount += messageField.ShowBeforeCount;
+            try
+            {
+                accessor.SendMessage(message);
+                messageTextBox.Text = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                Disconnect();
+            }
+        }
 
+        private void ShowBefore()
+        {
             // Get SQL Messages
-            foreach (var message in accessor.GetTopMessagesInRange(messageField.LoadedMessagesCount - messageField.ShowBeforeCount, messageField.LoadedMessagesCount, channelSelector.SelectedChannel))
-                messageField.AddMessageOnTop(message);
+            messageField.ShowBefore((start, end) => accessor.GetTopMessagesInRange(start, end, channelSelector.SelectedChannel));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -76,7 +83,7 @@ namespace PCS.WPFClientInterface
 
                 channelSelector.Enable();
 
-                ShowMessagesBefore();
+                ShowBefore();
 
                 ToggleAll();
             }
@@ -110,26 +117,16 @@ namespace PCS.WPFClientInterface
         }
 
         private void DisconnectMenuItem_Click(object sender, RoutedEventArgs e)
-            => Disconnect(); // TODO: Do similar everywhere
+            => Disconnect();
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
             var message = new SendableMessage(messageTextBox.Text, channelSelector.SelectedChannel);
-
-            try
-            {
-                accessor.SendMessage(message);
-                messageTextBox.Text = string.Empty;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Disconnect();
-            }
+            SendMessage(message);
         }
 
         private void ShowBeforeButton_Click(object sender, RoutedEventArgs e)
-            => ShowMessagesBefore();
+            => ShowBefore();
 
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -139,7 +136,7 @@ namespace PCS.WPFClientInterface
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
-                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\nVersion 0.3",
+                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\nVersion 0.4",
                 "About Project Communication Software",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
@@ -181,7 +178,7 @@ namespace PCS.WPFClientInterface
             accessor.DeleteMessage(67);
             accessor.ModifyMessage(66, new SendableMessage("Modifié", "channel1"));
             messageField.Clear();// TODO Reset func, handle better MessageField //TODO MAKE MessageField adapted to Modify and Remove message // TODO In messageField use List<Broadcast> to handle them and with an update system
-            ShowMessagesBefore();
+            ShowBefore();
         }
     }
 }

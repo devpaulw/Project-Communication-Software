@@ -23,11 +23,11 @@ namespace PCS.WPFClientInterface
     public partial class MessageField : UserControl
     {
         const int ImageHeight = 260;
+        const int ShowBeforeCount = 20;
 
-        public int LoadedMessagesCount { get; set; }
-        public int ShowBeforeCount => 20;
+        private int loadedMessagesCount;
 
-        public MessageField() // TODO Implement ClientAccessor reference for this class it will be simpler for GetDailyMessages
+        public MessageField()
         {
             InitializeComponent();
 
@@ -58,6 +58,19 @@ namespace PCS.WPFClientInterface
             else // When no messages in the messageField
                 fieldRtb.Document.Blocks.Add(appendParagraph);
         }
+        
+        /// <param name="getTopMessages">in 1: start, in 2: end, out messages</param>
+        public void ShowBefore(Func<int, int, IEnumerable<BroadcastMessage>> getTopMessages)
+        {
+            loadedMessagesCount += ShowBeforeCount;
+
+            int start = loadedMessagesCount - ShowBeforeCount,
+                end = loadedMessagesCount;
+
+            // Get SQL Messages
+            foreach (var message in getTopMessages(start, end))
+                AddMessageOnTop(message);
+        }
 
         public void AddImage(BitmapImage bitmap) 
         {
@@ -79,7 +92,7 @@ namespace PCS.WPFClientInterface
         public void Clear()
         {
             fieldRtb.Document.Blocks.Clear();
-            LoadedMessagesCount = 0;
+            loadedMessagesCount = 0;
         }
 
         public void ScrollToEnd() => fieldRtb.ScrollToEnd();

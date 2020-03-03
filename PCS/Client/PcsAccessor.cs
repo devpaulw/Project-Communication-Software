@@ -102,7 +102,6 @@ namespace PCS
 
         public override void Disconnect()
         {
-            listen = false;
             MessageReceive = null;
             ListenException = null;
 
@@ -111,7 +110,12 @@ namespace PCS
                 SendPacket(new DisconnectPacket());
             }
 
-            base.Disconnect();
+            if (listen)
+            {
+                base.Disconnect();
+                listen = false;
+            }
+
         }
 
         private void StartListenServer()
@@ -155,7 +159,7 @@ namespace PCS
                                 throw new PcsTransmissionException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
                         }
                     }
-                    catch (SocketException ex)
+                    catch (SocketException)
                     {
                         if (IsConnected)
                             throw;
@@ -168,7 +172,10 @@ namespace PCS
         {
             SendPacket(new RequestPacket(request));
 
-            var response = responseEvent.WaitResponse(); // TODO Timeout system ?
+            Response response;
+
+            response = responseEvent.WaitResponse(); // TODO Timeout system ?
+
             if (response.Code == request.Code)
             {
                 return response;

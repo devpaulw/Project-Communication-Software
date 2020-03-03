@@ -78,13 +78,10 @@ namespace PCS
 
         public virtual void Disconnect()
         {
-            if (IsConnected)
-            {
-                AdapteeClient.Shutdown(SocketShutdown.Both);
-                AdapteeClient.Close();
+            AdapteeClient.Shutdown(SocketShutdown.Both);
+            AdapteeClient.Close();
 
-                IsConnected = false;
-            }
+            IsConnected = false;
         }
 
         public void Dispose()
@@ -95,15 +92,15 @@ namespace PCS
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!IsConnected)
-                return;
-
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    Disconnect();
-                    AdapteeClient.Dispose();
+                    if (AdapteeClient != null)
+                    {
+                        Disconnect();
+                        AdapteeClient.Dispose();
+                    }
                 }
 
                 disposedValue = true;
