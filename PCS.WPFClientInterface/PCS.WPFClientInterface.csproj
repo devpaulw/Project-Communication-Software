@@ -155,6 +155,9 @@
     <Compile Include="MessageField.xaml.cs">
       <DependentUpon>MessageField.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ModifyInputBox.xaml.cs">
+      <DependentUpon>ModifyInputBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PcsGlobalInterface.cs" />
     <Compile Include="PcsNotifier.cs" />
     <Compile Include="ConnectionWindow.xaml.cs">
@@ -181,6 +184,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ConnectionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ModifyInputBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

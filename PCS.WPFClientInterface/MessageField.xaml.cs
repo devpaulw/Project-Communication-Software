@@ -29,8 +29,6 @@ namespace PCS.WPFClientInterface
         private int loadedMessagesCount;
         private BroadcastMessage selectedBroadcast;
 
-        public Action<int> OnDeleteBroadcast { get; set; }
-
         public MessageField()
         {
             InitializeComponent();
@@ -56,9 +54,8 @@ namespace PCS.WPFClientInterface
             else // When no messages in the messageField
                 fieldRtb.Document.Blocks.Add(appendParagraph);
         }
-        
-        /// <param name="getTopMessages">in 1: start, in 2: end, out messages</param>
-        public void ShowBefore(Func<int, int, IEnumerable<BroadcastMessage>> getTopMessages)
+
+        public void ShowBefore()
         {
             loadedMessagesCount += ShowBeforeCount;
 
@@ -66,11 +63,11 @@ namespace PCS.WPFClientInterface
                 end = loadedMessagesCount;
 
             // Get SQL Messages
-            foreach (var message in getTopMessages(start, end))
+            foreach (var message in PcsGlobalInterface.Accessor.GetTopMessagesInRange(start, end, PcsGlobalInterface.SelectedChannel))
                 AddMessageOnTop(message);
         }
 
-        public void AddImage(BitmapImage bitmap) 
+        public void AddImage(BitmapImage bitmap)
         {
             double sizeRatio = ImageHeight / bitmap.Height;
 
@@ -95,21 +92,65 @@ namespace PCS.WPFClientInterface
 
         public void ScrollToEnd() => fieldRtb.ScrollToEnd();
 
-
-
         private void DeleteMessage_Click(object sender, RoutedEventArgs e)
         {
+            if (PcsGlobalInterface.Accessor.ActiveMemberId != selectedBroadcast.Author.ID)
+            {
+                MessageBox.Show("Can't delete this message, it's not yours.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
             if (MessageBox.Show(string.Format("Are you sure you want to delete the {0} ?", selectedBroadcast.ToString()), "Delete message", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                OnDeleteBroadcast(selectedBroadcast.ID);
+                try
+                {
+                    PcsGlobalInterface.Accessor.DeleteMessage(selectedBroadcast.ID); // TODO Handle exception
+
+                    Clear();
+                    ShowBefore();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+            }
+        }
+
+        private void ModifyMessage_Click(object sender, RoutedEventArgs e)
+        {
+            if (PcsGlobalInterface.Accessor.ActiveMemberId != selectedBroadcast.Author.ID)
+            {
+                MessageBox.Show("Can't modify this message, it's not yours.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            ModifyInputBox modifyInputBox = new ModifyInputBox(selectedBroadcast.Text);
+            modifyInputBox.ShowDialog();
+
+            if (!string.IsNullOrWhiteSpace(modifyInputBox.ModifiedMessage))
+            {
+                try
+                {
+                    PcsGlobalInterface.Accessor.ModifyMessage(selectedBroadcast.ID,
+                        new SendableMessage(modifyInputBox.ModifiedMessage, PcsGlobalInterface.SelectedChannel)); // TODO Handle exception
+
+                    Clear();
+                    ShowBefore();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
             }
         }
 
         private void DetailsMessage_Click(object sender, RoutedEventArgs e)
         {
-            string text = string.Format("On: {0}\n" +
-                                        "From: {1}\n" +
-                                        "At: {2}",
+            string text = string.Format("ID: {0}\n" + 
+                                        "On: {1}\n" +
+                                        "From: {2}\n" +
+                                        "At: {3}",
+                                        selectedBroadcast.ID,
                                         selectedBroadcast.ChannelName,
                                         selectedBroadcast.Author,
                                         selectedBroadcast.DateTime);
@@ -123,11 +164,11 @@ namespace PCS.WPFClientInterface
                 e.Handled = true;
             else
             {
-                foreach (Block block in fieldRtb.Document.Blocks)
+                foreach (BroadcastMessageParagraph block in fieldRtb.Document.Blocks)
                 {
                     if (block.IsMouseOver)
                     {
-                        selectedBroadcast = (block as BroadcastMessageParagraph).BroadcastMessage;
+                        selectedBroadcast = block.BroadcastMessage;
                     }
                 }
             }

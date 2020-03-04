@@ -177,28 +177,37 @@ namespace PCS
 
                 void OnDeleteMessage(DeleteMessageRequest deleteMessageRequest)
                 {
-                    { // Remove message
+                    bool succeeded = true;
+
+                    if (signInMember.ID == messageTable.GetItemAt(deleteMessageRequest.MessageId).Author.ID)
                         lock (@lock)
                             messageTable.RemoveRow(deleteMessageRequest.MessageId);
-                    }
+                    else
+                        succeeded = false;
 
                     client.SendPacket(new ResponsePacket(
-                        new Response(request.Code, true)));
+                        new Response(request.Code, succeeded)));
                 }
 
                 void OnModifyMessage(ModifyMessageRequest modifyMessageRequest)
                 {
-                    lock (@lock)
+                    bool succeeded = true;
+                    if (signInMember.ID == messageTable.GetItemAt(modifyMessageRequest.MessageId).Author.ID)
                     {
-                        var oldBroadcast = messageTable.GetItemAt(modifyMessageRequest.MessageId);
-                        var newBroadcast = new BroadcastMessage(modifyMessageRequest.MessageId, modifyMessageRequest.NewMessage.Text, modifyMessageRequest.NewMessage.ChannelName, oldBroadcast.DateTime, oldBroadcast.Author);
+                        lock (@lock)
+                        {
+                            var oldBroadcast = messageTable.GetItemAt(modifyMessageRequest.MessageId);
+                            var newBroadcast = new BroadcastMessage(modifyMessageRequest.MessageId, modifyMessageRequest.NewMessage.Text, modifyMessageRequest.NewMessage.ChannelName, oldBroadcast.DateTime, oldBroadcast.Author);
 
-                        messageTable.RemoveRow(modifyMessageRequest.MessageId);
-                        messageTable.AddRow(newBroadcast);
+                            messageTable.RemoveRow(modifyMessageRequest.MessageId);
+                            messageTable.AddRow(newBroadcast);
+                        }
                     }
+                    else
+                        succeeded = false;
 
                     client.SendPacket(new ResponsePacket(
-                        new Response(request.Code, true)));
+                        new Response(request.Code, succeeded)));
                 }
 
                 void OnBroadcastDelivery(BroadcastDeliveryRequest broadcastDeliveryRequest)

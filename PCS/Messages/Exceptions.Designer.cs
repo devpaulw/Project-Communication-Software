@@ -106,7 +106,7 @@ namespace PCS.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Impossible to delete of modify this message, it was not allowed by the server.
+        ///   Looks up a localized string similar to Impossible to delete or modify this message, it was not allowed by the server.
         /// </summary>
         internal static string UnauthorizedHandleMessage {
             get {

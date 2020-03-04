@@ -8,6 +8,6 @@
 		<Grid.RowDefinitions>
 			<RowDefinition/>
 		</Grid.RowDefinitions>
-		<ListBox x:Name="ChannelList" Margin="-2,1,-172,0"/>
+		<ListBox x:Name="ChannelList" Margin="-2,1,-172,0" SelectionChanged="ChannelList_SelectionChanged"/>
 	</Grid>
 </UserControl>

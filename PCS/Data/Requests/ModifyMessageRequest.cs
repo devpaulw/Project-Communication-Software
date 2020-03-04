@@ -29,7 +29,7 @@ namespace PCS.Data
         public static Request FromAttributes(string[] attributes)
         {
             return new ModifyMessageRequest(Convert.ToInt32(attributes[0], CultureInfo.InvariantCulture),
-                        new SendableMessage(attributes[2], attributes[1]));
+                new SendableMessage(attributes[2], attributes[1]));
         }
     }
 }

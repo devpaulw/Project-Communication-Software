@@ -28,21 +28,23 @@ namespace PCS.WPFClientInterface
     public partial class ConnectionWindow : Window
     {
         const string fieldSavePath = "./connection_infos.xml";
-
-        private PcsAccessor m_accessor;
+        private bool AutoConnect { get; }
 
         public bool Connected { get; private set; }
 
-        public ConnectionWindow(ref PcsAccessor accessor)
+        public ConnectionWindow()
         {
-            m_accessor = accessor;
-
             InitializeComponent();
         }
 
-        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        public ConnectionWindow(bool autoConnect)
         {
-            // Assuming it was clicked only if we Can Sign In and the Sign In Button is enabled
+            AutoConnect = autoConnect;
+            InitializeComponent();
+        }
+
+        private void Connect()
+        {
             Connected = TryMakeConnection();
 
             if (Connected)
@@ -50,7 +52,12 @@ namespace PCS.WPFClientInterface
                 SaveFields();
                 Close();
             }
+        }
 
+        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Assuming it was clicked only if we Can Sign In and the Sign In Button is enabled
+            Connect();
         }
 
         private void ServerAddressTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -77,7 +84,7 @@ namespace PCS.WPFClientInterface
         {
             try
             {
-                m_accessor.Connect(IPAddress.Parse(serverAddressTextBox.Text), 
+                PcsGlobalInterface.Accessor.Connect(IPAddress.Parse(serverAddressTextBox.Text),
                     new AuthenticationInfos(
                         Convert.ToInt32(idTextBox.Text, CultureInfo.CurrentCulture),
                         passwordTb.Password));
@@ -86,7 +93,7 @@ namespace PCS.WPFClientInterface
             }
             catch (Exception ex)
             {
-                m_accessor.Disconnect(); // Cancel connecting
+                PcsGlobalInterface.Accessor.Disconnect(); // Cancel connecting
                 MessageBox.Show(ex.Message, $"Connection to {serverAddressTextBox.Text} failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -102,15 +109,15 @@ namespace PCS.WPFClientInterface
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //serverAddressTextBox.Text = "127.0.0.1";
-            //usernameTextBox.Text = "PcsTester1";
-            //idTextBox.Text = "54312";
             try
             {
                 LoadFields();
             }
             catch (FileNotFoundException) { }
             // DOLATER Get used of other possible exceptions (+everywhere)
+
+            if (AutoConnect && (bool)autoConnectCb.IsChecked)
+                Connect();
 
             ToggleConnectButton();
         }
@@ -121,7 +128,8 @@ namespace PCS.WPFClientInterface
                 new XElement("ConnectionInfos",
                     new XElement("ServerAddress", serverAddressTextBox.Text),
                     new XElement("UserID", idTextBox.Text),
-                    new XElement("Password", passwordTb.Password)
+                    new XElement("Password", passwordTb.Password),
+                    new XElement("AutoConnect", autoConnectCb.IsChecked)
                 )
             );
 
@@ -135,6 +143,7 @@ namespace PCS.WPFClientInterface
             serverAddressTextBox.Text = document.SelectSingleNode("/ConnectionInfos/ServerAddress").InnerXml;
             idTextBox.Text = document.SelectSingleNode("/ConnectionInfos/UserID").InnerXml;
             passwordTb.Password = document.SelectSingleNode("/ConnectionInfos/Password").InnerXml; // DOLATER Make it secured
+            autoConnectCb.IsChecked = Convert.ToBoolean(document.SelectSingleNode("/ConnectionInfos/AutoConnect").InnerXml); // DOLATER Make it secured
         }
     }
 }

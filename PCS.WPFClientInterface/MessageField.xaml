@@ -9,7 +9,7 @@
         <RichTextBox x:Name="fieldRtb" IsReadOnly="True" Background="#BF000000" Foreground="White" VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Bottom" Grid.ColumnSpan="2" Grid.RowSpan="2" ContextMenuOpening="fieldRtb_ContextMenuOpening">
             <RichTextBox.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Modify" Command=""/>
+                    <MenuItem Header="Modify" Command="" Click="ModifyMessage_Click"/>
 
                     <MenuItem Header="Delete" Click="DeleteMessage_Click"/>
                     <Separator/>
