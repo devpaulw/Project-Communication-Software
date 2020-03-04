@@ -155,6 +155,7 @@
     <Compile Include="MessageField.xaml.cs">
       <DependentUpon>MessageField.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PcsGlobalInterface.cs" />
     <Compile Include="PcsNotifier.cs" />
     <Compile Include="ConnectionWindow.xaml.cs">
       <DependentUpon>ConnectionWindow.xaml</DependentUpon>

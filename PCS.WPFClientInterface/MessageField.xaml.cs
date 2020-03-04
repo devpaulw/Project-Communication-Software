@@ -95,25 +95,6 @@ namespace PCS.WPFClientInterface
 
         public void ScrollToEnd() => fieldRtb.ScrollToEnd();
 
-        private Paragraph GetBroadcastParagraph(BroadcastMessage broadcast)
-        {
-            string dayFormat = "MMM dd";
-            string timeFormat = "t";
-            var paragraph = new Paragraph();
-
-            paragraph.Inlines.Add(new Run('@' + broadcast.Author.Username + ' ') { FontWeight = FontWeights.SemiBold, FontSize = 13.5d, Foreground = Brushes.CadetBlue });
-
-            paragraph.Inlines.Add(new Run(string.Format("{0}, {1} ",
-                broadcast.DateTime.ToString(dayFormat, CultureInfo.InvariantCulture),
-                broadcast.DateTime.ToString(timeFormat, CultureInfo.InvariantCulture))) 
-            { FontSize = 11d, Foreground = Brushes.Gray });
-
-            paragraph.Inlines.Add(broadcast.Text);
-
-            paragraph.LineHeight = 3;
-            return paragraph;
-        }
-
 
 
         private void DeleteMessage_Click(object sender, RoutedEventArgs e)
@@ -122,6 +103,18 @@ namespace PCS.WPFClientInterface
             {
                 OnDeleteBroadcast(selectedBroadcast.ID);
             }
+        }
+
+        private void DetailsMessage_Click(object sender, RoutedEventArgs e)
+        {
+            string text = string.Format("On: {0}\n" +
+                                        "From: {1}\n" +
+                                        "At: {2}",
+                                        selectedBroadcast.ChannelName,
+                                        selectedBroadcast.Author,
+                                        selectedBroadcast.DateTime);
+
+            MessageBox.Show(text, "Message details", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void fieldRtb_ContextMenuOpening(object sender, ContextMenuEventArgs e)

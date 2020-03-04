@@ -98,6 +98,7 @@ namespace PCS.WPFClientInterface
 
         void OnMessageReceive(object sender, BroadcastMessage broadcastMsg)
         {
+            
             lock (@lock)
             {
                 Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread

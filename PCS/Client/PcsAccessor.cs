@@ -25,6 +25,7 @@ namespace PCS
 
         public PcsAccessor()
         {
+
         }
 
         public void Connect(IPAddress ip, AuthenticationInfos authenticationInfos) // DOLATER I don't know if this password is secured

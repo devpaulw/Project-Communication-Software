@@ -26,7 +26,7 @@ namespace PCS.Data
 
         public override string ToString()
         {
-            return "Member " + Username + " (ID " + ID + ")";
+            return Username + " (ID " + ID + ")";
         }
 
         //public override bool Equals(object obj)

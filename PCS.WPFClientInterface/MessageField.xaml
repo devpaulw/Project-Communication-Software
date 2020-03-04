@@ -13,7 +13,7 @@
 
                     <MenuItem Header="Delete" Click="DeleteMessage_Click"/>
                     <Separator/>
-                    <MenuItem Header="Details"/>
+                    <MenuItem Header="Details" Click="DetailsMessage_Click"/>
 
                 </ContextMenu>
             </RichTextBox.ContextMenu>
