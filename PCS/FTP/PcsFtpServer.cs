@@ -10,15 +10,17 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
-namespace PCS
+namespace PCS.Ftp
 {
+    [Obsolete("Not using FTP anymore")]
+
     public class PcsFtpServer : IDisposable
     {
         private bool disposed;
         private readonly IFtpServerHost serverHost;
 
         public const string Directory = @"./ftp_server/";
-        public const string MessagePath = "messages"; // TODO: It's to the server to do that
+        public const string MessagePath = "messages";
         public const string ResourcePath = "resources";
         public const ushort Port = 6784;
 
@@ -30,7 +32,7 @@ namespace PCS
             // use %TEMP%/TestFtpServer as root folder
             services.Configure<DotNetFileSystemOptions>(opt => opt
                 .RootPath = Directory);
-
+            
             // Add FTP server services
             // DotNetFileSystemProvider = Use the .NET file system functionality
             // AnonymousMembershipProvider = allow only anonymous logins

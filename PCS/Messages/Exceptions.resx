@@ -123,10 +123,19 @@
   <data name="MessageEmptyField" xml:space="preserve">
     <value>A text field in the message is not filled in.</value>
   </data>
+  <data name="NoResponseTimeout" xml:space="preserve">
+    <value>Timeout exception: no response from server</value>
+  </data>
   <data name="NotConnected" xml:space="preserve">
     <value>The socket was not connected to the server.</value>
   </data>
   <data name="NotRecognizedDataPacket" xml:space="preserve">
     <value>This data packet is not recognized.</value>
+  </data>
+  <data name="UnauthorizedHandleMessage" xml:space="preserve">
+    <value>Impossible to delete or modify this message, it was not allowed by the server</value>
+  </data>
+  <data name="UnauthorizedLogin" xml:space="preserve">
+    <value>Server login unauthorized: check your username, password.</value>
   </data>
 </root>

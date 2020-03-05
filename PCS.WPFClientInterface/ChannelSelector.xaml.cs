@@ -20,7 +20,13 @@ namespace PCS.WPFClientInterface
 	/// </summary>
 	public partial class ChannelSelector : UserControl
 	{
-		public string SelectedChannel { get => ChannelList.SelectedItem.ToString(); }
+		public string SelectedChannel { 
+			get {
+				if (ChannelList.SelectedItem != null)
+					return ChannelList.SelectedItem.ToString();
+				else return null;
+			} 
+		}
 
 		public ChannelSelector()
 		{
@@ -40,6 +46,9 @@ namespace PCS.WPFClientInterface
 			ChannelList.Items.Clear();
 		}
 
-
+		private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			PcsGlobalInterface.SelectedChannel = SelectedChannel;
+		}
 	}
 }

@@ -6,8 +6,20 @@
              xmlns:local="clr-namespace:PCS.WPFClientInterface"
              mc:Ignorable="d" d:DesignWidth="415.417" d:DesignHeight="308.916" >
     <Grid>
+        <RichTextBox x:Name="fieldRtb" IsReadOnly="True" Background="#BF000000" Foreground="White" VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Bottom" Grid.ColumnSpan="2" Grid.RowSpan="2" ContextMenuOpening="fieldRtb_ContextMenuOpening">
+            <RichTextBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Modify" Command="" Click="ModifyMessage_Click"/>
 
-        <RichTextBox x:Name="fieldRtb" IsReadOnly="True" Background="#BF000000" Foreground="White" VerticalScrollBarVisibility="Visible" VerticalContentAlignment="Bottom" Grid.ColumnSpan="2" Grid.RowSpan="2"></RichTextBox>
+                    <MenuItem Header="Delete" Click="DeleteMessage_Click"/>
+                    <Separator/>
+                    <MenuItem Header="Details" Click="DetailsMessage_Click"/>
 
+                </ContextMenu>
+            </RichTextBox.ContextMenu>
+            
+        </RichTextBox>
     </Grid>
+    <UserControl.Resources>
+    </UserControl.Resources>
 </UserControl>

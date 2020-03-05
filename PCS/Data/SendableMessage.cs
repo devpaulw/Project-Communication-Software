@@ -1,16 +1,17 @@
-﻿using System;
+﻿using PCS.Data.Packets;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace PCS
+namespace PCS.Data
 {
-    public class Message
+    public class SendableMessage
     {
         public string Text { get; set; }
         public string ChannelName { get; set; }
 
-        public Message(string text, string channelName)
+        public SendableMessage(string text, string channelName)
         {
             Text = text;
             ChannelName = channelName;

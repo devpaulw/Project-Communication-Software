@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ClientConnect" xml:space="preserve">
-    <value>{0} connected!</value>
+    <value>{0} connected from {1}</value>
   </data>
   <data name="ClientDisconnect" xml:space="preserve">
     <value>{0} disconnected.</value>

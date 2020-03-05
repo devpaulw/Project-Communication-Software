@@ -1,22 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
+using PCS.Data;
+using PCS.Data.Packets;
 
 namespace PCS
 {
     public class PcsClient : IDisposable
     {
-        private protected bool disposedValue;
+        private bool disposedValue;
 
         protected Socket AdapteeClient { get; set; }
+
+        public bool IsConnected { get; set; }
+
+        public IPEndPoint RemoteIP
+            => AdapteeClient.RemoteEndPoint == null ? null : AdapteeClient.RemoteEndPoint as IPEndPoint;
+        public IPEndPoint LocalIP
+            => AdapteeClient.LocalEndPoint == null ? null : AdapteeClient.LocalEndPoint as IPEndPoint;
 
         public PcsClient() { }
 
         public PcsClient(Socket client)
         {
             AdapteeClient = client;
+            IsConnected = true;
         }
 
         internal Packet ReceivePacket()
@@ -68,6 +80,8 @@ namespace PCS
         {
             AdapteeClient.Shutdown(SocketShutdown.Both);
             AdapteeClient.Close();
+
+            IsConnected = false;
         }
 
         public void Dispose()
@@ -82,8 +96,11 @@ namespace PCS
             {
                 if (disposing)
                 {
-                    Disconnect();
-                    AdapteeClient.Dispose();
+                    if (AdapteeClient != null)
+                    {
+                        Disconnect();
+                        AdapteeClient.Dispose();
+                    }
                 }
 
                 disposedValue = true;

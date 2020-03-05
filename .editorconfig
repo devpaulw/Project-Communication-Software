@@ -4,3 +4,6 @@
 
 # CA1806: Do not ignore method results
 dotnet_diagnostic.CA1806.severity = none
+
+# CA2100: Review SQL queries for security vulnerabilities
+dotnet_diagnostic.CA2100.severity = none

@@ -6,66 +6,155 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using PCS.Sql;
+using PCS.Data;
+using PCS.Data.Packets;
+using System.Threading.Tasks;
 
 namespace PCS
 {
     public class PcsAccessor : PcsClient
     {
-        private Thread serverListenThread;
-        private PcsFtpClient ftp;
+        private ResponseResetEvent responseEvent;
+        private bool listen;
 
-        public bool IsConnected { get; private set; }
+        public event EventHandler<BroadcastMessage> MessageReceive;
+        public event EventHandler<Exception> ListenException;
+
+        public int ActiveMemberId { get; private set; }
 
         public PcsAccessor()
         {
+
         }
 
-        public void Connect(IPAddress ip, Member member)
+        public void Connect(IPAddress ip, AuthenticationInfos authenticationInfos) // DOLATER I don't know if this password is secured
         {
-            if (ip == null)
-                throw new ArgumentNullException(nameof(ip));
+            ActiveMemberId = (authenticationInfos ?? throw new ArgumentNullException(nameof(authenticationInfos))).MemberId;
 
-            AdapteeClient = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            #region Connect to the network
+            AdapteeClient = new Socket((ip ?? throw new ArgumentNullException(nameof(ip))).AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             var endPoint = new IPEndPoint(ip, PcsServer.Port);
-
             AdapteeClient.Connect(endPoint);
             Console.WriteLine(Messages.Client.Connected, ip.MapToIPv4());
+            #endregion
 
-            ftp = new PcsFtpClient(ip);
+            #region Init Listen
+            listen = true;
+            responseEvent = new ResponseResetEvent();
+            ListenException += OnListenException;
+
+            StartListenServer();
+            #endregion
 
             SignIn();
 
             void SignIn()
             {
-                if (member == null)
-                    throw new ArgumentNullException(nameof(member));
+                Response response = SendRequest(new SignInRequest(authenticationInfos));
 
-                SendPacket(new SignInPacket(member));
-
-                IsConnected = true;
+                if (response.Succeeded)
+                    IsConnected = true;
+                else
+                    throw new Exception(Messages.Exceptions.UnauthorizedLogin);
             }
         }
 
-        public void StartListenAsync(Action<BroadcastMessage> messageReceived)
+        public void SendMessage(SendableMessage message)
         {
             if (!IsConnected)
                 throw new Exception(Messages.Exceptions.NotConnected);
 
-            serverListenThread = new Thread(() => Listen());
-            serverListenThread.Start();
+            SendPacket(new SendableMessagePacket(message ?? throw new ArgumentNullException(nameof(message))));
+        }
 
-            void Listen()
+        public void DeleteMessage(int messageId)
+        {
+            Response response = SendRequest(new DeleteMessageRequest(messageId));
+            if (response.Succeeded)
+                System.Diagnostics.Debug.WriteLine("Message delete succeeded");
+            else
+                throw new Exception(Messages.Exceptions.UnauthorizedHandleMessage);
+        }
+
+        public void ModifyMessage(int messageId, SendableMessage newMessage)
+        {
+            Response response = SendRequest(new ModifyMessageRequest(
+                        messageId,
+                        newMessage ?? throw new ArgumentNullException(nameof(newMessage))
+                        ));
+
+            if (response.Succeeded)
+                System.Diagnostics.Debug.WriteLine("Message modification succeeded");
+            else
+                throw new Exception(Messages.Exceptions.UnauthorizedHandleMessage);
+        }
+
+        public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
+        {
+            var response = SendRequest(new BroadcastDeliveryRequest(start, end, channelName)) as BroadcastDeliveryResponse;
+
+            if (response.Succeeded)
             {
-                while (IsConnected)
+                foreach (var broadcast in response.BroadcastMessages)
+                    yield return broadcast;
+            }
+        }
+
+        public override void Disconnect()
+        {
+            MessageReceive = null;
+            ListenException = null;
+
+            if (IsConnected)
+            {
+                SendPacket(new DisconnectPacket());
+            }
+
+            if (listen)
+            {
+                base.Disconnect();
+                listen = false;
+            }
+
+        }
+
+        private void StartListenServer()
+        {
+            var serverListenTask = Task.Run(() => Listen());
+
+            try
+            {
+                serverListenTask.Wait();
+            }
+            catch (PcsTransmissionException ex)
+            {
+                ListenException(this, ex);
+            }
+            catch (SocketException ex)
+            {
+                ListenException(this, ex);
+            }
+
+            async void Listen()
+            {
+                while (listen)
                 {
                     try
                     {
-                        Packet receivedPacket = ReceivePacket();
+                        Packet receivedPacket = await Task.Run(() => ReceivePacket()).ConfigureAwait(false);
 
-                        if (receivedPacket is BroadcastMessagePacket == false)
-                            throw new Exception(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
-
-                        messageReceived((receivedPacket as BroadcastMessagePacket).BroadcastMessage);
+                        switch (receivedPacket)
+                        {
+                            case BroadcastMessagePacket broadcastMessagePacket when IsConnected:
+                                MessageReceive(this, broadcastMessagePacket.Item);
+                                break;
+                            case ResponsePacket responsePacket:
+                                responseEvent.SetResponse(responsePacket.Item);
+                                break;
+                            default:
+                                throw new PcsTransmissionException(Messages.Exceptions.NotRecognizedDataPacket); // DOLATER: Handle better save messages on the PC, not just resources
+                        }
                     }
                     catch (SocketException)
                     {
@@ -76,47 +165,26 @@ namespace PCS
             }
         }
 
-        public void SendMessage(Message message)
+        private Response SendRequest(Request request)
         {
-            if (!IsConnected)
-                throw new Exception(Messages.Exceptions.NotConnected);
+            SendPacket(new RequestPacket(request));
 
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
+            Response response;
 
-            SendPacket(new MessagePacket(message));
-        }
+            response = responseEvent.WaitResponse(); // TODO Timeout system ?
 
-        public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
-        {
-            var dailyMessages = new List<BroadcastMessage>(ftp.GetDailyMessages(channelName, day));
-
-            return dailyMessages;
-        }
-
-        public override void Disconnect()
-        {
-            if (IsConnected)
+            if (response.Code == request.Code)
             {
-                SendPacket(new DisconnectPacket());
-
-                IsConnected = false;
-
-                base.Disconnect();
+                return response;
             }
+            else
+                throw new Exception(Messages.Exceptions.NotRecognizedDataPacket);
         }
 
-        protected override void Dispose(bool disposing)
+        private void OnListenException(object sender, Exception exception)
         {
-            if (!IsConnected)
-                return;
-
-            if (!disposedValue && disposing)
-            {
-                ftp.Dispose();
-
-                base.Dispose(disposing);
-            }
+            IsConnected = false;
+            Disconnect();
         }
     }
 }

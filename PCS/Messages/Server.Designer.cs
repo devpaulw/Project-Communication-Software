@@ -61,7 +61,7 @@ namespace PCS.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} connected!.
+        ///   Looks up a localized string similar to {0} connected from {1}.
         /// </summary>
         internal static string ClientConnect {
             get {

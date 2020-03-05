@@ -79,6 +79,15 @@ namespace PCS.Messages {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Timeout exception: no response from server.
+        /// </summary>
+        internal static string NoResponseTimeout {
+            get {
+                return ResourceManager.GetString("NoResponseTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The socket was not connected to the server..
         /// </summary>
         internal static string NotConnected {
@@ -93,6 +102,24 @@ namespace PCS.Messages {
         internal static string NotRecognizedDataPacket {
             get {
                 return ResourceManager.GetString("NotRecognizedDataPacket", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Impossible to delete or modify this message, it was not allowed by the server.
+        /// </summary>
+        internal static string UnauthorizedHandleMessage {
+            get {
+                return ResourceManager.GetString("UnauthorizedHandleMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server login unauthorized: check your username, password..
+        /// </summary>
+        internal static string UnauthorizedLogin {
+            get {
+                return ResourceManager.GetString("UnauthorizedLogin", resourceCulture);
             }
         }
     }

@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using PCS.Data;
 
 namespace PCS.WPFClientInterface
 {
@@ -30,10 +31,6 @@ namespace PCS.WPFClientInterface
     {
         private readonly object @lock = new object();
 
-        private PcsAccessor clientAccessor = new PcsAccessor();
-
-        public Member ActiveMember { get; private set; }
-
         public MainWindow()
         {
             InitializeComponent();
@@ -41,71 +38,17 @@ namespace PCS.WPFClientInterface
 
         private void Disconnect()
         {
-            clientAccessor.Disconnect();
+            PcsGlobalInterface.Accessor.Disconnect();
             messageField.Clear();
-
             channelSelector.Disable();
-
             ToggleAll();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        public void SendMessage(SendableMessage message)
         {
-            ToggleAll();
-        }
-
-        private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var signInWindow = new ConnectionWindow(ref clientAccessor);
-            signInWindow.ShowDialog();
-
-            if (signInWindow.Connected)
-            {
-                ActiveMember = signInWindow.SignedInMember;
-
-                clientAccessor.StartListenAsync((BroadcastMessage broadcastMsg) => MessageReceived(broadcastMsg)); // TODO Handle exceptions here.
-                
-                channelSelector.Enable();
-
-                // Get FTP Messages
-                foreach (var dailyMessage in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, DateTime.Now))
-                    messageField.AddMessage(dailyMessage, () => { });
-
-                ToggleAll();
-            }
-
-            void MessageReceived(BroadcastMessage broadcastMsg)
-            {
-                lock (@lock)
-                {
-                    Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
-                            messageField.AddMessage(broadcastMsg, () => Notify(broadcastMsg)));
-                }
-
-                void Notify(BroadcastMessage message)
-                {
-                    if (message.Author != ActiveMember)
-                        PcsNotifier.Notify(this, message); // Notify when it's not us
-                }
-            }
-        }
-
-        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            clientAccessor.Disconnect();
-            Application.Current.Shutdown();
-        }
-
-        private void DisconnectMenuItem_Click(object sender, RoutedEventArgs e)
-            => Disconnect(); // TODO: Do similar everywhere
-
-        private void SendMessageButton_Click(object sender, RoutedEventArgs e)
-        {
-            var message = new Message(messageTextBox.Text, channelSelector.SelectedChannel);
-
             try
             {
-                clientAccessor.SendMessage(message);
+                PcsGlobalInterface.Accessor.SendMessage(message);
                 messageTextBox.Text = string.Empty;
             }
             catch (Exception ex)
@@ -115,13 +58,76 @@ namespace PCS.WPFClientInterface
             }
         }
 
-        private void DisplayPreviousDayButton_Click(object sender, RoutedEventArgs e)
-        {
-            messageField.SetPreviousDay();
+        private void ShowBefore()
+            => messageField.ShowBefore();
 
-            foreach (var message in clientAccessor.GetDailyMessages(channelSelector.SelectedChannel, messageField.LastDayLoaded).Reverse())
-                messageField.AddMessageOnTop(message);
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            ToggleAll();
+
+            ConnectDialog(true);
         }
+
+        private void ConnectDialog(bool autoConnect = false)
+        {
+            var connWindow = new ConnectionWindow(autoConnect);
+            connWindow.ShowDialog();
+
+            if (connWindow.Connected)
+            {
+                PcsGlobalInterface.Accessor.MessageReceive += OnMessageReceive;
+                PcsGlobalInterface.Accessor.ListenException += OnServerListenException;
+
+                channelSelector.Enable();
+                PcsGlobalInterface.SelectedChannel = channelSelector.SelectedChannel;
+
+                ShowBefore();
+                ToggleAll();
+            }
+        }
+
+        private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
+            => ConnectDialog();
+
+        void OnMessageReceive(object sender, BroadcastMessage broadcastMsg)
+        {
+            lock (@lock)
+            {
+                Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+                        messageField.AddMessage(broadcastMsg));
+                Notify(broadcastMsg);
+            }
+        }
+
+        void OnServerListenException(object sender, Exception exception)
+        {
+            MessageBox.Show(exception.Message, "Transmission exception", MessageBoxButton.OK, MessageBoxImage.Error);
+            Dispatcher.Invoke(() => Disconnect());
+        }
+
+        void Notify(BroadcastMessage broadcastMsg)
+        {
+            if (broadcastMsg.Author.ID != PcsGlobalInterface.Accessor.ActiveMemberId)
+                PcsNotifier.Notify(this, broadcastMsg); // Notify when it's not us
+        }
+
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            PcsGlobalInterface.Accessor.Disconnect();
+            Application.Current.Shutdown();
+        }
+
+        private void DisconnectMenuItem_Click(object sender, RoutedEventArgs e)
+            => Disconnect();
+
+        private void SendMessageButton_Click(object sender, RoutedEventArgs e)
+        {
+            var message = new SendableMessage(messageTextBox.Text, PcsGlobalInterface.SelectedChannel);
+            SendMessage(message);
+        }
+
+        private void ShowBeforeButton_Click(object sender, RoutedEventArgs e)
+            => ShowBefore();
 
         private void MessageTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -131,20 +137,15 @@ namespace PCS.WPFClientInterface
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show(
-                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\nVersion 0.3",
+                "Project Communication Software (P.C.S.), developed by Paul Wacquet, Thomas Wacquet and Ilian Baylon.\nVersion 0.4",
                 "About Project Communication Software",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
 
-        private void ScrollToEndButton_Click(object sender, RoutedEventArgs e)
-        {
-            messageField.ScrollToEnd();
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            clientAccessor.Dispose();
+            PcsGlobalInterface.Accessor.Dispose();
         }
 
         private void ToggleAll()
@@ -157,19 +158,23 @@ namespace PCS.WPFClientInterface
 
         private void ToggleSendMessageButton()
             => sendMessageButton.IsEnabled = messageTextBox.Text != string.Empty
-            && clientAccessor.IsConnected;
+            && PcsGlobalInterface.Accessor.IsConnected;
 
         private void ToggleConnectMenuItem()
-            => connectMenuItem.IsEnabled = !clientAccessor.IsConnected;
+            => connectMenuItem.IsEnabled = !PcsGlobalInterface.Accessor.IsConnected;
 
         private void ToggleDisconnectMenuItem()
-            => disconnectMenuItem.IsEnabled = clientAccessor.IsConnected;
+            => disconnectMenuItem.IsEnabled = PcsGlobalInterface.Accessor.IsConnected;
 
         private void ToggleDisplayPreviousDayButton()
-            => displayPreviousDayButton.IsEnabled = clientAccessor.IsConnected;
+            => displayPreviousDayButton.IsEnabled = PcsGlobalInterface.Accessor.IsConnected;
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
+            //PcsGlobalInterface.Accessor.DeleteMessage(67);
+            //PcsGlobalInterface.Accessor.ModifyMessage(66, new SendableMessage("Modifié", "channel1"));
+            //messageField.Clear();// TODO Reset func, handle better MessageField //TODO MAKE MessageField adapted to Modify and Remove message // TODO In messageField use List<Broadcast> to handle them and with an update system
+            //ShowBefore();
         }
     }
 }

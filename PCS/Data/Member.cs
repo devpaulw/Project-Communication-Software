@@ -5,16 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PCS
+namespace PCS.Data
 {
-    public class Member : IEquatable<Member>
+    public class Member
     {
         public string Username { get; set; }
         public int ID { get; set; }
 
         public Member(string username, int id)
         {
-            Username = username;
+            Username = username ?? throw new ArgumentNullException(nameof(username));
             ID = id;
         }
 
@@ -26,38 +26,38 @@ namespace PCS
 
         public override string ToString()
         {
-            return "Member " + Username + " (ID " + ID + ")";
+            return Username + " (ID " + ID + ")";
         }
 
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as Member);
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    return Equals(obj as Member);
+        //}
 
-        public bool Equals(Member other)
-        {
-            return other != null &&
-                   ID == other.ID;
-        }
+        //public bool Equals(Member other)
+        //{
+        //    return other != null &&
+        //           ID == other.ID;
+        //}
 
-        public override int GetHashCode()
-        {
-            var hashCode = 1275858721;
-            hashCode = hashCode * -1521134295 + ID.GetHashCode();
-            return hashCode;
-        }
+        //public override int GetHashCode()
+        //{
+        //    var hashCode = 1275858721;
+        //    hashCode = hashCode * -1521134295 + ID.GetHashCode();
+        //    return hashCode;
+        //}
 
-        public static bool operator ==(Member left, Member right)
-        {
-            if (left is null || right is null)
-                return false;
+        //public static bool operator ==(Member left, Member right)
+        //{
+        //    if (left is null || right is null)
+        //        return false;
 
-            return left.ID == right.ID;
-        }
+        //    return left.ID == right.ID;
+        //}
 
-        public static bool operator !=(Member left, Member right)
-        {
-            return !(left == right);
-        }
+        //public static bool operator !=(Member left, Member right)
+        //{
+        //    return !(left == right);
+        //}
     }
 }

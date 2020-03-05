@@ -4,32 +4,37 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace PCS
+namespace PCS.Data
 {
     public class BroadcastMessage
     {
-        public Message BaseMessage { get; set; }
+        public int ID { get; set; }
+        public string Text { get; set; }
+        public string ChannelName { get; set; }
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
 
-        public BroadcastMessage(Message baseMessage, DateTime dateTime, Member author)
+        public BroadcastMessage(int iD, string text, string channelName, DateTime dateTime, Member author)
         {
-            BaseMessage = baseMessage;
-            Author = author;
+            ID = iD;
+            Text = text ?? throw new ArgumentNullException(nameof(text));
+            ChannelName = channelName ?? throw new ArgumentNullException(nameof(channelName));
+            Author = author ?? Member.Unknown;
             DateTime = dateTime;
         }
 
+        [Obsolete("Not using FTP anymore")]
         public string ToFileMessage()
         {
             const char endOfTB = (char)23;
-            return BaseMessage.ChannelName + endOfTB
+            return ChannelName + endOfTB
                 + Author.Username + endOfTB
                 + Author.ID + endOfTB
                 + DateTime.ToFileTime() + endOfTB
-                + BaseMessage.Text;
+                + Text;
         }
 
-        // DOLATER: When It will be C# 8.0, implement interface with static functions: IDataObject and discontinue DataPacket(Attributes)/(Objects)
+        [Obsolete("Not using FTP anymore")]
         public static BroadcastMessage FromFileMessage(string fileMessage)
         {
             if (fileMessage == null)
@@ -39,8 +44,9 @@ namespace PCS
             string[] infos = fileMessage.Split(endOfTB);
 
             return new BroadcastMessage(
-                new Message(infos[4],
-                infos[0]),
+                0,
+                infos[4],
+                infos[0],
                 DateTime.FromFileTime(Convert.ToInt64(infos[3], CultureInfo.InvariantCulture)),
                 new Member(infos[1], 
                 Convert.ToInt32(infos[2], CultureInfo.InvariantCulture))
@@ -49,7 +55,7 @@ namespace PCS
 
         public override string ToString()
         {
-            return $"Message from {Author} in {BaseMessage.ChannelName} at {DateTime}: {BaseMessage.Text}";
+            return $"Message from {Author} in {ChannelName} at {DateTime}: {Text}";
         }
     }
 }

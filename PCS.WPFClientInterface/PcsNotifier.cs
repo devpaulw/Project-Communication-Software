@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Interop;
 using System.Runtime.InteropServices;
 using System.Windows;
+using PCS.Data;
 
 namespace PCS.WPFClientInterface
 {
