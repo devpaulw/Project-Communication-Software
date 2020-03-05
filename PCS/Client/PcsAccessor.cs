@@ -121,32 +121,28 @@ namespace PCS
 
         private void StartListenServer()
         {
-            Thread serverListenThread =
-                new Thread(() =>
-                {
-                    try
-                    {
-                        Listen();
-                    }
-                    catch (PcsTransmissionException ex)
-                    {
-                        ListenException(this, ex);
-                    }
-                    catch (SocketException ex)
-                    {
-                        ListenException(this, ex);
-                    }
-                });
-            serverListenThread.Start();
+            var serverListenTask = Task.Run(() => Listen());
 
+            try
+            {
+                serverListenTask.Wait();
+            }
+            catch (PcsTransmissionException ex)
+            {
+                ListenException(this, ex);
+            }
+            catch (SocketException ex)
+            {
+                ListenException(this, ex);
+            }
 
-            void Listen()
+            async void Listen()
             {
                 while (listen)
                 {
                     try
                     {
-                        Packet receivedPacket = ReceivePacket();
+                        Packet receivedPacket = await Task.Run(() => ReceivePacket()).ConfigureAwait(false);
 
                         switch (receivedPacket)
                         {
