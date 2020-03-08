@@ -70,15 +70,6 @@ namespace PCS.Messages {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A text field in the message is not filled in..
-        /// </summary>
-        internal static string MessageEmptyField {
-            get {
-                return ResourceManager.GetString("MessageEmptyField", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Timeout exception: no response from server.
         /// </summary>
         internal static string NoResponseTimeout {

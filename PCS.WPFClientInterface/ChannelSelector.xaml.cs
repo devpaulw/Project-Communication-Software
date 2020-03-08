@@ -23,37 +23,41 @@ namespace PCS.WPFClientInterface
 		public event EventHandler<Channel> OnChangeChannel;
 
 		public Channel FocusedChannel { 
-			get {
-				if (ChannelList.SelectedItem is null)
-					return null;
-
-				return new Channel(ChannelList.SelectedItem.ToString());
-			}
+			get => new Channel(ChannelList.SelectedItem.ToString());
 		}
 
 		public ChannelSelector()
 		{
 			InitializeComponent();
+			IsEnabled = false;
 		}
 
 		public void Enable()
 		{
 			// BBTODO retrieve the channels from the server
+			IsEnabled = true;
+
 			ChannelList.Items.Add("channel1");
 			ChannelList.Items.Add("channel2");
 			ChannelList.SelectedItem = ChannelList.Items[0];
+
 		}
 
 		public void Disable()
 		{
+			IsEnabled = false;
 			ChannelList.Items.Clear();
 			OnChangeChannel = null;
+			
 		}
 
 		private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			PcsGlobalInterface.FocusedChannel = FocusedChannel;
-			OnChangeChannel?.Invoke(this, FocusedChannel);
+			if (IsEnabled)
+			{
+				PcsGlobalInterface.FocusedChannel = FocusedChannel;
+				OnChangeChannel?.Invoke(this, FocusedChannel);
+			}
 		}
 	}
 }

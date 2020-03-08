@@ -120,9 +120,6 @@
   <data name="IPv4NotFound" xml:space="preserve">
     <value>No network adapters with an IPv4 address in the system!</value>
   </data>
-  <data name="MessageEmptyField" xml:space="preserve">
-    <value>A text field in the message is not filled in.</value>
-  </data>
   <data name="NoResponseTimeout" xml:space="preserve">
     <value>Timeout exception: no response from server</value>
   </data>

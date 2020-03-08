@@ -41,6 +41,7 @@ namespace PCS.WPFClientInterface
             PcsGlobalInterface.Accessor.Disconnect();
             messageField.Clear();
             channelSelector.Disable();
+            projectSelector.Disable();
             ToggleAll();
         }
 
@@ -80,6 +81,7 @@ namespace PCS.WPFClientInterface
                 channelSelector.OnChangeChannel += OnChangeChannel;
 
                 channelSelector.Enable();
+                projectSelector.Enable();
                 PcsGlobalInterface.FocusedChannel = channelSelector.FocusedChannel;
 
                 ShowBefore();
@@ -184,6 +186,16 @@ namespace PCS.WPFClientInterface
             //PcsGlobalInterface.Accessor.ModifyMessage(66, new SendableMessage("Modifié", "channel1"));
             //messageField.Clear();// TODO Reset func, handle better MessageField //TODO MAKE MessageField adapted to Modify and Remove message // TODO In messageField use List<Broadcast> to handle them and with an update system
             //ShowBefore();
+        }
+
+        private void channelSelector_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void projectSelector_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
