@@ -20,6 +20,8 @@ namespace PCS.WPFClientInterface
 	/// </summary>
 	public partial class ChannelSelector : UserControl
 	{
+		public event EventHandler<Channel> OnChangeChannel;
+
 		public Channel FocusedChannel { 
 			get {
 				if (ChannelList.SelectedItem is null)
@@ -45,11 +47,13 @@ namespace PCS.WPFClientInterface
 		public void Disable()
 		{
 			ChannelList.Items.Clear();
+			OnChangeChannel = null;
 		}
 
 		private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			PcsGlobalInterface.FocusedChannel = FocusedChannel;
+			OnChangeChannel?.Invoke(this, FocusedChannel);
 		}
 	}
 }

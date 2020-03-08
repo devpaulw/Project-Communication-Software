@@ -77,6 +77,7 @@ namespace PCS.WPFClientInterface
             {
                 PcsGlobalInterface.Accessor.MessageReceive += OnMessageReceive;
                 PcsGlobalInterface.Accessor.ListenException += OnServerListenException;
+                channelSelector.OnChangeChannel += OnChangeChannel;
 
                 channelSelector.Enable();
                 PcsGlobalInterface.FocusedChannel = channelSelector.FocusedChannel;
@@ -89,6 +90,11 @@ namespace PCS.WPFClientInterface
         private void ConnectMenuItem_Click(object sender, RoutedEventArgs e)
             => ConnectDialog();
 
+        void OnChangeChannel(object sender, Channel channel)
+        {
+            messageField.Clear();
+        }
+ 
         void OnMessageReceive(object sender, BroadcastMessage broadcastMsg)
         {
             lock (@lock)
