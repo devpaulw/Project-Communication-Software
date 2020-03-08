@@ -63,7 +63,7 @@ namespace PCS.WPFClientInterface
                 end = loadedMessagesCount;
 
             // Get SQL Messages
-            foreach (var message in PcsGlobalInterface.Accessor.GetTopMessagesInRange(start, end, PcsGlobalInterface.SelectedChannel))
+            foreach (var message in PcsGlobalInterface.Accessor.GetTopMessagesInRange(start, end, PcsGlobalInterface.FocusedChannel))
                 AddMessageOnTop(message);
         }
 
@@ -132,7 +132,7 @@ namespace PCS.WPFClientInterface
                 try
                 {
                     PcsGlobalInterface.Accessor.ModifyMessage(selectedBroadcast.ID,
-                        new SendableMessage(modifyInputBox.ModifiedMessage, PcsGlobalInterface.SelectedChannel)); // TODO Handle exception
+                        new SendableMessage(PcsGlobalInterface.FocusedChannel, modifyInputBox.ModifiedMessage)); // TODO Handle exception
 
                     Clear();
                     ShowBefore();
@@ -151,7 +151,7 @@ namespace PCS.WPFClientInterface
                                         "From: {2}\n" +
                                         "At: {3}",
                                         selectedBroadcast.ID,
-                                        selectedBroadcast.ChannelName,
+                                        selectedBroadcast.Channel.Name,
                                         selectedBroadcast.Author,
                                         selectedBroadcast.DateTime);
 

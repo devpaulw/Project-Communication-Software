@@ -113,7 +113,7 @@ namespace PCS
 
             void OnMessageReceived(SendableMessage message)
             {
-                var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message.Text, message.ChannelName, DateTime.Now, signInMember);
+                var broadcastMsg = new BroadcastMessage(messageTable.GetNewID(), message.Text, message.Channel, DateTime.Now, signInMember);
                 Console.WriteLine("Received: " + broadcastMsg);
 
                 AddBroadcast(broadcastMsg);
@@ -197,7 +197,7 @@ namespace PCS
                         lock (@lock)
                         {
                             var oldBroadcast = messageTable.GetItemAt(modifyMessageRequest.MessageId);
-                            var newBroadcast = new BroadcastMessage(modifyMessageRequest.MessageId, modifyMessageRequest.NewMessage.Text, modifyMessageRequest.NewMessage.ChannelName, oldBroadcast.DateTime, oldBroadcast.Author);
+                            var newBroadcast = new BroadcastMessage(modifyMessageRequest.MessageId, modifyMessageRequest.NewMessage.Text, modifyMessageRequest.NewMessage.Channel, oldBroadcast.DateTime, oldBroadcast.Author);
 
                             messageTable.RemoveRow(modifyMessageRequest.MessageId);
                             messageTable.AddRow(newBroadcast);
@@ -215,7 +215,7 @@ namespace PCS
                     BroadcastMessage[] delivery;
 
                     lock (@lock)
-                        delivery = messageTable.GetTopMessagesInRange(broadcastDeliveryRequest.Start, broadcastDeliveryRequest.End, broadcastDeliveryRequest.ChannelName).ToArray();
+                        delivery = messageTable.GetTopMessagesInRange(broadcastDeliveryRequest.Start, broadcastDeliveryRequest.End, broadcastDeliveryRequest.Channel).ToArray();
     
                     client.SendPacket(new ResponsePacket(new BroadcastDeliveryResponse(true, delivery)));
                 }

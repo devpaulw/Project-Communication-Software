@@ -10,15 +10,15 @@ namespace PCS.Data
     {
         public int ID { get; set; }
         public string Text { get; set; }
-        public string ChannelName { get; set; }
+        public Channel Channel { get; set; }
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
 
-        public BroadcastMessage(int iD, string text, string channelName, DateTime dateTime, Member author)
+        public BroadcastMessage(int iD, string text, Channel channel, DateTime dateTime, Member author)
         {
             ID = iD;
             Text = text ?? throw new ArgumentNullException(nameof(text));
-            ChannelName = channelName ?? throw new ArgumentNullException(nameof(channelName));
+            Channel = channel ?? throw new ArgumentNullException(nameof(channel));
             Author = author ?? Member.Unknown;
             DateTime = dateTime;
         }
@@ -27,7 +27,7 @@ namespace PCS.Data
         public string ToFileMessage()
         {
             const char endOfTB = (char)23;
-            return ChannelName + endOfTB
+            return Channel.Name + endOfTB
                 + Author.Username + endOfTB
                 + Author.ID + endOfTB
                 + DateTime.ToFileTime() + endOfTB
@@ -46,7 +46,7 @@ namespace PCS.Data
             return new BroadcastMessage(
                 0,
                 infos[4],
-                infos[0],
+                new Channel(infos[0]),
                 DateTime.FromFileTime(Convert.ToInt64(infos[3], CultureInfo.InvariantCulture)),
                 new Member(infos[1], 
                 Convert.ToInt32(infos[2], CultureInfo.InvariantCulture))
@@ -55,7 +55,7 @@ namespace PCS.Data
 
         public override string ToString()
         {
-            return $"Message from {Author} in {ChannelName} at {DateTime}: {Text}";
+            return $"Message from {Author} in {Channel.Name} at {DateTime}: {Text}";
         }
     }
 }

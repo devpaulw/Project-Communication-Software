@@ -11,17 +11,17 @@ namespace PCS.Data.Packets
         public override string[] GetAttributes()
         {
             return new string[] {
-                 Item.ChannelName,
+                 Item.Channel.Name,
                  Item.Text
             };
         }
 
         public static Packet FromAttributes(string[] attributes)
         {
-            string channelTitle = attributes[0];
+            var channel = new Channel(attributes[0]);
             string text = attributes[1];
 
-            return new SendableMessagePacket(new SendableMessage(text, channelTitle));
+            return new SendableMessagePacket(new SendableMessage(channel, text));
         }
     }
 }

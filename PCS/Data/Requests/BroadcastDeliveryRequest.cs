@@ -9,13 +9,13 @@ namespace PCS.Data
     {
         public int Start { get; set; }
         public int End { get; set; }
-        public string ChannelName { get; set; }
+        public Channel Channel { get; set; }
 
-        public BroadcastDeliveryRequest(int start, int end, string channelName) : base(RequestCode.BroadcastDelivery)
+        public BroadcastDeliveryRequest(int start, int end, Channel channel) : base(RequestCode.BroadcastDelivery)
         {
             Start = start;
             End = end;
-            ChannelName = channelName;
+            Channel = channel;
         }
 
         internal override string[] GetAttributes()
@@ -23,7 +23,7 @@ namespace PCS.Data
             return new[] { 
                 Start.ToString(CultureInfo.InvariantCulture), 
                 End.ToString(CultureInfo.InvariantCulture), 
-                ChannelName };
+                Channel.Name };
         }
 
         public static Request FromAttributes(string[] attributes)
@@ -31,7 +31,7 @@ namespace PCS.Data
             return new BroadcastDeliveryRequest(
                 int.Parse(attributes[0], CultureInfo.InvariantCulture),
                 int.Parse(attributes[1], CultureInfo.InvariantCulture),
-                attributes[2]);
+                new Channel(attributes[2]));
         }
     }
 }

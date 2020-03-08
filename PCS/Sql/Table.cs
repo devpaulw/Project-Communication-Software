@@ -99,6 +99,8 @@ namespace PCS.Sql
         protected abstract SqlParameter[] GetParameters();
         protected SqlParameter KeyParameter
             => GetParameters()[0];
+        protected virtual Dictionary<SqlParameter, string> GetForeignKeys()
+            => new Dictionary<SqlParameter, string>();
 
         private void TryCreate()
         {

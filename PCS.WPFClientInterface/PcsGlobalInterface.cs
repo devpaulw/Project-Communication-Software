@@ -9,6 +9,6 @@ namespace PCS.WPFClientInterface
     internal static class PcsGlobalInterface
     {
         public static PcsAccessor Accessor { get; } = new PcsAccessor();
-        public static string SelectedChannel { get; set; }
+        public static Channel FocusedChannel { get; set; }
     }
 }

@@ -79,7 +79,7 @@ namespace PCS.WPFClientInterface
                 PcsGlobalInterface.Accessor.ListenException += OnServerListenException;
 
                 channelSelector.Enable();
-                PcsGlobalInterface.SelectedChannel = channelSelector.SelectedChannel;
+                PcsGlobalInterface.FocusedChannel = channelSelector.FocusedChannel;
 
                 ShowBefore();
                 ToggleAll();
@@ -93,9 +93,12 @@ namespace PCS.WPFClientInterface
         {
             lock (@lock)
             {
-                Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
+                if (broadcastMsg.Channel.Equals(PcsGlobalInterface.FocusedChannel))
+                {
+                    Dispatcher.Invoke(() => // Otherwise, can't access controls from another thread
                         messageField.AddMessage(broadcastMsg));
-                Notify(broadcastMsg);
+                    Notify(broadcastMsg);
+                }
             }
         }
 
@@ -122,7 +125,7 @@ namespace PCS.WPFClientInterface
 
         private void SendMessageButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new SendableMessage(messageTextBox.Text, PcsGlobalInterface.SelectedChannel);
+            var message = new SendableMessage(PcsGlobalInterface.FocusedChannel, messageTextBox.Text);
             SendMessage(message);
         }
 

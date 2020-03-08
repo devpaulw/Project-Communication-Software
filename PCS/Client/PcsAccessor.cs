@@ -90,9 +90,9 @@ namespace PCS
                 throw new Exception(Messages.Exceptions.UnauthorizedHandleMessage);
         }
 
-        public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
+        public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, Channel channel)
         {
-            var response = SendRequest(new BroadcastDeliveryRequest(start, end, channelName)) as BroadcastDeliveryResponse;
+            var response = SendRequest(new BroadcastDeliveryRequest(start, end, channel)) as BroadcastDeliveryResponse;
 
             if (response.Succeeded)
             {

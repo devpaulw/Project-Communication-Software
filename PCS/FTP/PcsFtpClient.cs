@@ -33,7 +33,7 @@ namespace PCS.Ftp
             if (broadcastMsg == null)
                 throw new ArgumentNullException(nameof(broadcastMsg));
 
-            string remotePath = GetMessagePath(broadcastMsg.ChannelName, broadcastMsg.DateTime);
+            string remotePath = GetMessagePath(broadcastMsg.Channel.Name, broadcastMsg.DateTime);
 
             CreateMissingDirectories(remotePath, true);
 

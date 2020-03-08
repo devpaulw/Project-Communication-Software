@@ -20,12 +20,13 @@ namespace PCS.WPFClientInterface
 	/// </summary>
 	public partial class ChannelSelector : UserControl
 	{
-		public string SelectedChannel { 
+		public Channel FocusedChannel { 
 			get {
-				if (ChannelList.SelectedItem != null)
-					return ChannelList.SelectedItem.ToString();
-				else return null;
-			} 
+				if (ChannelList.SelectedItem is null)
+					return null;
+
+				return new Channel(ChannelList.SelectedItem.ToString());
+			}
 		}
 
 		public ChannelSelector()
@@ -35,7 +36,7 @@ namespace PCS.WPFClientInterface
 
 		public void Enable()
 		{
-			// TODO retrieve the channels from the server
+			// BBTODO retrieve the channels from the server
 			ChannelList.Items.Add("channel1");
 			ChannelList.Items.Add("channel2");
 			ChannelList.SelectedItem = ChannelList.Items[0];
@@ -48,7 +49,7 @@ namespace PCS.WPFClientInterface
 
 		private void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			PcsGlobalInterface.SelectedChannel = SelectedChannel;
+			PcsGlobalInterface.FocusedChannel = FocusedChannel;
 		}
 	}
 }

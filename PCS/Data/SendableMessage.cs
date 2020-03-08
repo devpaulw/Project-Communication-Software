@@ -9,18 +9,12 @@ namespace PCS.Data
     public class SendableMessage
     {
         public string Text { get; set; }
-        public string ChannelName { get; set; }
+        public Channel Channel { get; set; }
 
-        public SendableMessage(string text, string channelName)
+        public SendableMessage(Channel channel, string text)
         {
-            Text = text;
-            ChannelName = channelName;
-
-            if (HasEmptyField)
-                throw new Exception(Messages.Exceptions.MessageEmptyField);
+            Text = text ?? throw new ArgumentNullException(nameof(text));
+            Channel = channel ?? throw new ArgumentNullException(nameof(channel));
         }
-
-        public bool HasEmptyField
-            => string.IsNullOrEmpty(Text) || string.IsNullOrEmpty(ChannelName);
     }
 }

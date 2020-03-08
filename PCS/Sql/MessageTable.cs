@@ -19,9 +19,9 @@ namespace PCS.Sql
             return topMessage.Any() ? topMessage.First().ID + 1 : 0;
         }
 
-        public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, string channelName)
+        public IEnumerable<BroadcastMessage> GetTopMessagesInRange(int start, int end, Channel channel)
         {
-            string cmdTxt = $"SELECT TOP {start + end} * FROM {Name} {(channelName != null ? $"WHERE Channel = '{channelName}'" : "")} ORDER BY {KeyParameter.ParameterName} DESC";
+            string cmdTxt = $"SELECT TOP {start + end} * FROM {Name} {(channel != null ? $"WHERE Channel = '{channel.Name}'" : "")} ORDER BY {KeyParameter.ParameterName} DESC";
 
             using (SqlConnection conn = new SqlConnection($"server=;Initial Catalog = {Database.Name};Integrated security=SSPI"))
             using (var cmd = new SqlCommand(cmdTxt, conn))
@@ -55,7 +55,7 @@ namespace PCS.Sql
             {
                 { "Id", broadcast.ID },
                 { "Text", broadcast.Text },
-                { "Channel", broadcast.ChannelName },
+                { "Channel", broadcast.Channel.Name },
                 { "AuthorId", broadcast.Author.ID },
                 { "DateTime", broadcast.DateTime }
             };
@@ -79,7 +79,7 @@ namespace PCS.Sql
             return new BroadcastMessage(
                 values["Id"] as int? ?? throw new NullReferenceException(),
                 values["Text"] as string ?? throw new NullReferenceException(), 
-                values["Channel"] as string ?? throw new NullReferenceException(),
+                new Channel(values["Channel"] as string ?? throw new NullReferenceException()),
                 values["DateTime"] as DateTime? ?? throw new NullReferenceException(),
                 new MemberTable().GetMemberFromId(values["AuthorId"] as int? ?? throw new NullReferenceException())
                 );
