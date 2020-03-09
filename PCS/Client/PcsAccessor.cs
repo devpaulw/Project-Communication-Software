@@ -25,7 +25,7 @@ namespace PCS
 
         public PcsAccessor()
         {
-
+            
         }
 
         public void Connect(IPAddress ip, AuthenticationInfos authenticationInfos) // DOLATER I don't know if this password is secured
@@ -121,28 +121,30 @@ namespace PCS
 
         private void StartListenServer()
         {
-            var serverListenTask = Task.Run(() => Listen());
+            var serverListenThread = new Thread(() => {
+                    try
+                    {
+                        Listen();
+                    }
+                    catch (PcsTransmissionException ex)
+                    {
+                        ListenException(this, ex);
+                    }
+                    catch (SocketException ex)
+                    {
+                        ListenException(this, ex);
+                    }
+                });
 
-            try
-            {
-                serverListenTask.Wait();
-            }
-            catch (PcsTransmissionException ex)
-            {
-                ListenException(this, ex);
-            }
-            catch (SocketException ex)
-            {
-                ListenException(this, ex);
-            }
+            serverListenThread.Start();
 
-            async void Listen()
+            void Listen()
             {
                 while (listen)
                 {
                     try
                     {
-                        Packet receivedPacket = await Task.Run(() => ReceivePacket()).ConfigureAwait(false);
+                        Packet receivedPacket = ReceivePacket();
 
                         switch (receivedPacket)
                         {
@@ -171,7 +173,7 @@ namespace PCS
 
             Response response;
 
-            response = responseEvent.WaitResponse(); // TODO Timeout system ?
+            response = responseEvent.WaitResponse();
 
             if (response.Code == request.Code)
             {

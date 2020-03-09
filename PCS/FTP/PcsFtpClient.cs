@@ -9,7 +9,6 @@ using PCS.Data;
 
 namespace PCS.Ftp
 {
-    [Obsolete("Not using FTP anymore")]
     public class PcsFtpClient : IDisposable
     {
         private readonly FtpClient ftpClient;
@@ -28,6 +27,7 @@ namespace PCS.Ftp
             ftpClient.Connect();
         }
 
+        [Obsolete("Not using FTP anymore for messages")]
         public void SaveMessage(BroadcastMessage broadcastMsg)
         {
             if (broadcastMsg == null)
@@ -45,6 +45,7 @@ namespace PCS.Ftp
             }
         }
 
+        [Obsolete("Not using FTP anymore for messages")]
         public IEnumerable<BroadcastMessage> GetDailyMessages(string channelName, DateTime day)
         {
             string remotePath = GetMessagePath(channelName, day);
@@ -115,6 +116,7 @@ namespace PCS.Ftp
             }
         }
 
+        [Obsolete("Not using FTP anymore for messages")]
         private static string GetMessagePath(string channelName, DateTime date)
         {
             string extension = ".txt";

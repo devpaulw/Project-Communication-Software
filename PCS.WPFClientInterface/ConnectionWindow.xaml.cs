@@ -138,7 +138,7 @@ namespace PCS.WPFClientInterface
 
         private void LoadFields()
         {
-            var document = new XmlDocument();
+            var document = new XmlDocument() ;
             document.Load(fieldSavePath);
             serverAddressTextBox.Text = document.SelectSingleNode("/ConnectionInfos/ServerAddress").InnerXml;
             idTextBox.Text = document.SelectSingleNode("/ConnectionInfos/UserID").InnerXml;

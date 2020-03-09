@@ -11,5 +11,6 @@ namespace PCS.Data
         public const string ClientDisconnect = "DC";
         public const string Response = "RS";
         public const string Request = "RQ";
+        public const string Separator = "SP";
     }
 }

@@ -22,15 +22,18 @@ namespace PCS.Data
             string[] ret = Array.Empty<string>();
             foreach (var broadcast in BroadcastMessages)
             {
-                ret = ret .Concat(new BroadcastMessagePacket(broadcast).GetAttributes()).ToArray();
+                ret = ret .Concat(new BroadcastMessagePacket(broadcast).GetAttributes())
+                    .Concat(new[] { Flags.Separator })
+                    .ToArray();
             }
             return ret;
         }
 
         public static Response FromAttributes(bool succeeded, string[] attributes)
         {
+            const int attributesCount = 6; // UNDONE Separator system handle
             List<BroadcastMessage> broadcastMessages = new List<BroadcastMessage>();
-            for (int i = 0; i < attributes.Length; i += 6) // DOLATER a better approach to know what the length (5 yet)
+            for (int i = 0; i < attributes.Length; i += attributesCount) // DOLATER a better approach to know what the length (5 yet)
             {
                 broadcastMessages.Add(BroadcastMessagePacket.FromAttributes(attributes.Skip(i).ToArray()).Item);
             }

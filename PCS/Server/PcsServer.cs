@@ -191,8 +191,8 @@ namespace PCS
 
                 void OnModifyMessage(ModifyMessageRequest modifyMessageRequest)
                 {
-                    bool succeeded = true;
-                    if (signInMember.ID == messageTable.GetItemAt(modifyMessageRequest.MessageId).Author.ID)
+                    bool succeeded = signInMember.ID == messageTable.GetItemAt(modifyMessageRequest.MessageId).Author.ID; // Cool new boolean approach
+                    if (succeeded)
                     {
                         lock (@lock)
                         {
@@ -203,8 +203,6 @@ namespace PCS
                             messageTable.AddRow(newBroadcast);
                         }
                     }
-                    else
-                        succeeded = false;
 
                     client.SendPacket(new ResponsePacket(
                         new Response(request.Code, succeeded)));

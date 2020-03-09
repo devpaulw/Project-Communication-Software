@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace PCS.Data.Packets
@@ -13,14 +14,20 @@ namespace PCS.Data.Packets
 
         public override string[] GetAttributes()
         {
-            return new string[] {
+            var ret =  new string[] {
                  Item.ID.ToString(CultureInfo.InvariantCulture),
                  Item.ChannelName,
                  Item.Author.Username,
                  Item.Author.ID.ToString(CultureInfo.CurrentCulture),
                  Item.DateTime.ToFileTime().ToString(CultureInfo.CurrentCulture),
-                 Item.Text
+                 Item.Text,
+
             };
+
+            IEnumerable<string> files = Item.Files.Select(file => file.FtpLink);
+            ret = ret.Concat(files).ToArray();
+
+            return ret;
         }
 
         public static BroadcastMessagePacket FromAttributes(string[] attributes)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -13,17 +14,19 @@ namespace PCS.Data
         public string ChannelName { get; set; }
         public Member Author { get; set; }
         public DateTime DateTime { get; set; }
+        public List<File> Files { get; set; }
 
-        public BroadcastMessage(int iD, string text, string channelName, DateTime dateTime, Member author)
+        public BroadcastMessage(int iD, string text, string channelName, DateTime dateTime, Member author, List<File> files = null)
         {
             ID = iD;
             Text = text ?? throw new ArgumentNullException(nameof(text));
             ChannelName = channelName ?? throw new ArgumentNullException(nameof(channelName));
             Author = author ?? Member.Unknown;
             DateTime = dateTime;
+            Files = files;
         }
 
-        [Obsolete("Not using FTP anymore")]
+        [Obsolete("Not using FTP anymore for messages")]
         public string ToFileMessage()
         {
             const char endOfTB = (char)23;
@@ -34,7 +37,7 @@ namespace PCS.Data
                 + Text;
         }
 
-        [Obsolete("Not using FTP anymore")]
+        [Obsolete("Not using FTP anymore for messages")]
         public static BroadcastMessage FromFileMessage(string fileMessage)
         {
             if (fileMessage == null)
